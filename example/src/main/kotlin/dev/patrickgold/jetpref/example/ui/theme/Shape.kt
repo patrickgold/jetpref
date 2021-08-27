@@ -1,4 +1,4 @@
-package dev.patrickgold.jetpref.ui.theme
+package dev.patrickgold.jetpref.example.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

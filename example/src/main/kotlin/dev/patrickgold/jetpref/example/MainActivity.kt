@@ -1,4 +1,4 @@
-package dev.patrickgold.jetpref
+package dev.patrickgold.jetpref.example
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,7 +8,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import dev.patrickgold.jetpref.ui.theme.JetPrefTheme
+import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

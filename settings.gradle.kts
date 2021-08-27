@@ -7,4 +7,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "JetPref"
 include(":example")
-include(":core")
+include(":datastore")
