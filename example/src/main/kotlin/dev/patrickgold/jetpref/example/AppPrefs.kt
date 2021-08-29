@@ -10,6 +10,7 @@ enum class Step {
     THREE;
 }
 
+
 class AppPrefs : JetPrefDataStore("test-file") {
     companion object : Singleton<AppPrefs> by singleton({ AppPrefs() })
 
@@ -18,6 +19,10 @@ class AppPrefs : JetPrefDataStore("test-file") {
         var isButtonShowing = boolean {
             key = "test__is_button_showing"
             defaultValue = true
+        }
+        val fontSize = float {
+            key = "test__font_size"
+            defaultValue = 10.0f
         }
         val buttonSize = int {
             key = "test__button_size"

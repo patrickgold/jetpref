@@ -26,6 +26,14 @@ abstract class JetPrefDataStore(private val name: String) {
         }
     }
 
+    private fun getFloat(key: String, defaultValue: Float): Float {
+        return try {
+            shared.getFloat(key, defaultValue)
+        } catch (e: Throwable) {
+            defaultValue
+        }
+    }
+
     private fun getInt(key: String, defaultValue: Int): Int {
         return try {
             shared.getInt(key, defaultValue)
@@ -42,9 +50,24 @@ abstract class JetPrefDataStore(private val name: String) {
         }
     }
 
+    private fun getStringOrNull(key: String): String? {
+        return try {
+            shared.getString(key, null)
+        } catch (e: Throwable) {
+            null
+        }
+    }
+
     private fun setBoolean(key: String, value: Boolean) {
         try {
             shared.edit().putBoolean(key, value).apply()
+        } catch (e: Throwable) {
+        }
+    }
+
+    private fun setFloat(key: String, value: Float) {
+        try {
+            shared.edit().putFloat(key, value).apply()
         } catch (e: Throwable) {
         }
     }
@@ -71,6 +94,16 @@ abstract class JetPrefDataStore(private val name: String) {
         override var value: Boolean
             get() =  getBoolean(key, defaultValue)
             set(v) = setBoolean(key, v)
+    }
+
+    private inner class FloatJetPrefData(
+        override val key: String,
+        override val defaultValue: Float,
+    ) : JetPrefData<Float> {
+
+        override var value: Float
+            get() =  getFloat(key, defaultValue)
+            set(v) = setFloat(key, v)
     }
 
     private inner class IntJetPrefData(
@@ -100,28 +133,31 @@ abstract class JetPrefDataStore(private val name: String) {
         val convertToString: (v: V) -> String,
     ) : JetPrefData<V> {
 
-        // Cache converted default value as it never changes
-        private val _defaultValue = convertToString(defaultValue)
-
         override var value: V
-            get() =  convertFromString(getString(key, _defaultValue))
+            get() =  getStringOrNull(key)?.let { convertFromString(it) } ?: defaultValue
             set(v) = setString(key, convertToString(v))
     }
 
-    protected open class PreferenceBuilder<T : Any> {
+    protected open class PreferenceBuilder<V : Any> {
         lateinit var key: String
-        lateinit var defaultValue: T
+        lateinit var defaultValue: V
     }
 
-    protected open class CustomPreferenceBuilder<T : Any> : PreferenceBuilder<T>() {
-        lateinit var convertFromString: (v: String) -> T
-        lateinit var convertToString: (v: T) -> String
+    protected open class CustomPreferenceBuilder<V : Any> : PreferenceBuilder<V>() {
+        lateinit var convertFromString: (v: String) -> V
+        lateinit var convertToString: (v: V) -> String
     }
 
     protected fun boolean(configure: PreferenceBuilder<Boolean>.() -> Unit): JetPrefData<Boolean> {
         val builder = PreferenceBuilder<Boolean>()
         configure(builder)
         return BooleanJetPrefData(builder.key, builder.defaultValue)
+    }
+
+    protected fun float(configure: PreferenceBuilder<Float>.() -> Unit): JetPrefData<Float> {
+        val builder = PreferenceBuilder<Float>()
+        configure(builder)
+        return FloatJetPrefData(builder.key, builder.defaultValue)
     }
 
     protected fun int(configure: PreferenceBuilder<Int>.() -> Unit): JetPrefData<Int> {
@@ -136,8 +172,8 @@ abstract class JetPrefDataStore(private val name: String) {
         return StringJetPrefData(builder.key, builder.defaultValue)
     }
 
-    protected fun <T : Any> custom(configure: CustomPreferenceBuilder<T>.() -> Unit): JetPrefData<T> {
-        val builder = CustomPreferenceBuilder<T>()
+    protected fun <V : Any> custom(configure: CustomPreferenceBuilder<V>.() -> Unit): JetPrefData<V> {
+        val builder = CustomPreferenceBuilder<V>()
         configure(builder)
         return CustomJetPrefData(builder.key, builder.defaultValue,
             builder.convertFromString, builder.convertToString)
