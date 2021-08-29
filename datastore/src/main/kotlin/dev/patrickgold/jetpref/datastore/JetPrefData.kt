@@ -1,11 +1,20 @@
 package dev.patrickgold.jetpref.datastore
 
-interface JetPrefData<V : Any> {
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
+
+interface JetPrefData<V : Any> : ReadWriteProperty<Any?, V> {
     val key: String
 
     var value: V
 
     val defaultValue: V
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): V = this.value
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
+        this.value = value
+    }
 }
 
 fun <T : Any> singleton(generator: () -> T) = SingletonImpl(generator)
