@@ -1,43 +1,59 @@
+/*
+ * Copyright 2021 Patrick Goldinger
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package dev.patrickgold.jetpref.datastore.model
 
 interface PreferenceSerializer<V : Any> {
-    fun serialize(v: V): String?
+    fun serialize(value: V): String?
 
-    fun deserialize(v: String): V?
+    fun deserialize(value: String): V?
 }
 
 internal object BooleanPreferenceSerializer : PreferenceSerializer<Boolean> {
-    override fun serialize(v: Boolean): String = v.toString()
+    override fun serialize(value: Boolean): String = value.toString()
 
-    override fun deserialize(v: String): Boolean? = v.toBooleanStrictOrNull()
+    override fun deserialize(value: String): Boolean? = value.toBooleanStrictOrNull()
 }
 
 internal object DoublePreferenceSerializer : PreferenceSerializer<Double> {
-    override fun serialize(v: Double): String = v.toString()
+    override fun serialize(value: Double): String = value.toString()
 
-    override fun deserialize(v: String): Double? = v.toDoubleOrNull()
+    override fun deserialize(value: String): Double? = value.toDoubleOrNull()
 }
 
 internal object FloatPreferenceSerializer : PreferenceSerializer<Float> {
-    override fun serialize(v: Float): String = v.toString()
+    override fun serialize(value: Float): String = value.toString()
 
-    override fun deserialize(v: String): Float? = v.toFloatOrNull()
+    override fun deserialize(value: String): Float? = value.toFloatOrNull()
 }
 
 internal object IntPreferenceSerializer : PreferenceSerializer<Int> {
-    override fun serialize(v: Int): String = v.toString(10)
+    override fun serialize(value: Int): String = value.toString(10)
 
-    override fun deserialize(v: String): Int? = v.toIntOrNull(10)
+    override fun deserialize(value: String): Int? = value.toIntOrNull(10)
 }
 
 internal object LongPreferenceSerializer : PreferenceSerializer<Long> {
-    override fun serialize(v: Long): String = v.toString(10)
+    override fun serialize(value: Long): String = value.toString(10)
 
-    override fun deserialize(v: String): Long? = v.toLongOrNull(10)
+    override fun deserialize(value: String): Long? = value.toLongOrNull(10)
 }
 
 internal object StringPreferenceSerializer : PreferenceSerializer<String> {
-    override fun serialize(v: String): String = v
+    override fun serialize(value: String): String = value
 
-    override fun deserialize(v: String): String = v
+    override fun deserialize(value: String): String = value
 }
