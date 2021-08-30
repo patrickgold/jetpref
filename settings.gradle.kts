@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 rootProject.name = "JetPref"
 include(":example")
 include(":datastore")
+include(":ui-compose")

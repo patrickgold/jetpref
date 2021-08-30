@@ -1,8 +1,7 @@
 package dev.patrickgold.jetpref.example
 
-import dev.patrickgold.jetpref.datastore.JetPrefDataStore
-import dev.patrickgold.jetpref.datastore.Singleton
-import dev.patrickgold.jetpref.datastore.singleton
+import dev.patrickgold.jetpref.datastore.model.PreferenceModel
+import dev.patrickgold.jetpref.datastore.model.PreferenceSerializer
 
 enum class Step {
     ONE,
@@ -10,37 +9,32 @@ enum class Step {
     THREE;
 }
 
-
-class AppPrefs : JetPrefDataStore("test-file") {
-    companion object : Singleton<AppPrefs> by singleton({ AppPrefs() })
-
+class AppPrefs : PreferenceModel("test-file") {
     val test = Test()
     inner class Test {
-        var isButtonShowing = boolean {
-            key = "test__is_button_showing"
-            defaultValue = true
-        }
-        val fontSize = float {
-            key = "test__font_size"
-            defaultValue = 10.0f
-        }
-        val buttonSize = int {
-            key = "test__button_size"
-            defaultValue = 10
-        }
-        val title = string {
-            key = "test__title"
-            defaultValue = "Hello!"
-        }
-        val step = custom<Step> {
-            key = "test__step"
-            defaultValue = Step.ONE
-            convertFromString = { Step.valueOf(it) }
-            convertToString = { it.toString() }
-        }
-    }
-
-    fun xxx() {
-        test.isButtonShowing.value = true
+        var isButtonShowing = boolean(
+            key = "test__is_button_showing",
+            default = true,
+        )
+        val fontSize = float(
+            key = "test__font_size",
+            default = 10.0f,
+        )
+        val buttonSize = int(
+            key = "test__button_size",
+            default = 10,
+        )
+        val title = string(
+            key = "test__title",
+            default = "Hello!",
+        )
+        val step = custom(
+            key = "test__step",
+            default = Step.ONE,
+            serializer = object : PreferenceSerializer<Step> {
+                override fun serialize(value: Step): String = value.toString()
+                override fun deserialize(value: String): Step = Step.valueOf(value)
+            }
+        )
     }
 }
