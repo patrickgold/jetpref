@@ -153,7 +153,7 @@ abstract class PreferenceModel(val name: String) {
         }
     }
 
-    private suspend fun <V : Any> PreferenceData<V>.serialize(): String? {
+    private fun <V : Any> PreferenceData<V>.serialize(): String? {
         if (!type.isPrimitive()) return null
         val rawValue = getOrNull()?.let { serializer.serialize(it) } ?: return null
         val sb = StringBuilder()
@@ -165,7 +165,7 @@ abstract class PreferenceModel(val name: String) {
         return sb.toString()
     }
 
-    private suspend fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {
+    private fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {
         if (!type.isPrimitive()) return
         val value = serializer.deserialize(rawValue)
         if (value == null) {

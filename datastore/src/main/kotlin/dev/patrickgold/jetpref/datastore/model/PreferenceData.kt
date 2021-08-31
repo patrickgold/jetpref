@@ -1,4 +1,5 @@
 /*
+ * Copyright 2017 The Android Open Source Project
  * Copyright 2021 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +20,6 @@ package dev.patrickgold.jetpref.datastore.model
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -55,6 +55,10 @@ interface PreferenceData<V : Any> {
     fun removeObservers(owner: LifecycleOwner)
 }
 
+/**
+ * Implementation partially based on:
+ *  https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-main/lifecycle/lifecycle-livedata-core/src/main/java/androidx/lifecycle/LiveData.java
+ */
 internal abstract class AbstractPreferenceData<V : Any>(private val model: PreferenceModel) : PreferenceData<V> {
     private val cacheGuard = Mutex()
     private var cachedValue: V? = null
@@ -64,7 +68,7 @@ internal abstract class AbstractPreferenceData<V : Any>(private val model: Prefe
     private val observers: WeakHashMap<PreferenceObserver<V>, ObserverWrapper> = WeakHashMap()
 
     private val dispatchChannel: Channel<ObserverWrapper?> = Channel(Channel.UNLIMITED)
-    private val dispatcher = model.scope.launch(Dispatchers.Main.immediate) {
+    private val dispatcher = model.scope.launch {
         for (wrapper in dispatchChannel) {
             if (wrapper != null) {
                 considerNotify(wrapper)
@@ -81,28 +85,32 @@ internal abstract class AbstractPreferenceData<V : Any>(private val model: Prefe
 
     final override fun getOrNull(): V? = cachedValue
 
-    final override fun set(value: V, requestSync: Boolean) = runBlocking {
-        cacheGuard.withLock {
-            if (cachedValue != value) {
-                cachedValue = value
-                cachedValueVersion++
-                if (requestSync) {
-                    model.notifyValueChanged()
+    final override fun set(value: V, requestSync: Boolean) {
+        model.scope.launch {
+            cacheGuard.withLock {
+                if (cachedValue != value) {
+                    cachedValue = value
+                    cachedValueVersion++
+                    if (requestSync) {
+                        model.notifyValueChanged()
+                    }
+                    dispatchValue(null)
                 }
-                dispatchValue(null)
             }
         }
     }
 
-    final override fun reset(requestSync: Boolean) = runBlocking {
-        cacheGuard.withLock {
-            if (cachedValue != null) {
-                cachedValue = null
-                cachedValueVersion++
-                if (requestSync) {
-                    model.notifyValueChanged()
+    final override fun reset(requestSync: Boolean) {
+        model.scope.launch {
+            cacheGuard.withLock {
+                if (cachedValue != null) {
+                    cachedValue = null
+                    cachedValueVersion++
+                    if (requestSync) {
+                        model.notifyValueChanged()
+                    }
+                    dispatchValue(null)
                 }
-                dispatchValue(null)
             }
         }
     }
