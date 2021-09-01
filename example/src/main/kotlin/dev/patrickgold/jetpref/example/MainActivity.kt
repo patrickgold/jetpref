@@ -17,13 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import dev.patrickgold.jetpref.datastore.jetRemember
+import dev.patrickgold.jetpref.datastore.preferenceModel
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 
 class MainActivity : ComponentActivity() {
-    val prefs = jetRemember(AppPrefs::class) { AppPrefs() }
+    private val prefs by preferenceModel(::AppPrefs)
 
     init {
         prefs.test.isButtonShowing.observe(this) { newValue ->

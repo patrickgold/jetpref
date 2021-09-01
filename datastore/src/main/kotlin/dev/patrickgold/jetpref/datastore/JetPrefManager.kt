@@ -23,7 +23,9 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
+import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 object JetPrefManager {
     private const val JETPREF_DIR_NAME = "jetpref_datastore"
@@ -36,7 +38,7 @@ object JetPrefManager {
     private var applicationContext: WeakReference<Context> = WeakReference(null)
     internal var saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS
 
-    internal val jetRememberCache: MutableMap<KClass<*>, Any> = mutableMapOf()
+    private val preferenceModelCache: MutableList<CachedPreferenceModel<*>> = mutableListOf()
 
     fun init(
         context: Context,
@@ -76,15 +78,46 @@ object JetPrefManager {
     private fun Context.jetPrefPath(name: String): File {
         return File(this.jetPrefDir, "$name.$JETPREF_EXT")
     }
+
+    @Suppress("unchecked_cast")
+    fun <T : PreferenceModel> getOrCreatePreferenceModel(
+        kClass: KClass<T>,
+        factory: () -> T
+    ): CachedPreferenceModel<T> = synchronized(preferenceModelCache) {
+        val cachedEntry = preferenceModelCache.find { it.kClass == kClass }
+        if (cachedEntry != null) {
+            return cachedEntry as CachedPreferenceModel<T>
+        }
+        val newModel = factory()
+        val newCacheEntry = CachedPreferenceModel(kClass, newModel)
+        preferenceModelCache.add(newCacheEntry)
+        return@synchronized newCacheEntry
+    }
+
+    fun <T : PreferenceModel> preloadPreferenceModel(
+        kClass: KClass<T>,
+        factory: () -> T
+    ) = synchronized(preferenceModelCache) {
+        val cachedEntry = preferenceModelCache.find { it.kClass == kClass }
+        if (cachedEntry == null) {
+            val newModel = factory()
+            val newCacheEntry = CachedPreferenceModel(kClass, newModel)
+            preferenceModelCache.add(newCacheEntry)
+        }
+    }
 }
 
-@Synchronized
-fun <T : Any> jetRemember(kClass: KClass<T>, init: () -> T): T {
-    val cached = JetPrefManager.jetRememberCache[kClass]
-    if (cached != null) {
-        return cached as T
+data class CachedPreferenceModel<T : PreferenceModel>(
+    val kClass: KClass<T>,
+    val preferenceModel: T
+) : ReadOnlyProperty<Any?, T> {
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        return preferenceModel
     }
-    val newValue = init()
-    JetPrefManager.jetRememberCache[kClass] = newValue
-    return newValue
 }
+
+inline fun <reified T : PreferenceModel> preferenceModel(noinline factory: () -> T): CachedPreferenceModel<T> {
+    return JetPrefManager.getOrCreatePreferenceModel(T::class, factory)
+}
+
