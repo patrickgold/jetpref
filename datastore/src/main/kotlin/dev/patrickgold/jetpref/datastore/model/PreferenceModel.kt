@@ -114,7 +114,7 @@ abstract class PreferenceModel(val name: String) {
     private fun CoroutineScope.setupModel() = launch(Dispatchers.IO) {
         JetPrefManager.loadPrefFile(name) {
             registryGuard.withLock {
-                for (line in lineSequence()) {
+                for (line in it.lineSequence()) {
                     if (line.isBlank()) continue
                     val type = line.first().toString()
                     val del1 = line.indexOf(JetPrefManager.DELIMITER)
@@ -144,7 +144,7 @@ abstract class PreferenceModel(val name: String) {
                     registryGuard.withLock {
                         for (preferenceData in registry) {
                             val serializedData = preferenceData.serialize() ?: continue
-                            appendLine(serializedData)
+                            it.appendLine(serializedData)
                         }
                     }
                 }

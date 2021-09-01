@@ -48,8 +48,23 @@ object JetPrefManager {
         this.saveIntervalMs = saveIntervalMs
     }
 
-    internal inline fun loadPrefFile(name: String, block: BufferedReader.() -> Unit) {
+    internal fun setupJetPrefDir(context: Context): Boolean {
+        val dir = context.jetPrefDir
+        return try {
+            dir.mkdirs()
+            true
+        } catch (e: SecurityException) {
+            android.util.Log.e("JetPref", "Cannot initialize datastore directory at '$dir'! Reason: ${e.message}")
+            false
+        } catch (e: FileNotFoundException) {
+            android.util.Log.e("JetPref", "Cannot initialize datastore directory at '$dir'! Reason: ${e.message}")
+            false
+        }
+    }
+
+    internal inline fun loadPrefFile(name: String, block: (BufferedReader) -> Unit) {
         val context = applicationContext.get() ?: return
+        if (!setupJetPrefDir(context)) return
         val path = context.jetPrefPath(name)
         try {
             path.bufferedReader().use { block(it) }
@@ -60,8 +75,9 @@ object JetPrefManager {
         }
     }
 
-    internal inline fun savePrefFile(name: String, block: BufferedWriter.() -> Unit) {
+    internal inline fun savePrefFile(name: String, block: (BufferedWriter) -> Unit) {
         val context = applicationContext.get() ?: return
+        if (!setupJetPrefDir(context)) return
         val path = context.jetPrefPath(name)
         try {
             path.bufferedWriter().use { block(it) }
