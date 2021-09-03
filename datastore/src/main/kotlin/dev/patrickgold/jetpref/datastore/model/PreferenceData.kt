@@ -263,7 +263,7 @@ internal class BooleanPreferenceData(
     override val default: Boolean,
 ) : AbstractPreferenceData<Boolean>(model) {
 
-    override val type: PreferenceType = PreferenceTypes.BOOLEAN
+    override val type: PreferenceType = PreferenceType.boolean()
 
     override val serializer: PreferenceSerializer<Boolean> = BooleanPreferenceSerializer
 }
@@ -274,7 +274,7 @@ internal class DoublePreferenceData(
     override val default: Double,
 ) : AbstractPreferenceData<Double>(model) {
 
-    override val type: PreferenceType = PreferenceTypes.DOUBLE
+    override val type: PreferenceType = PreferenceType.double()
 
     override val serializer: PreferenceSerializer<Double> = DoublePreferenceSerializer
 }
@@ -285,7 +285,7 @@ internal class FloatPreferenceData(
     override val default: Float,
 ) : AbstractPreferenceData<Float>(model) {
 
-    override val type: PreferenceType = PreferenceTypes.FLOAT
+    override val type: PreferenceType = PreferenceType.float()
 
     override val serializer: PreferenceSerializer<Float> = FloatPreferenceSerializer
 }
@@ -296,7 +296,7 @@ internal class IntPreferenceData(
     override val default: Int,
 ) : AbstractPreferenceData<Int>(model) {
 
-    override val type: PreferenceType = PreferenceTypes.INTEGER
+    override val type: PreferenceType = PreferenceType.integer()
 
     override val serializer: PreferenceSerializer<Int> = IntPreferenceSerializer
 }
@@ -307,7 +307,7 @@ internal class LongPreferenceData(
     override val default: Long,
 ) : AbstractPreferenceData<Long>(model) {
 
-    override val type: PreferenceType = PreferenceTypes.LONG
+    override val type: PreferenceType = PreferenceType.long()
 
     override val serializer: PreferenceSerializer<Long> = LongPreferenceSerializer
 }
@@ -318,7 +318,7 @@ internal class StringPreferenceData(
     override val default: String,
 ) : AbstractPreferenceData<String>(model) {
 
-    override val type: PreferenceType = PreferenceTypes.STRING
+    override val type: PreferenceType = PreferenceType.string()
 
     override val serializer: PreferenceSerializer<String> = StringPreferenceSerializer
 }
@@ -330,5 +330,5 @@ internal class CustomPreferenceData<V : Any>(
     override val serializer: PreferenceSerializer<V>,
 ) : AbstractPreferenceData<V>(model) {
 
-    override val type: PreferenceType = PreferenceTypes.STRING
+    override val type: PreferenceType = PreferenceType.string()
 }

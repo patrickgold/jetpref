@@ -116,15 +116,15 @@ abstract class PreferenceModel(val name: String) {
             registryGuard.withLock {
                 for (line in it.lineSequence()) {
                     if (line.isBlank()) continue
-                    val type = line.first().toString()
                     val del1 = line.indexOf(JetPrefManager.DELIMITER)
                     if (del1 < 0) continue
+                    val type = PreferenceType.from(line.substring(0, del1))
                     val del2 = line.indexOf(JetPrefManager.DELIMITER, del1 + 1)
                     if (del2 < 0) continue
                     val key = line.substring(del1 + 1, del2)
                     val preferenceData = registry.find { it.key == key }
                     if (preferenceData != null) {
-                        if (preferenceData.type != type) {
+                        if (preferenceData.type.id != type.id) {
                             preferenceData.reset(requestSync = false)
                         }
                         preferenceData.deserialize(
@@ -153,21 +153,43 @@ abstract class PreferenceModel(val name: String) {
         }
     }
 
+    private fun String.encodeNewline(): String {
+        return this
+            .replace("\\", "\\\\")
+            .replace("\r", "\\r")
+            .replace("\n", "\\n")
+    }
+
+    private fun String.decodeNewline(): String {
+        return this
+            .replace("\\n", "\n")
+            .replace("\\r", "\r")
+            .replace("\\\\", "\\")
+    }
+
     private fun <V : Any> PreferenceData<V>.serialize(): String? {
-        if (!type.isPrimitive()) return null
+        if (type.isInvalid() || !type.isPrimitive()) return null
         val rawValue = getOrNull()?.let { serializer.serialize(it) } ?: return null
         val sb = StringBuilder()
-        sb.append(type)
+        sb.append(type.id)
         sb.append(JetPrefManager.DELIMITER)
         sb.append(key)
         sb.append(JetPrefManager.DELIMITER)
-        sb.append(rawValue)
+        if (type.isString()) {
+            sb.append(rawValue.encodeNewline())
+        } else {
+            sb.append(rawValue)
+        }
         return sb.toString()
     }
 
     private fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {
-        if (!type.isPrimitive()) return
-        val value = serializer.deserialize(rawValue)
+        if (type.isInvalid() || !type.isPrimitive()) return
+        val value = if (type.isString()) {
+            serializer.deserialize(rawValue.decodeNewline())
+        } else {
+            serializer.deserialize(rawValue)
+        }
         if (value == null) {
             reset(requestSync = false)
         } else {

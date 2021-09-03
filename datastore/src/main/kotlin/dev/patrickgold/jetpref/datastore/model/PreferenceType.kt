@@ -16,23 +16,46 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
-typealias PreferenceType = String
+@JvmInline
+value class PreferenceType private constructor(val id: String) {
+    companion object {
+        private const val BOOLEAN: String =     "b"
+        private const val DOUBLE: String =      "d"
+        private const val FLOAT: String =       "f"
+        private const val INTEGER: String =     "i"
+        private const val LONG: String =        "l"
+        private const val STRING: String =      "s"
 
-internal object PreferenceTypes {
-    const val BOOLEAN: PreferenceType =     "b"
-    const val DOUBLE: PreferenceType =      "d"
-    const val FLOAT: PreferenceType =       "f"
-    const val INTEGER: PreferenceType =     "i"
-    const val LONG: PreferenceType =        "l"
-    const val STRING: PreferenceType =      "s"
-}
+        fun boolean() = PreferenceType(BOOLEAN)
 
-fun PreferenceType.isPrimitive() = when (this) {
-    PreferenceTypes.BOOLEAN,
-    PreferenceTypes.DOUBLE,
-    PreferenceTypes.FLOAT,
-    PreferenceTypes.INTEGER,
-    PreferenceTypes.LONG,
-    PreferenceTypes.STRING -> true
-    else -> false
+        fun double() = PreferenceType(DOUBLE)
+
+        fun float() = PreferenceType(FLOAT)
+
+        fun integer() = PreferenceType(INTEGER)
+
+        fun long() = PreferenceType(LONG)
+
+        fun string() = PreferenceType(STRING)
+
+        fun from(id: String) = PreferenceType(id)
+    }
+
+    fun isValid() = id.isNotBlank()
+
+    fun isInvalid() = !isValid()
+
+    fun isPrimitive() = id.first().isLowerCase()
+
+    fun isBoolean() = id == BOOLEAN
+
+    fun isDouble() = id == DOUBLE
+
+    fun isFloat() = id == FLOAT
+
+    fun isInteger() = id == INTEGER
+
+    fun isLong() = id == LONG
+
+    fun isString() = id == STRING
 }
