@@ -43,11 +43,14 @@ value class PreferenceType private constructor(@PreferenceTypeId val id: String)
         fun from(@PreferenceTypeId id: String) = PreferenceType(id)
     }
 
-    fun isValid() = id.isNotBlank()
+    fun isValid() = isPrimitive()
 
     fun isInvalid() = !isValid()
 
-    fun isPrimitive() = id.first().isLowerCase()
+    fun isPrimitive() = when (id) {
+        BOOLEAN, DOUBLE, FLOAT, INTEGER, LONG, STRING -> true
+        else -> false
+    }
 
     fun isBoolean() = id == BOOLEAN
 

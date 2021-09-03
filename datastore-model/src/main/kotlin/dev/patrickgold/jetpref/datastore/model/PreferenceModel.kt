@@ -27,6 +27,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class PreferenceModel(val name: String) {
@@ -112,30 +113,35 @@ abstract class PreferenceModel(val name: String) {
         return prefData
     }
 
-    private fun CoroutineScope.setupModel() = launch(Dispatchers.IO) {
-        JetPrefManager.loadPrefFile(name) {
-            registryGuard.withLock {
-                for (line in it.lineSequence()) {
-                    if (line.isBlank()) continue
-                    val del1 = line.indexOf(JetPrefManager.DELIMITER)
-                    if (del1 < 0) continue
-                    val type = PreferenceType.from(line.substring(0, del1))
-                    val del2 = line.indexOf(JetPrefManager.DELIMITER, del1 + 1)
-                    if (del2 < 0) continue
-                    val key = line.substring(del1 + 1, del2)
-                    val preferenceData = registry.find { it.key == key }
-                    if (preferenceData != null) {
-                        if (preferenceData.type.id != type.id) {
-                            preferenceData.reset(requestSync = false)
+    private fun CoroutineScope.setupModel() = launch(Dispatchers.Main) {
+        // Important: MUST launch in Main then switch to IO or registry won't be initialized correctly!!
+        // TODO: research if this happens only by accident. If so, consider using codegen or reflection
+        withContext(Dispatchers.IO) {
+            JetPrefManager.loadPrefFile(name) {
+                registryGuard.withLock {
+                    android.util.Log.i("JetPref", registry.toString())
+                    for (line in it.lineSequence()) {
+                        if (line.isBlank()) continue
+                        val del1 = line.indexOf(JetPrefManager.DELIMITER)
+                        if (del1 < 0) continue
+                        val type = PreferenceType.from(line.substring(0, del1))
+                        val del2 = line.indexOf(JetPrefManager.DELIMITER, del1 + 1)
+                        if (del2 < 0) continue
+                        val key = line.substring(del1 + 1, del2)
+                        val preferenceData = registry.find { it.key == key }
+                        if (preferenceData != null) {
+                            if (preferenceData.type.id != type.id) {
+                                preferenceData.reset(requestSync = false)
+                            }
+                            preferenceData.deserialize(
+                                if (del2 + 1 == line.length) { "" } else { line.substring(del2 + 1) }
+                            )
                         }
-                        preferenceData.deserialize(
-                            if (del2 + 1 == line.length) { "" } else { line.substring(del2 + 1) }
-                        )
                     }
                 }
             }
+            persistJob = launchSyncJob()
         }
-        persistJob = launchSyncJob()
     }
 
     private fun CoroutineScope.launchSyncJob() = launch(Dispatchers.IO) {
