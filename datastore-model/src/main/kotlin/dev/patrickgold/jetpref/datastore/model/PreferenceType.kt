@@ -16,15 +16,17 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
+import dev.patrickgold.jetpref.datastore.annotations.PreferenceTypeId
+
 @JvmInline
-value class PreferenceType private constructor(val id: String) {
+value class PreferenceType private constructor(@PreferenceTypeId val id: String) {
     companion object {
-        private const val BOOLEAN: String =     "b"
-        private const val DOUBLE: String =      "d"
-        private const val FLOAT: String =       "f"
-        private const val INTEGER: String =     "i"
-        private const val LONG: String =        "l"
-        private const val STRING: String =      "s"
+        @PreferenceTypeId private const val BOOLEAN: String =       "b"
+        @PreferenceTypeId private const val DOUBLE: String =        "d"
+        @PreferenceTypeId private const val FLOAT: String =         "f"
+        @PreferenceTypeId private const val INTEGER: String =       "i"
+        @PreferenceTypeId private const val LONG: String =          "l"
+        @PreferenceTypeId private const val STRING: String =        "s"
 
         fun boolean() = PreferenceType(BOOLEAN)
 
@@ -38,7 +40,7 @@ value class PreferenceType private constructor(val id: String) {
 
         fun string() = PreferenceType(STRING)
 
-        fun from(id: String) = PreferenceType(id)
+        fun from(@PreferenceTypeId id: String) = PreferenceType(id)
     }
 
     fun isValid() = id.isNotBlank()

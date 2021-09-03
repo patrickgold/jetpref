@@ -20,6 +20,7 @@ package dev.patrickgold.jetpref.datastore.model
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -32,7 +33,7 @@ interface PreferenceData<V : Any> {
 
     val serializer: PreferenceSerializer<V>
 
-    val key: String
+    @PreferenceKey val key: String
 
     val default: V
 

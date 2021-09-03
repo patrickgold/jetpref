@@ -17,6 +17,7 @@
 package dev.patrickgold.jetpref.datastore.model
 
 import dev.patrickgold.jetpref.datastore.JetPrefManager
+import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -48,7 +49,7 @@ abstract class PreferenceModel(val name: String) {
     }
 
     protected fun boolean(
-        key: String,
+        @PreferenceKey key: String,
         default: Boolean,
     ): PreferenceData<Boolean> {
         val prefData = BooleanPreferenceData(this, key, default)
@@ -57,7 +58,7 @@ abstract class PreferenceModel(val name: String) {
     }
 
     protected fun double(
-        key: String,
+        @PreferenceKey key: String,
         default: Double,
     ): PreferenceData<Double> {
         val prefData = DoublePreferenceData(this, key, default)
@@ -66,7 +67,7 @@ abstract class PreferenceModel(val name: String) {
     }
 
     protected fun float(
-        key: String,
+        @PreferenceKey key: String,
         default: Float,
     ): PreferenceData<Float> {
         val prefData = FloatPreferenceData(this, key, default)
@@ -75,7 +76,7 @@ abstract class PreferenceModel(val name: String) {
     }
 
     protected fun int(
-        key: String,
+        @PreferenceKey key: String,
         default: Int,
     ): PreferenceData<Int> {
         val prefData = IntPreferenceData(this, key, default)
@@ -84,7 +85,7 @@ abstract class PreferenceModel(val name: String) {
     }
 
     protected fun long(
-        key: String,
+        @PreferenceKey key: String,
         default: Long,
     ): PreferenceData<Long> {
         val prefData = LongPreferenceData(this, key, default)
@@ -93,7 +94,7 @@ abstract class PreferenceModel(val name: String) {
     }
 
     protected fun string(
-        key: String,
+        @PreferenceKey key: String,
         default: String,
     ): PreferenceData<String> {
         val prefData = StringPreferenceData(this, key, default)
@@ -102,7 +103,7 @@ abstract class PreferenceModel(val name: String) {
     }
 
     protected fun <V : Any> custom(
-        key: String,
+        @PreferenceKey key: String,
         default: V,
         serializer: PreferenceSerializer<V>,
     ): PreferenceData<V> {
