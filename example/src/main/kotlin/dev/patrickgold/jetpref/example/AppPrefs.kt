@@ -16,6 +16,10 @@ class AppPrefs : PreferenceModel("test-file") {
             key = "test__is_button_showing",
             default = true,
         )
+        var isButtonShowing2 = boolean(
+            key = "test__is_button_showing2",
+            default = true,
+        )
         val fontSize = float(
             key = "test__font_size",
             default = 10.0f,

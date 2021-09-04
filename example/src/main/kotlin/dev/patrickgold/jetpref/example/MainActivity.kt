@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import dev.patrickgold.jetpref.datastore.preferenceModel
+import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 
@@ -36,7 +37,7 @@ class MainActivity : ComponentActivity() {
             JetPrefTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    Greeting(prefs, "Android")
+                    Greeting("Android")
                 }
             }
         }
@@ -44,7 +45,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(prefs: AppPrefs, name: String) {
+fun Greeting(name: String) {
     Column(
         modifier = Modifier.verticalScroll(
             rememberScrollState()
@@ -60,7 +61,7 @@ fun Greeting(prefs: AppPrefs, name: String) {
             )
             Text(text = "Text")
         }
-        SwitchPreference(data = prefs.test.isButtonShowing, title = "Hello")
+        HomeScreen()
     }
 }
 
