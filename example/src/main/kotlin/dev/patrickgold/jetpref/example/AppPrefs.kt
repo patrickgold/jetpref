@@ -24,13 +24,21 @@ class AppPrefs : PreferenceModel("test-file") {
             key = "test__is_button_showing2",
             default = true,
         )
+        val mainFontSize = double(
+            key = "test__main_font_size",
+            default = 20.0,
+        )
         val fontSize = float(
             key = "test__font_size",
-            default = 10.0f,
+            default = 30.0f,
         )
         val buttonSize = int(
             key = "test__button_size",
             default = 10,
+        )
+        val buttonWidth = long(
+            key = "test__button_width",
+            default = 40,
         )
         val title = string(
             key = "test__title",

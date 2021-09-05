@@ -45,6 +45,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     visibleIf: PreferenceDataEvaluator = this.visibleIf,
 ) {
     val pref = ref.observeAsState()
+
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
         ListItem(

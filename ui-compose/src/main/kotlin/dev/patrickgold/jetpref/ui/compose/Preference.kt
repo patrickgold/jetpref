@@ -48,10 +48,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
         ListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = { Text(title) },
-            secondaryText = maybeJetText(when {
-                summary != null -> summary
-                else -> null
-            }),
+            secondaryText = maybeJetText(summary),
             modifier = if (onClick != null) {
                 Modifier.clickable(
                     enabled = isEnabled,

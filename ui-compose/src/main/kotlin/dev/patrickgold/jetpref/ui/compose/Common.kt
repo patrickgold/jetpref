@@ -24,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 
 @Composable
-fun maybeJetIcon(
+internal fun maybeJetIcon(
     @DrawableRes id: Int?,
     iconSpaceReserved: Boolean,
     contentDescription: String? = null,
@@ -42,11 +42,15 @@ fun maybeJetIcon(
 }
 
 @Composable
-fun maybeJetText(
+internal fun maybeJetText(
     text: String?
 ): @Composable (() -> Unit)? {
     return when {
         text != null && text.isNotBlank() -> ({ Text(text) })
         else -> null
     }
+}
+
+internal fun String.formatValue(value: Any?): String {
+    return this.replace("{v}", value.toString())
 }

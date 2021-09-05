@@ -18,13 +18,14 @@ package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.example.AppPrefs
+import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
 import dev.patrickgold.jetpref.ui.compose.Preference
 import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
 import dev.patrickgold.jetpref.ui.compose.PreferenceScreen
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 
 @Composable
-fun HomeScreen() = PreferenceScreen(::AppPrefs, iconSpaceReserved = true) {
+fun HomeScreen() = PreferenceScreen(::AppPrefs) {
     Preference(
         title = "Hello",
         summary = "Test",
@@ -45,6 +46,38 @@ fun HomeScreen() = PreferenceScreen(::AppPrefs, iconSpaceReserved = true) {
             summaryOn = "Hello",
             summaryOff = "Bye",
             enabledIf = { prefs.test.isButtonShowing isEqualTo true },
+        )
+        DialogSliderPreference(
+            prefs.test.buttonSize,
+            title = "Button Size",
+            min = 0,
+            max = 100,
+            stepIncrement = 1,
+            unit = "{v}%",
+        )
+        DialogSliderPreference(
+            prefs.test.buttonWidth,
+            title = "Button Size",
+            min = 0,
+            max = 100,
+            stepIncrement = 5,
+            unit = "{v} dp",
+        )
+        DialogSliderPreference(
+            prefs.test.mainFontSize,
+            title = "Main Font Size",
+            min = 0.0,
+            max = 100.0,
+            stepIncrement = 5.0,
+            unit = "{v} sp",
+        )
+        DialogSliderPreference(
+            prefs.test.fontSize,
+            title = "Font Size",
+            min = 0.0f,
+            max = 100.0f,
+            stepIncrement = 5.0f,
+            unit = "{v} sp",
         )
     }
 }

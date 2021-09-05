@@ -51,7 +51,7 @@ class PreferenceUiScope<T : PreferenceModel>(
 inline fun <reified T : PreferenceModel> PreferenceScreen(
     noinline factory: () -> T,
     scrollable: Boolean = true,
-    iconSpaceReserved: Boolean = false,
+    iconSpaceReserved: Boolean = true,
     noinline enabledIf: PreferenceDataEvaluator = { true },
     noinline visibleIf: PreferenceDataEvaluator = { true },
     content: PreferenceUiContent<T>,
