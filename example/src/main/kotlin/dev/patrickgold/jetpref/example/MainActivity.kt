@@ -16,6 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import dev.patrickgold.jetpref.datastore.preferenceModel
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
@@ -32,10 +36,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
+
             JetPrefTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
+                    AppContent(navController)
                 }
             }
         }
@@ -43,7 +49,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String) {
+fun AppContent(navController: NavHostController) {
     Column {
         TopAppBar(
             title = { Text(text = "Hello Android!") },
@@ -58,7 +64,9 @@ fun Greeting(name: String) {
             )
             Text(text = "Text")
         }
-        HomeScreen()
+        NavHost(navController = navController, startDestination = "home") {
+            composable("home") { HomeScreen() }
+        }
     }
 }
 

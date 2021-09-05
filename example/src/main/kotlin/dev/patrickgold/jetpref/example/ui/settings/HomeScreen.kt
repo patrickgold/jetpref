@@ -18,12 +18,18 @@ package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.example.AppPrefs
+import dev.patrickgold.jetpref.ui.compose.Preference
 import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
 import dev.patrickgold.jetpref.ui.compose.PreferenceScreen
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 
 @Composable
 fun HomeScreen() = PreferenceScreen(::AppPrefs, iconSpaceReserved = true) {
+    Preference(
+        title = "Hello",
+        summary = "Test",
+        onClick = { },
+    )
     SwitchPreference(
         prefs.showTestGroup,
         title = "Show Test Group",
