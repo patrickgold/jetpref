@@ -19,11 +19,14 @@ package dev.patrickgold.jetpref.ui.compose
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
@@ -38,21 +41,27 @@ typealias PreferenceUiContent<T> = @Composable @PreferenceUiScopeDsl PreferenceU
 
 class PreferenceUiScope<T : PreferenceModel>(
     val prefs: T,
-    val iconSpaceReserved: Boolean,
-    val enabledIf: PreferenceDataEvaluator,
-    val visibleIf: PreferenceDataEvaluator,
+    internal val iconSpaceReserved: Boolean,
+    internal val enabledIf: PreferenceDataEvaluator,
+    internal val visibleIf: PreferenceDataEvaluator,
     columnScope: ColumnScope,
 ) : ColumnScope by columnScope
 
 @Composable
 inline fun <reified T : PreferenceModel> PreferenceScreen(
     noinline factory: () -> T,
+    scrollable: Boolean = true,
     iconSpaceReserved: Boolean = false,
     noinline enabledIf: PreferenceDataEvaluator = { true },
     noinline visibleIf: PreferenceDataEvaluator = { true },
     content: PreferenceUiContent<T>,
 ) {
-    Column {
+    val modifier = if (scrollable) {
+        Modifier.verticalScroll(rememberScrollState())
+    } else {
+        Modifier
+    }
+    Column(modifier = modifier) {
         val prefModel by preferenceModel(factory)
         val preferenceScope = PreferenceUiScope(
             prefs = prefModel,
