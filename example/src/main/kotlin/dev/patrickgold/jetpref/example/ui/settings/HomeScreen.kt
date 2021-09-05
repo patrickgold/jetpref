@@ -23,18 +23,22 @@ import dev.patrickgold.jetpref.ui.compose.PreferenceScreen
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 
 @Composable
-fun HomeScreen() = PreferenceScreen(::AppPrefs) {
-    PreferenceGroup(title = "Hello") {
+fun HomeScreen() = PreferenceScreen(::AppPrefs, iconSpaceReserved = true) {
+    SwitchPreference(
+        prefs.showTestGroup,
+        title = "Show Test Group",
+    )
+    PreferenceGroup(title = "Hello", visibleIf = { prefs.showTestGroup isEqualTo true }) {
         SwitchPreference(
-            ref = prefs.test.isButtonShowing,
-            iconSpaceReserved = true,
+            prefs.test.isButtonShowing,
             title = "isBtnShow",
         )
         SwitchPreference(
-            ref = prefs.test.isButtonShowing2,
-            iconSpaceReserved = true,
+            prefs.test.isButtonShowing2,
             title = "isBtnShow2",
-            visibleIf = { prefs.test.isButtonShowing isEqualTo true },
+            summaryOn = "Hello",
+            summaryOff = "Bye",
+            enabledIf = { prefs.test.isButtonShowing isEqualTo true },
         )
     }
 }

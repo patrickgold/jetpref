@@ -19,46 +19,82 @@ package dev.patrickgold.jetpref.ui.compose
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.preferenceModel
+
+@DslMarker
+@Target(AnnotationTarget.TYPE)
+annotation class PreferenceUiScopeDsl
+
+typealias PreferenceUiContent<T> = @Composable @PreferenceUiScopeDsl PreferenceUiScope<T>.() -> Unit
+
+class PreferenceUiScope<T : PreferenceModel>(
+    val prefs: T,
+    val iconSpaceReserved: Boolean,
+    val enabledIf: PreferenceDataEvaluator,
+    val visibleIf: PreferenceDataEvaluator,
+    columnScope: ColumnScope,
+) : ColumnScope by columnScope
 
 @Composable
 inline fun <reified T : PreferenceModel> PreferenceScreen(
     noinline factory: () -> T,
-    content: @Composable PreferenceScope<T>.() -> Unit,
+    iconSpaceReserved: Boolean = false,
+    noinline enabledIf: PreferenceDataEvaluator = { true },
+    noinline visibleIf: PreferenceDataEvaluator = { true },
+    content: PreferenceUiContent<T>,
 ) {
     Column {
         val prefModel by preferenceModel(factory)
-        val preferenceScope = PreferenceScope(prefModel, this)
+        val preferenceScope = PreferenceUiScope(
+            prefs = prefModel,
+            iconSpaceReserved = iconSpaceReserved,
+            enabledIf = enabledIf,
+            visibleIf = visibleIf,
+            columnScope = this,
+        )
 
         content(preferenceScope)
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun <T : PreferenceModel> PreferenceScope<T>.PreferenceGroup(
+fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
     @DrawableRes iconId: Int? = null,
-    iconSpaceReserved: Boolean = false,
+    iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
-    enabledIf: @Composable PreferenceDataEvaluator.() -> Boolean = { true },
-    visibleIf: @Composable PreferenceDataEvaluator.() -> Boolean = { true },
-    content: @Composable PreferenceScope<T>.() -> Unit,
+    enabledIf: PreferenceDataEvaluator = this.enabledIf,
+    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    content: PreferenceUiContent<T>,
 ) {
-
-    if (visibleIf(PreferenceDataEvaluator.instance())) {
+    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
         Column {
-            val preferenceScope = PreferenceScope(this@PreferenceGroup.prefs, this@Column)
+            val preferenceScope = PreferenceUiScope(
+                prefs = this@PreferenceGroup.prefs,
+                iconSpaceReserved = iconSpaceReserved,
+                enabledIf = enabledIf,
+                visibleIf = visibleIf,
+                columnScope = this@Column,
+            )
 
-            Text(text = title)
+            ListItem(
+                icon = maybeJetIcon(iconId, iconSpaceReserved),
+                text = { Text(
+                    text = title,
+                    color = MaterialTheme.colors.secondary,
+                    fontWeight = FontWeight.Bold,
+                ) },
+            )
             content(preferenceScope)
         }
     }
 }
-
-class PreferenceScope<T : PreferenceModel>(
-    val prefs: T,
-    columnScope: ColumnScope,
-) : ColumnScope by columnScope

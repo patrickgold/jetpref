@@ -18,9 +18,11 @@ package dev.patrickgold.jetpref.datastore.model
 
 import androidx.compose.runtime.Composable
 
-class PreferenceDataEvaluator {
+typealias PreferenceDataEvaluator = @Composable PreferenceDataEvaluatorScope.() -> Boolean
+
+class PreferenceDataEvaluatorScope {
     companion object {
-        private val staticInstance = PreferenceDataEvaluator()
+        private val staticInstance = PreferenceDataEvaluatorScope()
 
         fun instance() = staticInstance
     }

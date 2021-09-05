@@ -27,24 +27,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
+import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SwitchPreference(
+fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     ref: PreferenceData<Boolean>,
     @DrawableRes iconId: Int? = null,
-    iconSpaceReserved: Boolean = false,
+    iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summary: String? = null,
     summaryOn: String? = null,
     summaryOff: String? = null,
-    enabledIf: @Composable PreferenceDataEvaluator.() -> Boolean = { true },
-    visibleIf: @Composable PreferenceDataEvaluator.() -> Boolean = { true },
+    enabledIf: PreferenceDataEvaluator = this.enabledIf,
+    visibleIf: PreferenceDataEvaluator = this.visibleIf,
 ) {
     val pref = ref.observeAsState()
-    if (visibleIf(PreferenceDataEvaluator.instance())) {
-        val isEnabled = enabledIf(PreferenceDataEvaluator.instance())
+    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
+        val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
         ListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = { Text(title) },

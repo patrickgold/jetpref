@@ -10,6 +10,10 @@ enum class Step {
 }
 
 class AppPrefs : PreferenceModel("test-file") {
+    var showTestGroup = boolean(
+        key = "show_test_group",
+        default = true,
+    )
     val test = Test()
     inner class Test {
         var isButtonShowing = boolean(
