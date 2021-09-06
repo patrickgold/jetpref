@@ -19,10 +19,12 @@ package dev.patrickgold.jetpref.example.ui.settings
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.example.AppPrefs
 import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
+import dev.patrickgold.jetpref.ui.compose.ListPreference
 import dev.patrickgold.jetpref.ui.compose.Preference
 import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
 import dev.patrickgold.jetpref.ui.compose.PreferenceScreen
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
+import dev.patrickgold.jetpref.ui.compose.entry
 
 @Composable
 fun HomeScreen() = PreferenceScreen(::AppPrefs) {
@@ -80,4 +82,28 @@ fun HomeScreen() = PreferenceScreen(::AppPrefs) {
             unit = "{v} sp",
         )
     }
+    ListPreference(
+        prefs.test.title,
+        title = "String",
+        entries = listOf(
+            entry(
+                key = "str1",
+                label = "String 1",
+                description = "Some lengthy description about this entry.",
+                showDescriptionOnlyIfSelected = true,
+            ),
+            entry(
+                key = "str2",
+                label = "String 2",
+                description = "Some lengthy description about this entry.",
+                showDescriptionOnlyIfSelected = true,
+            ),
+            entry(
+                key = "str3",
+                label = "String 3",
+                description = "Some lengthy description about this entry.",
+                showDescriptionOnlyIfSelected = true,
+            ),
+        ),
+    )
 }

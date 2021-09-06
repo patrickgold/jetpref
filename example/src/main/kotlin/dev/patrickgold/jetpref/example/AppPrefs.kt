@@ -42,7 +42,7 @@ class AppPrefs : PreferenceModel("test-file") {
         )
         val title = string(
             key = "test__title",
-            default = "Hello!",
+            default = "str1",
         )
         val step = custom(
             key = "test__step",
