@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("kotlin-android")
+    id("maven-publish")
 }
 
 android {
@@ -60,4 +61,41 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.0.2")
     debugImplementation("androidx.compose.ui:ui-tooling:1.0.2")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("uiComposeRelease").apply {
+                from(components.findByName("release"))
+
+                groupId = "dev.patrickgold.jetpref"
+                artifactId = "jetpref-ui-compose"
+                version = "0.1.0-alpha01"
+
+                pom {
+                    name.set("JetPref DataStore Model")
+                    description.set("An alternative model to SharedPreferences.")
+                    url.set("https://patrickgold.dev/jetpref")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("patrickgold")
+                            name.set("Patrick Goldinger")
+                            email.set("patrick@patrickgold.dev")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:https://github.com/patrickgold/jetpref.git")
+                        url.set("https://github.com/patrickgold/jetpref")
+                    }
+                }
+            }
+        }
+    }
 }
