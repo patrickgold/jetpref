@@ -36,6 +36,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
+group = "com.github.patrickgold.jetpref"
+version = "0.1.0-alpha01"
+
 afterEvaluate {
     publishing {
         publications {

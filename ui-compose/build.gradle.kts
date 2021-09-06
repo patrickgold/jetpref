@@ -63,6 +63,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.0.2")
 }
 
+group = "com.github.patrickgold.jetpref"
+version = "0.1.0-alpha01"
+
 afterEvaluate {
     publishing {
         publications {

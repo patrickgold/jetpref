@@ -57,6 +57,9 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+group = "com.github.patrickgold.jetpref"
+version = "0.1.0-alpha01"
+
 afterEvaluate {
     publishing {
         publications {
