@@ -18,12 +18,14 @@ package dev.patrickgold.jetpref.ui.compose
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -69,7 +71,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                 enabled = isEnabled,
                 role = Role.Switch,
                 onValueChange = { ref.set(it) }
-            )
+            ).alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
         )
     }
 }

@@ -55,15 +55,6 @@ fun AppContent(navController: NavHostController) {
             title = { Text(text = "Hello Android!") },
             backgroundColor = MaterialTheme.colors.surface
         )
-        Row {
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = "Icon",
-                modifier = Modifier
-                    .clip(CircleShape)
-            )
-            Text(text = "Text")
-        }
         NavHost(navController = navController, startDestination = "home") {
             composable("home") { HomeScreen() }
         }

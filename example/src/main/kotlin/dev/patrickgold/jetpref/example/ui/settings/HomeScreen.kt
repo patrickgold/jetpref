@@ -18,6 +18,7 @@ package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.example.AppPrefs
+import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
 import dev.patrickgold.jetpref.ui.compose.ListPreference
 import dev.patrickgold.jetpref.ui.compose.Preference
@@ -29,12 +30,14 @@ import dev.patrickgold.jetpref.ui.compose.entry
 @Composable
 fun HomeScreen() = PreferenceScreen(::AppPrefs) {
     Preference(
+        iconId = R.drawable.ic_question_answer_black_24dp,
         title = "Hello",
         summary = "Test",
         onClick = { },
     )
     SwitchPreference(
         prefs.showTestGroup,
+        iconId = R.drawable.ic_question_answer_black_24dp,
         title = "Show Test Group",
     )
     PreferenceGroup(title = "Hello", visibleIf = { prefs.showTestGroup isEqualTo true }) {
@@ -44,6 +47,7 @@ fun HomeScreen() = PreferenceScreen(::AppPrefs) {
         )
         SwitchPreference(
             prefs.test.isButtonShowing2,
+            iconId = R.drawable.ic_question_answer_black_24dp,
             title = "isBtnShow2",
             summaryOn = "Hello",
             summaryOff = "Bye",
