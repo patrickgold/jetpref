@@ -16,9 +16,28 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
+/**
+ * Interface allowing to implement a custom serializer for [V].
+ */
 interface PreferenceSerializer<V : Any> {
+    /**
+     * Serialize given [value] and return a [String]. If no serialization
+     * is possible, null is returned.
+     *
+     * @param value The value to serialize.
+     *
+     * @return The serialized value or null.
+     */
     fun serialize(value: V): String?
 
+    /**
+     * De-serialize given string [value] and return a value of type [V]. If
+     * no de-serialization is possible, null is returned.
+     *
+     * @param value The value to de-serialize.
+     *
+     * @return The de-serialized value or null.
+     */
     fun deserialize(value: String): V?
 }
 
