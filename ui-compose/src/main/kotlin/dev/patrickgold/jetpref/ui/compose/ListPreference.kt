@@ -54,14 +54,6 @@ data class ListPreferenceEntry<V : Any>(
 fun <V : Any> entry(
     key: V,
     label: String,
-    showDescriptionOnlyIfSelected: Boolean = false,
-): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, { Text(label) }, { }, showDescriptionOnlyIfSelected)
-}
-
-fun <V : Any> entry(
-    key: V,
-    label: String,
     description: String,
     showDescriptionOnlyIfSelected: Boolean = false,
 ): ListPreferenceEntry<V> {
@@ -105,18 +97,20 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
         ListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = { Text(title) },
+            text = prefTitle(title),
             secondaryText = entries.find {
                 it.key == pref.value
             }?.label ?: { Text("!! invalid !!") },
-            modifier = Modifier.clickable(
-                enabled = isEnabled,
-                role = Role.Button,
-                onClick = {
-                    setOptionValue(pref.value)
-                    isDialogOpen.value = true
-                }
-            ).alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
+            modifier = Modifier
+                .clickable(
+                    enabled = isEnabled,
+                    role = Role.Button,
+                    onClick = {
+                        setOptionValue(pref.value)
+                        isDialogOpen.value = true
+                    }
+                )
+                .alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
         )
         if (isDialogOpen.value) {
             JetPrefAlertDialog(

@@ -66,16 +66,18 @@ internal fun <V : Number> DialogSliderPreference(
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
         ListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = { Text(title) },
-            secondaryText = maybeJetText(summary.formatValue(pref.value)),
-            modifier = Modifier.clickable(
-                enabled = isEnabled,
-                role = Role.Button,
-                onClick = {
-                    setSliderValue(pref.value)
-                    isDialogOpen.value = true
-                }
-            ).alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
+            text = prefTitle(title),
+            secondaryText = maybePrefSummary(summary.formatValue(pref.value)),
+            modifier = Modifier
+                .clickable(
+                    enabled = isEnabled,
+                    role = Role.Button,
+                    onClick = {
+                        setSliderValue(pref.value)
+                        isDialogOpen.value = true
+                    }
+                )
+                .alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
         )
         if (isDialogOpen.value) {
             JetPrefAlertDialog(

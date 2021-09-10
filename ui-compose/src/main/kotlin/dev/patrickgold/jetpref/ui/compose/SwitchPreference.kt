@@ -22,7 +22,6 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Switch
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -52,8 +51,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
         ListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = { Text(title) },
-            secondaryText = maybeJetText(when {
+            text = prefTitle(title),
+            secondaryText = maybePrefSummary(when {
                 pref.value && summaryOn != null -> summaryOn
                 !pref.value && summaryOff != null -> summaryOff
                 summary != null -> summary
@@ -66,12 +65,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                     enabled = isEnabled
                 )
             },
-            modifier = Modifier.toggleable(
-                value = pref.value,
-                enabled = isEnabled,
-                role = Role.Switch,
-                onValueChange = { ref.set(it) }
-            ).alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
+            modifier = Modifier
+                .toggleable(
+                    value = pref.value,
+                    enabled = isEnabled,
+                    role = Role.Switch,
+                    onValueChange = { ref.set(it) }
+                )
+                .alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
         )
     }
 }

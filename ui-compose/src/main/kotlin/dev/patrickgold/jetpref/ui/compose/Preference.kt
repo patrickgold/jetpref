@@ -21,7 +21,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -45,8 +44,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
         ListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = { Text(title) },
-            secondaryText = maybeJetText(summary),
+            text = prefTitle(title),
+            secondaryText = maybePrefSummary(summary),
             modifier = if (onClick != null) {
                 Modifier.clickable(
                     enabled = isEnabled,

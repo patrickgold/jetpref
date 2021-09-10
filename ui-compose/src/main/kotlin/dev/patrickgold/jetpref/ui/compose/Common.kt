@@ -21,6 +21,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 internal fun maybeJetIcon(
@@ -46,6 +47,48 @@ internal fun maybeJetText(
 ): @Composable (() -> Unit)? {
     return when {
         text != null && text.isNotBlank() -> ({ Text(text) })
+        else -> null
+    }
+}
+
+@Composable
+internal fun prefTitle(text: String): @Composable () -> Unit {
+    return {
+        Text(
+            text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+internal fun prefSummary(text: String): @Composable () -> Unit {
+    return {
+        Text(
+            text = text,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+internal fun maybePrefTitle(
+    text: String?
+): @Composable (() -> Unit)? {
+    return when {
+        text != null && text.isNotBlank() -> prefTitle(text)
+        else -> null
+    }
+}
+
+@Composable
+internal fun maybePrefSummary(
+    text: String?
+): @Composable (() -> Unit)? {
+    return when {
+        text != null && text.isNotBlank() -> prefSummary(text)
         else -> null
     }
 }

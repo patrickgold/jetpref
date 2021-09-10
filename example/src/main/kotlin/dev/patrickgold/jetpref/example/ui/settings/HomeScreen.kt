@@ -35,6 +35,12 @@ fun HomeScreen() = PreferenceScreen(::AppPrefs) {
         summary = "Test",
         onClick = { },
     )
+    Preference(
+        iconId = R.drawable.ic_question_answer_black_24dp,
+        title = "This is a very very long sentence which does not fit in a title",
+        summary = "This is an even longer description which spans over multiple lines and is way too long. This is an even longer description which spans over multiple lines and is way too long.",
+        onClick = { },
+    )
     SwitchPreference(
         prefs.showTestGroup,
         iconId = R.drawable.ic_question_answer_black_24dp,
