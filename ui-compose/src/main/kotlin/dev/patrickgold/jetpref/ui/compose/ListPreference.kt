@@ -54,6 +54,13 @@ data class ListPreferenceEntry<V : Any>(
 fun <V : Any> entry(
     key: V,
     label: String,
+): ListPreferenceEntry<V> {
+    return ListPreferenceEntry(key, { Text(label) }, { }, false)
+}
+
+fun <V : Any> entry(
+    key: V,
+    label: String,
     description: String,
     showDescriptionOnlyIfSelected: Boolean = false,
 ): ListPreferenceEntry<V> {
