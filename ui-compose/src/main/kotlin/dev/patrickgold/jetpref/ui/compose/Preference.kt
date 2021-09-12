@@ -18,18 +18,13 @@ package dev.patrickgold.jetpref.ui.compose
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
     @DrawableRes iconId: Int? = null,
@@ -42,10 +37,10 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
 ) {
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
-        ListItem(
+        JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = prefTitle(title),
-            secondaryText = maybePrefSummary(summary),
+            text = title,
+            secondaryText = summary,
             modifier = if (onClick != null) {
                 Modifier.clickable(
                     enabled = isEnabled,
@@ -54,7 +49,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
                 )
             } else {
                 Modifier
-            }.alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
+            },
+            enabled = isEnabled,
         )
     }
 }

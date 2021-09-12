@@ -18,13 +18,9 @@ package dev.patrickgold.jetpref.ui.compose
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
 import androidx.compose.material.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -32,7 +28,6 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     ref: PreferenceData<Boolean>,
@@ -49,15 +44,15 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
 
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
-        ListItem(
+        JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = prefTitle(title),
-            secondaryText = maybePrefSummary(when {
+            text = title,
+            secondaryText = when {
                 pref.value && summaryOn != null -> summaryOn
                 !pref.value && summaryOff != null -> summaryOff
                 summary != null -> summary
                 else -> null
-            }),
+            },
             trailing = {
                 Switch(
                     checked = pref.value,
@@ -71,8 +66,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                     enabled = isEnabled,
                     role = Role.Switch,
                     onValueChange = { ref.set(it) }
-                )
-                .alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
+                ),
+            enabled = isEnabled,
         )
     }
 }

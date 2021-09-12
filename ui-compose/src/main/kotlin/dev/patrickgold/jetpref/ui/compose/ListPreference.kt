@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
@@ -46,8 +44,10 @@ import dev.patrickgold.jetpref.datastore.model.observeAsState
 
 data class ListPreferenceEntry<V : Any>(
     val key: V,
-    val label: @Composable () -> Unit,
-    val description: @Composable () -> Unit,
+    val label: String,
+    val labelComposer: @Composable (String) -> Unit,
+    val description: String,
+    val descriptionComposer: @Composable (String) -> Unit,
     val showDescriptionOnlyIfSelected: Boolean,
 )
 
@@ -55,7 +55,7 @@ fun <V : Any> entry(
     key: V,
     label: String,
 ): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, { Text(label) }, { }, false)
+    return ListPreferenceEntry(key, label, { Text(it) }, "", { }, false)
 }
 
 fun <V : Any> entry(
@@ -64,28 +64,30 @@ fun <V : Any> entry(
     description: String,
     showDescriptionOnlyIfSelected: Boolean = false,
 ): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, { Text(label) }, { Text(description) }, showDescriptionOnlyIfSelected)
+    return ListPreferenceEntry(key, label, { Text(it) }, description, { Text(it) }, showDescriptionOnlyIfSelected)
 }
 
 fun <V : Any> entry(
     key: V,
     label: String,
-    description: @Composable () -> Unit,
+    description: String,
+    descriptionComposer: @Composable (String) -> Unit,
     showDescriptionOnlyIfSelected: Boolean = false,
 ): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, { Text(label) }, description, showDescriptionOnlyIfSelected)
+    return ListPreferenceEntry(key, label, { Text(it) }, description, descriptionComposer, showDescriptionOnlyIfSelected)
 }
 
 fun <V : Any> entry(
     key: V,
-    label: @Composable () -> Unit,
-    description: @Composable () -> Unit,
+    label: String,
+    labelComposer: @Composable (String) -> Unit,
+    description: String,
+    descriptionComposer: @Composable (String) -> Unit,
     showDescriptionOnlyIfSelected: Boolean = false,
 ): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, label, description, showDescriptionOnlyIfSelected)
+    return ListPreferenceEntry(key, label, labelComposer, description, descriptionComposer, showDescriptionOnlyIfSelected)
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     ref: PreferenceData<V>,
@@ -102,12 +104,12 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
 
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
-        ListItem(
+        JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = prefTitle(title),
+            text = title,
             secondaryText = entries.find {
                 it.key == pref.value
-            }?.label ?: { Text("!! invalid !!") },
+            }?.label ?: "!! invalid !!",
             modifier = Modifier
                 .clickable(
                     enabled = isEnabled,
@@ -162,13 +164,13 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                             Column(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                entry.label()
+                                entry.labelComposer(entry.label)
                                 if (entry.showDescriptionOnlyIfSelected) {
                                     if (entry.key == optionValue) {
-                                        entry.description()
+                                        entry.descriptionComposer(entry.description)
                                     }
                                 } else {
-                                    entry.description()
+                                    entry.descriptionComposer(entry.description)
                                 }
                             }
                         }

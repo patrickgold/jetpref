@@ -88,7 +88,7 @@ afterEvaluate {
                         }
                     }
                     scm {
-                        connection.set("scm:git:https://github.com/patrickgold/jetpref.git")
+                        connection.set("scm:git:git://github.com/patrickgold/jetpref.git")
                         url.set("https://github.com/patrickgold/jetpref")
                     }
                 }

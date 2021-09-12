@@ -20,9 +20,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -32,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -42,7 +38,6 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun <V : Number> DialogSliderPreference(
     ref: PreferenceData<V>,
@@ -64,10 +59,10 @@ internal fun <V : Number> DialogSliderPreference(
 
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
-        ListItem(
+        JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = prefTitle(title),
-            secondaryText = maybePrefSummary(summary.formatValue(pref.value)),
+            text = title,
+            secondaryText = summary.formatValue(pref.value),
             modifier = Modifier
                 .clickable(
                     enabled = isEnabled,
@@ -76,8 +71,8 @@ internal fun <V : Number> DialogSliderPreference(
                         setSliderValue(pref.value)
                         isDialogOpen.value = true
                     }
-                )
-                .alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
+                ),
+            enabled = isEnabled,
         )
         if (isDialogOpen.value) {
             JetPrefAlertDialog(

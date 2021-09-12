@@ -50,7 +50,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.0.2")
     implementation("androidx.compose.material:material:1.0.2")
     implementation("androidx.compose.ui:ui-tooling-preview:1.0.2")
-    implementation("androidx.compose.runtime:runtime-livedata:1.0.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.0.2")
     implementation("androidx.core:core-ktx:1.6.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("com.google.android.material:material:1.4.0")
@@ -94,7 +94,7 @@ afterEvaluate {
                         }
                     }
                     scm {
-                        connection.set("scm:git:https://github.com/patrickgold/jetpref.git")
+                        connection.set("scm:git:git://github.com/patrickgold/jetpref.git")
                         url.set("https://github.com/patrickgold/jetpref")
                     }
                 }

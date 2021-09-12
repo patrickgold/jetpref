@@ -42,53 +42,12 @@ internal fun maybeJetIcon(
 }
 
 @Composable
-internal fun maybeJetText(
-    text: String?
+internal inline fun whenNotNullOrBlank(
+    string: String?,
+    crossinline composer: @Composable (text: String) -> Unit,
 ): @Composable (() -> Unit)? {
     return when {
-        text != null && text.isNotBlank() -> ({ Text(text) })
-        else -> null
-    }
-}
-
-@Composable
-internal fun prefTitle(text: String): @Composable () -> Unit {
-    return {
-        Text(
-            text = text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
-internal fun prefSummary(text: String): @Composable () -> Unit {
-    return {
-        Text(
-            text = text,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
-internal fun maybePrefTitle(
-    text: String?
-): @Composable (() -> Unit)? {
-    return when {
-        text != null && text.isNotBlank() -> prefTitle(text)
-        else -> null
-    }
-}
-
-@Composable
-internal fun maybePrefSummary(
-    text: String?
-): @Composable (() -> Unit)? {
-    return when {
-        text != null && text.isNotBlank() -> prefSummary(text)
+        string != null && string.isNotBlank() -> ({ composer(string) })
         else -> null
     }
 }
