@@ -37,7 +37,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 group = "com.github.patrickgold.jetpref"
-version = "0.1.0-alpha01"
+version = "0.1.0-alpha02"
 
 afterEvaluate {
     publishing {
@@ -47,7 +47,7 @@ afterEvaluate {
 
                 groupId = "dev.patrickgold.jetpref"
                 artifactId = "jetpref-datastore-annotations"
-                version = "0.1.0-alpha01"
+                version = "0.1.0-alpha02"
 
                 pom {
                     name.set("JetPref DataStore Model")
