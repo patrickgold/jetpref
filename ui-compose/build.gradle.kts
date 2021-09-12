@@ -77,8 +77,8 @@ afterEvaluate {
                 version = "0.1.0-alpha01"
 
                 pom {
-                    name.set("JetPref DataStore Model")
-                    description.set("An alternative model to SharedPreferences.")
+                    name.set("JetPref DataStore Model: Compose UI package")
+                    description.set("An AndroidX preference like UI for JetPref datastore settings, written in Jetpack Compose.")
                     url.set("https://patrickgold.dev/jetpref")
                     licenses {
                         license {
