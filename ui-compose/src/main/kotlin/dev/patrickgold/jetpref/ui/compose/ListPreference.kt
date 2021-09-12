@@ -29,6 +29,7 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -90,7 +91,7 @@ fun <V : Any> entry(
 
 @Composable
 fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
-    ref: PreferenceData<V>,
+    pref: PreferenceData<V>,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -98,8 +99,8 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     visibleIf: PreferenceDataEvaluator = this.visibleIf,
     entries: List<ListPreferenceEntry<V>>,
 ) {
-    val pref = ref.observeAsState()
-    val (optionValue, setOptionValue) = remember { mutableStateOf(ref.get()) }
+    val prefValue by pref.observeAsState()
+    val (optionValue, setOptionValue) = remember { mutableStateOf(pref.get()) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
@@ -108,14 +109,14 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
             secondaryText = entries.find {
-                it.key == pref.value
+                it.key == prefValue
             }?.label ?: "!! invalid !!",
             modifier = Modifier
                 .clickable(
                     enabled = isEnabled,
                     role = Role.Button,
                     onClick = {
-                        setOptionValue(pref.value)
+                        setOptionValue(prefValue)
                         isDialogOpen.value = true
                     }
                 )
@@ -126,14 +127,14 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                 title = title,
                 confirmLabel = stringResource(android.R.string.ok),
                 onConfirm = {
-                    ref.set(optionValue)
+                    pref.set(optionValue)
                     isDialogOpen.value = false
                 },
                 dismissLabel = stringResource(android.R.string.cancel),
                 onDismiss = { isDialogOpen.value = false },
                 neutralLabel = "Default",
                 onNeutral = {
-                    pref.value = ref.default
+                    pref.reset()
                     isDialogOpen.value = false
                 }
             ) {

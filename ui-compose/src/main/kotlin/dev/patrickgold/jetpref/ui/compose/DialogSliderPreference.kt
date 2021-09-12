@@ -26,6 +26,7 @@ import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,7 +43,7 @@ import dev.patrickgold.jetpref.datastore.model.observeAsState
 
 @Composable
 internal fun <V : Number> DialogSliderPreference(
-    ref: PreferenceData<V>,
+    pref: PreferenceData<V>,
     @DrawableRes iconId: Int?,
     iconSpaceReserved: Boolean,
     title: String,
@@ -55,7 +56,7 @@ internal fun <V : Number> DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator,
     convertToV: (Float) -> V,
 ) {
-    val pref = ref.observeAsState()
+    val prefValue by pref.observeAsState()
     val (sliderValue, setSliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
@@ -64,13 +65,13 @@ internal fun <V : Number> DialogSliderPreference(
         JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
-            secondaryText = summary.formatValue(pref.value),
+            secondaryText = summary.formatValue(prefValue),
             modifier = Modifier
                 .clickable(
                     enabled = isEnabled,
                     role = Role.Button,
                     onClick = {
-                        setSliderValue(pref.value)
+                        setSliderValue(prefValue)
                         isDialogOpen.value = true
                     }
                 ),
@@ -81,14 +82,14 @@ internal fun <V : Number> DialogSliderPreference(
                 title = title,
                 confirmLabel = stringResource(android.R.string.ok),
                 onConfirm = {
-                    ref.set(sliderValue)
+                    pref.set(sliderValue)
                     isDialogOpen.value = false
                 },
                 dismissLabel = stringResource(android.R.string.cancel),
                 onDismiss = { isDialogOpen.value = false },
                 neutralLabel = "Default",
                 onNeutral = {
-                    pref.value = ref.default
+                    pref.reset()
                     isDialogOpen.value = false
                 }
             ) {

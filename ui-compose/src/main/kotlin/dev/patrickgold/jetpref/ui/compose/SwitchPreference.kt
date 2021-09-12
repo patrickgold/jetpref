@@ -20,6 +20,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
@@ -30,7 +31,7 @@ import dev.patrickgold.jetpref.datastore.model.observeAsState
 
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
-    ref: PreferenceData<Boolean>,
+    pref: PreferenceData<Boolean>,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -40,7 +41,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     enabledIf: PreferenceDataEvaluator = this.enabledIf,
     visibleIf: PreferenceDataEvaluator = this.visibleIf,
 ) {
-    val pref = ref.observeAsState()
+    val prefValue by pref.observeAsState()
 
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
         val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
@@ -48,24 +49,24 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
             secondaryText = when {
-                pref.value && summaryOn != null -> summaryOn
-                !pref.value && summaryOff != null -> summaryOff
+                prefValue && summaryOn != null -> summaryOn
+                !prefValue && summaryOff != null -> summaryOff
                 summary != null -> summary
                 else -> null
             },
             trailing = {
                 Switch(
-                    checked = pref.value,
+                    checked = prefValue,
                     onCheckedChange = null,
                     enabled = isEnabled
                 )
             },
             modifier = Modifier
                 .toggleable(
-                    value = pref.value,
+                    value = prefValue,
                     enabled = isEnabled,
                     role = Role.Switch,
-                    onValueChange = { ref.set(it) }
+                    onValueChange = { pref.set(it) }
                 ),
             enabled = isEnabled,
         )
