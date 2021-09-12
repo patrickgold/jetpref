@@ -16,16 +16,30 @@
 
 package dev.patrickgold.jetpref.ui.compose
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.AlertDialog
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun JetPrefAlertDialog(
@@ -37,45 +51,80 @@ fun JetPrefAlertDialog(
     dismissLabel: String? = null,
     onDismiss: () -> Unit = { },
     allowOutsideDismissal: Boolean = true,
+    properties: DialogProperties = DialogProperties(),
+    backgroundColor: Color = MaterialTheme.colors.surface,
+    contentColor: Color = contentColorFor(backgroundColor),
     content: @Composable () -> Unit,
 ) {
-    AlertDialog(
+    val scrollState = rememberScrollState()
+    Dialog(
         onDismissRequest = { if (allowOutsideDismissal) onDismiss() },
-        title = { Text(title) },
-        text = content,
-        buttons = {
-            Row(modifier = Modifier.padding(top = 0.dp, bottom = 12.dp, start = 8.dp, end = 8.dp)) {
-                val colors = ButtonDefaults.textButtonColors()
-                val elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
-                if (neutralLabel != null && neutralLabel.isNotBlank()) {
-                    Button(
-                        onClick = onNeutral,
-                        colors = colors,
-                        elevation = elevation,
-                    ) {
-                        Text(neutralLabel)
-                    }
+        properties = properties,
+    ) {
+        Surface(
+            modifier = Modifier.padding(vertical = 16.dp),
+            shape = MaterialTheme.shapes.medium,
+            color = backgroundColor,
+            contentColor = contentColor,
+        ) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .height(64.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.subtitle1,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
-                Spacer(modifier = Modifier.weight(1.0f))
-                if (dismissLabel != null && dismissLabel.isNotBlank()) {
-                    Button(
-                        onClick = onDismiss,
-                        colors = colors,
-                        elevation = elevation,
-                    ) {
-                        Text(dismissLabel)
-                    }
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .weight(1.0f, fill = false)
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState),
+                ) {
+                    content()
                 }
-                if (confirmLabel != null && confirmLabel.isNotBlank()) {
-                    Button(
-                        onClick = onConfirm,
-                        colors = colors,
-                        elevation = elevation,
-                    ) {
-                        Text(confirmLabel)
+                Row(modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp)) {
+                    val colors = ButtonDefaults.textButtonColors()
+                    val elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
+                    if (neutralLabel != null && neutralLabel.isNotBlank()) {
+                        Button(
+                            onClick = onNeutral,
+                            colors = colors,
+                            elevation = elevation,
+                        ) {
+                            Text(neutralLabel)
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1.0f))
+                    if (dismissLabel != null && dismissLabel.isNotBlank()) {
+                        Button(
+                            onClick = onDismiss,
+                            colors = colors,
+                            elevation = elevation,
+                        ) {
+                            Text(dismissLabel)
+                        }
+                    }
+                    if (confirmLabel != null && confirmLabel.isNotBlank()) {
+                        Button(
+                            onClick = onConfirm,
+                            colors = colors,
+                            elevation = elevation,
+                        ) {
+                            Text(confirmLabel)
+                        }
                     }
                 }
             }
         }
-    )
+    }
 }

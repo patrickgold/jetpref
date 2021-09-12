@@ -14,6 +14,10 @@ class AppPrefs : PreferenceModel("test-file") {
         key = "show_test_group",
         default = true,
     )
+    val language = string(
+        key = "language",
+        default = "auto",
+    )
     val test = Test()
     inner class Test {
         var isButtonShowing = boolean(

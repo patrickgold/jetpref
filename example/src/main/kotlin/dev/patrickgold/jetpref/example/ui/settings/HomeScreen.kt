@@ -26,6 +26,7 @@ import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
 import dev.patrickgold.jetpref.ui.compose.PreferenceScreen
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 import dev.patrickgold.jetpref.ui.compose.entry
+import java.util.*
 
 @Composable
 fun HomeScreen() = PreferenceScreen(::AppPrefs) {
@@ -34,6 +35,63 @@ fun HomeScreen() = PreferenceScreen(::AppPrefs) {
         title = "Hello",
         summary = "Test",
         onClick = { },
+    )
+    ListPreference(
+        prefs.language,
+        title = "Language",
+        entries = listOf(
+            "auto",
+            "ar",
+            "bg",
+            "bs",
+            "ca",
+            "ckb-IR",
+            "cs",
+            "da",
+            "de",
+            "el",
+            "en",
+            "eo",
+            "es",
+            "fa",
+            "fi",
+            "fr",
+            "hr",
+            "hu",
+            "in",
+            "it",
+            "iw",
+            "kmr-TR",
+            "ko-KR",
+            "lv-LV",
+            "mk",
+            "nds-DE",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "pt-BR",
+            "ru",
+            "sk",
+            "sl",
+            "sr",
+            "sv",
+            "tr",
+            "uk",
+            "zgh",
+        ).map {
+            if (it == "auto") {
+                entry(
+                    key = "auto",
+                    label = "default",
+                )
+            } else {
+                entry(
+                    key = it,
+                    label = Locale(it).getDisplayName(Locale(it))
+                )
+            }
+        },
     )
     Preference(
         iconId = R.drawable.ic_question_answer_black_24dp,
@@ -106,7 +164,7 @@ fun HomeScreen() = PreferenceScreen(::AppPrefs) {
     }
     ListPreference(
         prefs.test.title,
-        title = "String",
+        title = "Some lengthy title about this entry some lengthy title about this entry.",
         entries = listOf(
             entry(
                 key = "str1",

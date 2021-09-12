@@ -20,6 +20,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
@@ -111,7 +113,7 @@ internal fun <V : Number> DialogSliderPreference(
                             ),
                             inactiveTickColor = Color.Transparent,
                         ),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
                     )
                 }
             }

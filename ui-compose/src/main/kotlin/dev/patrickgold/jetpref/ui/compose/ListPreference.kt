@@ -149,7 +149,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                                     }
                                 )
                                 .padding(
-                                    horizontal = 8.dp,
+                                    horizontal = 16.dp,
                                     vertical = 8.dp,
                                 )
                         ) {
