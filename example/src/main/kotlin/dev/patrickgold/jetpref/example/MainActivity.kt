@@ -19,7 +19,7 @@ import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
 
 class MainActivity : ComponentActivity() {
-    private val prefs by preferenceModel(::AppPrefs)
+    private val prefs by preferenceModel(AppPrefs::class, ::AppPrefs)
 
     init {
         prefs.test.isButtonShowing.observe(this) { newValue ->

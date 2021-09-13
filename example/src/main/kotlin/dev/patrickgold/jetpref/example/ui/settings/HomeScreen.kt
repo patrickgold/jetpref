@@ -17,19 +17,20 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.runtime.Composable
+import dev.patrickgold.jetpref.datastore.preferenceModel
 import dev.patrickgold.jetpref.example.AppPrefs
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
 import dev.patrickgold.jetpref.ui.compose.ListPreference
 import dev.patrickgold.jetpref.ui.compose.Preference
 import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
-import dev.patrickgold.jetpref.ui.compose.PreferenceScreen
+import dev.patrickgold.jetpref.ui.compose.PreferenceLayout
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 import dev.patrickgold.jetpref.ui.compose.entry
 import java.util.*
 
 @Composable
-fun HomeScreen() = PreferenceScreen(::AppPrefs) {
+fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)) {
     Preference(
         iconId = R.drawable.ic_question_answer_black_24dp,
         title = "Hello",

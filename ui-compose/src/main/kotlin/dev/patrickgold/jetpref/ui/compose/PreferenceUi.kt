@@ -29,10 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import dev.patrickgold.jetpref.datastore.CachedPreferenceModel
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import dev.patrickgold.jetpref.datastore.preferenceModel
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -49,12 +49,12 @@ class PreferenceUiScope<T : PreferenceModel>(
 ) : ColumnScope by columnScope
 
 @Composable
-inline fun <reified T : PreferenceModel> PreferenceScreen(
-    noinline factory: () -> T,
+fun <T : PreferenceModel> PreferenceLayout(
+    cachedPrefModel: CachedPreferenceModel<T>,
     scrollable: Boolean = true,
     iconSpaceReserved: Boolean = true,
-    noinline enabledIf: PreferenceDataEvaluator = { true },
-    noinline visibleIf: PreferenceDataEvaluator = { true },
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
     content: PreferenceUiContent<T>,
 ) {
     val modifier = if (scrollable) {
@@ -63,7 +63,7 @@ inline fun <reified T : PreferenceModel> PreferenceScreen(
         Modifier
     }
     Column(modifier = modifier) {
-        val prefModel by preferenceModel(factory)
+        val prefModel by cachedPrefModel
         val preferenceScope = PreferenceUiScope(
             prefs = prefModel,
             iconSpaceReserved = iconSpaceReserved,

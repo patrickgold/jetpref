@@ -133,7 +133,7 @@ data class CachedPreferenceModel<T : PreferenceModel>(
     }
 }
 
-inline fun <reified T : PreferenceModel> preferenceModel(noinline factory: () -> T): CachedPreferenceModel<T> {
-    return JetPrefManager.getOrCreatePreferenceModel(T::class, factory)
+fun <T : PreferenceModel> preferenceModel(kClass: KClass<T>, factory: () -> T): CachedPreferenceModel<T> {
+    return JetPrefManager.getOrCreatePreferenceModel(kClass, factory)
 }
 
