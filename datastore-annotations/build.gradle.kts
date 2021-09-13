@@ -19,6 +19,10 @@ plugins {
     id("maven-publish")
 }
 
+val jetprefMavenGroupId: String by project
+val jetprefJitpackGroupId: String by project
+val jetprefVersion: String by project
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -36,8 +40,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
-group = "com.github.patrickgold.jetpref"
-version = "0.1.0-alpha02"
+group = jetprefJitpackGroupId
+version = jetprefVersion
 
 afterEvaluate {
     publishing {
@@ -45,9 +49,9 @@ afterEvaluate {
             create<MavenPublication>("datastoreAnnotationsRelease").apply {
                 from(components.findByName("java"))
 
-                groupId = "dev.patrickgold.jetpref"
+                groupId = jetprefMavenGroupId
                 artifactId = "jetpref-datastore-annotations"
-                version = "0.1.0-alpha02"
+                version = jetprefVersion
 
                 pom {
                     name.set("JetPref DataStore Model")

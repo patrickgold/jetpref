@@ -21,6 +21,10 @@ plugins {
     id("de.mannodermaus.android-junit5")
 }
 
+val jetprefMavenGroupId: String by project
+val jetprefJitpackGroupId: String by project
+val jetprefVersion: String by project
+
 android {
     compileSdk = 30
 
@@ -57,8 +61,8 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-group = "com.github.patrickgold.jetpref"
-version = "0.1.0-alpha02"
+group = jetprefJitpackGroupId
+version = jetprefVersion
 
 afterEvaluate {
     publishing {
@@ -66,9 +70,9 @@ afterEvaluate {
             create<MavenPublication>("datastoreModelRelease").apply {
                 from(components.findByName("release"))
 
-                groupId = "dev.patrickgold.jetpref"
+                groupId = jetprefMavenGroupId
                 artifactId = "jetpref-datastore-model"
-                version = "0.1.0-alpha02"
+                version = jetprefVersion
 
                 pom {
                     name.set("JetPref DataStore Model")

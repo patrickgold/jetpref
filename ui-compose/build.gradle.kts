@@ -4,6 +4,10 @@ plugins {
     id("maven-publish")
 }
 
+val jetprefMavenGroupId: String by project
+val jetprefJitpackGroupId: String by project
+val jetprefVersion: String by project
+
 android {
     compileSdk = 30
 
@@ -63,8 +67,8 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.0.2")
 }
 
-group = "com.github.patrickgold.jetpref"
-version = "0.1.0-alpha02"
+group = jetprefJitpackGroupId
+version = jetprefVersion
 
 afterEvaluate {
     publishing {
@@ -72,9 +76,9 @@ afterEvaluate {
             create<MavenPublication>("uiComposeRelease").apply {
                 from(components.findByName("release"))
 
-                groupId = "dev.patrickgold.jetpref"
+                groupId = jetprefMavenGroupId
                 artifactId = "jetpref-ui-compose"
-                version = "0.1.0-alpha02"
+                version = jetprefVersion
 
                 pom {
                     name.set("JetPref DataStore Model: Compose UI package")
