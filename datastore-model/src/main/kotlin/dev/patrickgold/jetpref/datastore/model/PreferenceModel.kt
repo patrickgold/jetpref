@@ -160,18 +160,31 @@ abstract class PreferenceModel(val name: String) {
         }
     }
 
-    private fun String.encodeNewline(): String {
-        return this
-            .replace("\\", "\\\\")
-            .replace("\r", "\\r")
-            .replace("\n", "\\n")
+    internal fun String.encode(): String {
+        val sb = StringBuilder()
+        sb.append("\"")
+        sb.append(
+            this.replace("\\", "\\\\")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n")
+                .replace("\"", "\\\"")
+        )
+        sb.append("\"")
+        return sb.toString()
     }
 
-    private fun String.decodeNewline(): String {
-        return this
-            .replace("\\n", "\n")
-            .replace("\\r", "\r")
-            .replace("\\\\", "\\")
+    internal fun String.decode(): String {
+        val str = this.trim()
+        return if (str.startsWith("\"") && str.endsWith("\"") && str.length >= 2) {
+            str
+                .substring(1, length - 1)
+                .replace("\\\"", "\"")
+                .replace("\\n", "\n")
+                .replace("\\r", "\r")
+                .replace("\\\\", "\\")
+        } else {
+            ""
+        }
     }
 
     private fun <V : Any> PreferenceData<V>.serialize(): String? {
@@ -183,7 +196,7 @@ abstract class PreferenceModel(val name: String) {
         sb.append(key)
         sb.append(JetPrefManager.DELIMITER)
         if (type.isString()) {
-            sb.append(rawValue.encodeNewline())
+            sb.append(rawValue.encode())
         } else {
             sb.append(rawValue)
         }
@@ -193,7 +206,7 @@ abstract class PreferenceModel(val name: String) {
     private fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {
         if (type.isInvalid() || !type.isPrimitive()) return
         val value = if (type.isString()) {
-            serializer.deserialize(rawValue.decodeNewline())
+            serializer.deserialize(rawValue.decode())
         } else {
             serializer.deserialize(rawValue)
         }
