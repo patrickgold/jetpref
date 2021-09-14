@@ -18,6 +18,14 @@ class AppPrefs : PreferenceModel("test-file") {
         key = "language",
         default = "auto",
     )
+    val boxSizePortrait = int(
+        key = "box_size_portrait",
+        default = 40,
+    )
+    val boxSizeLandscape = int(
+        key = "box_size_landscape",
+        default = 20,
+    )
     val test = Test()
     inner class Test {
         var isButtonShowing = boolean(

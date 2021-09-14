@@ -18,9 +18,10 @@ package dev.patrickgold.jetpref.ui.compose
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -34,13 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 
+@ExperimentalJetPrefUi
 @Composable
 internal fun <V : Number> DialogSliderPreference(
     pref: PreferenceData<V>,
@@ -114,7 +115,7 @@ internal fun <V : Number> DialogSliderPreference(
                             ),
                             inactiveTickColor = Color.Transparent,
                         ),
-                        modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -122,6 +123,125 @@ internal fun <V : Number> DialogSliderPreference(
     }
 }
 
+@ExperimentalJetPrefUi
+@Composable
+internal fun <V : Number> DialogSliderPreference(
+    primaryPref: PreferenceData<V>,
+    secondaryPref: PreferenceData<V>,
+    @DrawableRes iconId: Int?,
+    iconSpaceReserved: Boolean,
+    title: String,
+    primaryLabel: String,
+    secondaryLabel: String,
+    summary: String,
+    unit: String,
+    min: V,
+    max: V,
+    stepIncrement: V,
+    enabledIf: PreferenceDataEvaluator,
+    visibleIf: PreferenceDataEvaluator,
+    convertToV: (Float) -> V,
+) {
+    val primaryPrefValue by primaryPref.observeAsState()
+    val secondaryPrefValue by secondaryPref.observeAsState()
+    val (primarySliderValue, setPrimarySliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
+    val (secondarySliderValue, setSecondarySliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
+    val isDialogOpen = remember { mutableStateOf(false) }
+
+    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
+        val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
+        JetPrefListItem(
+            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            text = title,
+            secondaryText = summary.formatValue(primaryPrefValue, secondaryPrefValue),
+            modifier = Modifier
+                .clickable(
+                    enabled = isEnabled,
+                    role = Role.Button,
+                    onClick = {
+                        setPrimarySliderValue(primaryPrefValue)
+                        setSecondarySliderValue(secondaryPrefValue)
+                        isDialogOpen.value = true
+                    }
+                ),
+            enabled = isEnabled,
+        )
+        if (isDialogOpen.value) {
+            JetPrefAlertDialog(
+                title = title,
+                confirmLabel = stringResource(android.R.string.ok),
+                onConfirm = {
+                    primaryPref.set(primarySliderValue)
+                    secondaryPref.set(secondarySliderValue)
+                    isDialogOpen.value = false
+                },
+                dismissLabel = stringResource(android.R.string.cancel),
+                onDismiss = { isDialogOpen.value = false },
+                neutralLabel = "Default",
+                onNeutral = {
+                    primaryPref.reset()
+                    secondaryPref.reset()
+                    isDialogOpen.value = false
+                }
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(primaryLabel)
+                        Text(unit.formatValue(primarySliderValue))
+                    }
+                    Slider(
+                        value = primarySliderValue.toFloat(),
+                        valueRange = min.toFloat()..max.toFloat(),
+                        steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
+                        onValueChange = {
+                            setPrimarySliderValue(convertToV(it))
+                        },
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colors.primary,
+                            activeTrackColor = MaterialTheme.colors.primary,
+                            activeTickColor = Color.Transparent,
+                            inactiveTrackColor = MaterialTheme.colors.onSurface.copy(
+                                alpha = SliderDefaults.InactiveTrackAlpha,
+                            ),
+                            inactiveTickColor = Color.Transparent,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(secondaryLabel)
+                        Text(unit.formatValue(secondarySliderValue))
+                    }
+                    Slider(
+                        value = secondarySliderValue.toFloat(),
+                        valueRange = min.toFloat()..max.toFloat(),
+                        steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
+                        onValueChange = {
+                            setSecondarySliderValue(convertToV(it))
+                        },
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colors.primary,
+                            activeTrackColor = MaterialTheme.colors.primary,
+                            activeTickColor = Color.Transparent,
+                            inactiveTrackColor = MaterialTheme.colors.onSurface.copy(
+                                alpha = SliderDefaults.InactiveTrackAlpha,
+                            ),
+                            inactiveTickColor = Color.Transparent,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@ExperimentalJetPrefUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Int>,
@@ -142,6 +262,32 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ) { it.toInt() }
 }
 
+@ExperimentalJetPrefUi
+@Composable
+fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+    primaryPref: PreferenceData<Int>,
+    secondaryPref: PreferenceData<Int>,
+    @DrawableRes iconId: Int? = null,
+    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    title: String,
+    primaryLabel: String,
+    secondaryLabel: String,
+    unit: String = "{v}",
+    summary: String = "$unit / $unit",
+    min: Int,
+    max: Int,
+    stepIncrement: Int,
+    enabledIf: PreferenceDataEvaluator = this.enabledIf,
+    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+) {
+    DialogSliderPreference(
+        primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
+        primaryLabel, secondaryLabel, summary, unit, min, max,
+        stepIncrement, enabledIf, visibleIf
+    ) { it.toInt() }
+}
+
+@ExperimentalJetPrefUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Long>,
@@ -162,6 +308,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ) { it.toLong() }
 }
 
+@ExperimentalJetPrefUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Double>,
@@ -182,6 +329,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ) { it.toDouble() }
 }
 
+@ExperimentalJetPrefUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Float>,

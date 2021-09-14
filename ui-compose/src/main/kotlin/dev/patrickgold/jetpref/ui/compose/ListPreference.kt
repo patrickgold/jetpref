@@ -19,6 +19,7 @@ package dev.patrickgold.jetpref.ui.compose
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -161,12 +162,14 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                 trailingIconTitle = {
                     if (switchPrefValue != null) {
                         Switch(
+                            modifier = Modifier.padding(start = 16.dp),
                             checked = tmpSwitchPrefValue,
                             onCheckedChange = { setTmpSwitchPrefValue(it) },
                             enabled = true,
                         )
                     }
-                }
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp),
             ) {
                 Column {
                     val alpha = when {

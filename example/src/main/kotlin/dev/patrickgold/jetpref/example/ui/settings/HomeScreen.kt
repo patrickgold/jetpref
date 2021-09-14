@@ -21,6 +21,7 @@ import dev.patrickgold.jetpref.datastore.preferenceModel
 import dev.patrickgold.jetpref.example.AppPrefs
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
+import dev.patrickgold.jetpref.ui.compose.ExperimentalJetPrefUi
 import dev.patrickgold.jetpref.ui.compose.ListPreference
 import dev.patrickgold.jetpref.ui.compose.Preference
 import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
@@ -29,6 +30,7 @@ import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 import dev.patrickgold.jetpref.ui.compose.entry
 import java.util.*
 
+@OptIn(ExperimentalJetPrefUi::class)
 @Composable
 fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)) {
     Preference(
@@ -93,6 +95,17 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
                 )
             }
         },
+    )
+    DialogSliderPreference(
+        primaryPref = prefs.boxSizePortrait,
+        secondaryPref = prefs.boxSizeLandscape,
+        title = "Button Size",
+        unit = "{v}%",
+        primaryLabel = "Portrait",
+        secondaryLabel = "Landscape",
+        min = 0,
+        max = 100,
+        stepIncrement = 1,
     )
     Preference(
         iconId = R.drawable.ic_question_answer_black_24dp,

@@ -18,10 +18,8 @@ package dev.patrickgold.jetpref.ui.compose
 
 import androidx.annotation.DrawableRes
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 internal fun maybeJetIcon(
@@ -52,6 +50,10 @@ internal inline fun whenNotNullOrBlank(
     }
 }
 
-internal fun String.formatValue(value: Any?): String {
-    return this.replace("{v}", value.toString())
+internal fun String.formatValue(vararg values: Any?): String {
+    var string = this
+    for (value in values) {
+        string = string.replaceFirst("{v}", value.toString())
+    }
+    return string
 }

@@ -19,6 +19,7 @@ package dev.patrickgold.jetpref.ui.compose
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,6 +54,7 @@ fun JetPrefAlertDialog(
     onDismiss: () -> Unit = { },
     allowOutsideDismissal: Boolean = true,
     trailingIconTitle: @Composable () -> Unit = { },
+    contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     properties: DialogProperties = DialogProperties(),
     backgroundColor: Color = MaterialTheme.colors.surface,
     contentColor: Color = contentColorFor(backgroundColor),
@@ -89,7 +91,7 @@ fun JetPrefAlertDialog(
                 }
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
+                        .padding(contentPadding)
                         .weight(1.0f, fill = false)
                         .fillMaxWidth()
                         .verticalScroll(scrollState),
