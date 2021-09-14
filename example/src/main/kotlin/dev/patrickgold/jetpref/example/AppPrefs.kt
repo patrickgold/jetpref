@@ -48,6 +48,10 @@ class AppPrefs : PreferenceModel("test-file") {
             key = "test__title",
             default = "str1",
         )
+        val showTitle = boolean(
+            key = "test__show_title",
+            default = true,
+        )
         val step = custom(
             key = "test__step",
             default = Step.ONE,

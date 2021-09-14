@@ -27,6 +27,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -91,16 +92,20 @@ fun <V : Any> entry(
 
 @Composable
 fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
-    pref: PreferenceData<V>,
+    listPref: PreferenceData<V>,
+    switchPref: PreferenceData<Boolean>? = null,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
+    summarySwitchDisabled: String? = null,
     enabledIf: PreferenceDataEvaluator = this.enabledIf,
     visibleIf: PreferenceDataEvaluator = this.visibleIf,
     entries: List<ListPreferenceEntry<V>>,
 ) {
-    val prefValue by pref.observeAsState()
-    val (optionValue, setOptionValue) = remember { mutableStateOf(pref.get()) }
+    val listPrefValue by listPref.observeAsState()
+    val switchPrefValue = switchPref?.observeAsState() // can't use delegate because nullable
+    val (tmpListPrefValue, setTmpListPrefValue) = remember { mutableStateOf(listPref.get()) }
+    val (tmpSwitchPrefValue, setTmpSwitchPrefValue) = remember { mutableStateOf(false) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
@@ -108,54 +113,86 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
         JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
-            secondaryText = entries.find {
-                it.key == prefValue
-            }?.label ?: "!! invalid !!",
+            secondaryText = if (switchPrefValue?.value == true || switchPrefValue == null) {
+                entries.find {
+                    it.key == listPrefValue
+                }?.label ?: "!! invalid !!"
+            } else { summarySwitchDisabled ?: "Disabled" },
+            trailing = {
+                if (switchPrefValue != null) {
+                    Switch(
+                        checked = switchPrefValue.value,
+                        onCheckedChange = { switchPref.set(it) },
+                        enabled = isEnabled,
+                    )
+                }
+            },
             modifier = Modifier
                 .clickable(
                     enabled = isEnabled,
                     role = Role.Button,
                     onClick = {
-                        setOptionValue(prefValue)
+                        setTmpListPrefValue(listPrefValue)
+                        if (switchPrefValue != null) {
+                            setTmpSwitchPrefValue(switchPrefValue.value)
+                        }
                         isDialogOpen.value = true
                     }
-                )
-                .alpha(if (isEnabled) 1.0f else ContentAlpha.disabled)
+                ),
+            enabled = isEnabled,
         )
         if (isDialogOpen.value) {
             JetPrefAlertDialog(
                 title = title,
                 confirmLabel = stringResource(android.R.string.ok),
                 onConfirm = {
-                    pref.set(optionValue)
+                    listPref.set(tmpListPrefValue)
+                    switchPref?.set(tmpSwitchPrefValue)
                     isDialogOpen.value = false
                 },
                 dismissLabel = stringResource(android.R.string.cancel),
                 onDismiss = { isDialogOpen.value = false },
                 neutralLabel = "Default",
                 onNeutral = {
-                    pref.reset()
+                    listPref.reset()
+                    switchPref?.reset()
                     isDialogOpen.value = false
+                },
+                trailingIconTitle = {
+                    if (switchPrefValue != null) {
+                        Switch(
+                            checked = tmpSwitchPrefValue,
+                            onCheckedChange = { setTmpSwitchPrefValue(it) },
+                            enabled = true,
+                        )
+                    }
                 }
             ) {
                 Column {
+                    val alpha = when {
+                        switchPrefValue == null -> ContentAlpha.high
+                        tmpSwitchPrefValue -> ContentAlpha.high
+                        else -> ContentAlpha.disabled
+                    }
                     for (entry in entries) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = entry.key == optionValue,
+                                    selected = entry.key == tmpListPrefValue,
+                                    enabled = switchPrefValue == null || tmpSwitchPrefValue,
                                     onClick = {
-                                        setOptionValue(entry.key)
+                                        setTmpListPrefValue(entry.key)
                                     }
                                 )
                                 .padding(
                                     horizontal = 16.dp,
                                     vertical = 8.dp,
                                 )
+                                .alpha(alpha)
                         ) {
                             RadioButton(
-                                selected = entry.key == optionValue,
+                                selected = entry.key == tmpListPrefValue,
                                 onClick = null,
                                 colors = RadioButtonDefaults.colors(
                                     selectedColor = MaterialTheme.colors.primary,
@@ -167,7 +204,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                             ) {
                                 entry.labelComposer(entry.label)
                                 if (entry.showDescriptionOnlyIfSelected) {
-                                    if (entry.key == optionValue) {
+                                    if (entry.key == tmpListPrefValue) {
                                         entry.descriptionComposer(entry.description)
                                     }
                                 } else {

@@ -187,4 +187,30 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
             ),
         ),
     )
+    ListPreference(
+        listPref = prefs.test.title,
+        switchPref = prefs.test.showTitle,
+        title = "Some lengthy title about this entry some lengthy title about this entry.",
+        summarySwitchDisabled = "off",
+        entries = listOf(
+            entry(
+                key = "str1",
+                label = "String 1",
+                description = "Some lengthy description about this entry.",
+                showDescriptionOnlyIfSelected = true,
+            ),
+            entry(
+                key = "str2",
+                label = "String 2",
+                description = "Some lengthy description about this entry.",
+                showDescriptionOnlyIfSelected = true,
+            ),
+            entry(
+                key = "str3",
+                label = "String 3",
+                description = "Some lengthy description about this entry.",
+                showDescriptionOnlyIfSelected = true,
+            ),
+        ),
+    )
 }

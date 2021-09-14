@@ -16,6 +16,7 @@
 
 package dev.patrickgold.jetpref.ui.compose
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,6 +52,7 @@ fun JetPrefAlertDialog(
     dismissLabel: String? = null,
     onDismiss: () -> Unit = { },
     allowOutsideDismissal: Boolean = true,
+    trailingIconTitle: @Composable () -> Unit = { },
     properties: DialogProperties = DialogProperties(),
     backgroundColor: Color = MaterialTheme.colors.surface,
     contentColor: Color = contentColorFor(backgroundColor),
@@ -68,20 +70,22 @@ fun JetPrefAlertDialog(
             contentColor = contentColor,
         ) {
             Column {
-                Box(
+                Row(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
-                        .height(64.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.CenterStart,
+                        .height(64.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
+                        modifier = Modifier.weight(1.0f),
                         text = title,
                         style = MaterialTheme.typography.subtitle1,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
+                    trailingIconTitle()
                 }
                 Box(
                     modifier = Modifier
