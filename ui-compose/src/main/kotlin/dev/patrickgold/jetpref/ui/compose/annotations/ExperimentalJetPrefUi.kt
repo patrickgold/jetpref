@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.ui.compose
+package dev.patrickgold.jetpref.ui.compose.annotations
 
 @RequiresOptIn(message = "This UI composable is experimental and" +
     " likely to change or to be removed in the future.")

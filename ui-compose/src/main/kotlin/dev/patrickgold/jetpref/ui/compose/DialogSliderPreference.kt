@@ -40,6 +40,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.ui.compose.annotations.ExperimentalJetPrefUi
 
 @ExperimentalJetPrefUi
 @Composable
