@@ -82,17 +82,18 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
     content: PreferenceUiContent<T>,
 ) {
-    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
+    val evalScope = PreferenceDataEvaluatorScope.instance()
+    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
         Column {
             val preferenceScope = PreferenceUiScope(
                 prefs = this@PreferenceGroup.prefs,
                 iconSpaceReserved = iconSpaceReserved,
-                enabledIf = enabledIf,
-                visibleIf = visibleIf,
+                enabledIf = { this@PreferenceGroup.enabledIf(evalScope) && enabledIf(evalScope) },
+                visibleIf = { this@PreferenceGroup.visibleIf(evalScope) && visibleIf(evalScope) },
                 columnScope = this@Column,
             )
 

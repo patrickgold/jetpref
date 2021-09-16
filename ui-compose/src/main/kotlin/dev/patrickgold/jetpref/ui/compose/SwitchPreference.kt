@@ -38,13 +38,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     summary: String? = null,
     summaryOn: String? = null,
     summaryOff: String? = null,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val prefValue by pref.observeAsState()
 
-    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
-        val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
+    val evalScope = PreferenceDataEvaluatorScope.instance()
+    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
+        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,

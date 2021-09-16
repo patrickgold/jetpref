@@ -99,8 +99,8 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summarySwitchDisabled: String? = null,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
     entries: List<ListPreferenceEntry<V>>,
 ) {
     val listPrefValue by listPref.observeAsState()
@@ -109,8 +109,9 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     val (tmpSwitchPrefValue, setTmpSwitchPrefValue) = remember { mutableStateOf(false) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
-    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
-        val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
+    val evalScope = PreferenceDataEvaluatorScope.instance()
+    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
+        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,

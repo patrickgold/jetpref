@@ -43,7 +43,7 @@ import dev.patrickgold.jetpref.datastore.model.observeAsState
 
 @ExperimentalJetPrefUi
 @Composable
-internal fun <V : Number> DialogSliderPreference(
+internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<V>,
     @DrawableRes iconId: Int?,
     iconSpaceReserved: Boolean,
@@ -61,8 +61,9 @@ internal fun <V : Number> DialogSliderPreference(
     val (sliderValue, setSliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
-    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
-        val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
+    val evalScope = PreferenceDataEvaluatorScope.instance()
+    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
+        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
@@ -125,7 +126,7 @@ internal fun <V : Number> DialogSliderPreference(
 
 @ExperimentalJetPrefUi
 @Composable
-internal fun <V : Number> DialogSliderPreference(
+internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     @DrawableRes iconId: Int?,
@@ -148,8 +149,9 @@ internal fun <V : Number> DialogSliderPreference(
     val (secondarySliderValue, setSecondarySliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
-    if (visibleIf(PreferenceDataEvaluatorScope.instance())) {
-        val isEnabled = enabledIf(PreferenceDataEvaluatorScope.instance())
+    val evalScope = PreferenceDataEvaluatorScope.instance()
+    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
+        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
@@ -253,8 +255,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Int,
     max: Int,
     stepIncrement: Int,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
@@ -277,8 +279,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Int,
     max: Int,
     stepIncrement: Int,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
@@ -299,8 +301,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Long,
     max: Long,
     stepIncrement: Long,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
@@ -320,8 +322,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Double,
     max: Double,
     stepIncrement: Double,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
@@ -341,8 +343,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Float,
     max: Float,
     stepIncrement: Float,
-    enabledIf: PreferenceDataEvaluator = this.enabledIf,
-    visibleIf: PreferenceDataEvaluator = this.visibleIf,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,

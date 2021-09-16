@@ -130,7 +130,7 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
         iconId = R.drawable.ic_question_answer_black_24dp,
         title = "Show Test Group",
     )
-    PreferenceGroup(title = "Hello", visibleIf = { prefs.showTestGroup isEqualTo true }) {
+    PreferenceGroup(title = "Hello", enabledIf = { prefs.showTestGroup isEqualTo true }) {
         SwitchPreference(
             prefs.test.isButtonShowing,
             title = "isBtnShow",
