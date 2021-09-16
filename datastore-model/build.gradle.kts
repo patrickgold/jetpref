@@ -29,6 +29,8 @@ android {
     compileSdk = 30
 
     defaultConfig {
+        targetSdk = 30
+
         consumerProguardFiles("proguard-rules.pro")
     }
     compileOptions {
