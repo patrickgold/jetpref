@@ -60,13 +60,9 @@ class AppPrefs : PreferenceModel("test-file") {
             key = "test__show_title",
             default = true,
         )
-        val step = custom(
+        val step = enum(
             key = "test__step",
             default = Step.ONE,
-            serializer = object : PreferenceSerializer<Step> {
-                override fun serialize(value: Step): String = value.toString()
-                override fun deserialize(value: String): Step = Step.valueOf(value)
-            }
         )
     }
 }

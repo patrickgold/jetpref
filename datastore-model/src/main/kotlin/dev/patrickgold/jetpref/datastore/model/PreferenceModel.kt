@@ -30,6 +30,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("SameParameterValue")
 abstract class PreferenceModel(val name: String) {
     internal val scope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
@@ -99,6 +100,36 @@ abstract class PreferenceModel(val name: String) {
         default: String,
     ): PreferenceData<String> {
         val prefData = StringPreferenceData(this, key, default)
+        registryAdd(prefData)
+        return prefData
+    }
+
+    protected inline fun <reified V : Enum<V>> enum(
+        @PreferenceKey key: String,
+        default: V,
+    ): PreferenceData<V> {
+        @Suppress("DEPRECATION") // this is the only intended call site for __enum()
+        return __enum(key, default) {
+            try {
+                enumValueOf(it)
+            } catch(e: Throwable) {
+                null
+            }
+        }
+    }
+
+    @Deprecated(
+        message = "Not for public use.",
+        level = DeprecationLevel.WARNING,
+        replaceWith = ReplaceWith("enum(key, default)"),
+    )
+    @Suppress("FunctionName")
+    protected fun <V : Enum<V>> __enum(
+        @PreferenceKey key: String,
+        default: V,
+        stringToEnum: (String) -> V?,
+    ): PreferenceData<V> {
+        val prefData = EnumPreferenceData(this, key, default, stringToEnum)
         registryAdd(prefData)
         return prefData
     }

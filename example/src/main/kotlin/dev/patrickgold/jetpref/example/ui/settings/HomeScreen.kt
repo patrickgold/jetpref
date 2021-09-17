@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.preferenceModel
 import dev.patrickgold.jetpref.example.AppPrefs
 import dev.patrickgold.jetpref.example.R
+import dev.patrickgold.jetpref.example.Step
 import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
 import dev.patrickgold.jetpref.ui.compose.ListPreference
 import dev.patrickgold.jetpref.ui.compose.Preference
@@ -223,6 +224,24 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
                 label = "String 3",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
+            ),
+        ),
+    )
+    ListPreference(
+        prefs.test.step,
+        title = "Step",
+        entries = listOf(
+            entry(
+                key = Step.ONE,
+                label = "Step 1",
+            ),
+            entry(
+                key = Step.TWO,
+                label = "Step 2",
+            ),
+            entry(
+                key = Step.THREE,
+                label = "Step 3",
             ),
         ),
     )
