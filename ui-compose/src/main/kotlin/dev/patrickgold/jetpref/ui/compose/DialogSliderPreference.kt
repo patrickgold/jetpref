@@ -59,7 +59,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     convertToV: (Float) -> V,
 ) {
     val prefValue by pref.observeAsState()
-    val (sliderValue, setSliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
+    val (sliderValue, setSliderValue) = remember { mutableStateOf(0.0f) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     val evalScope = PreferenceDataEvaluatorScope.instance()
@@ -74,7 +74,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                     enabled = isEnabled,
                     role = Role.Button,
                     onClick = {
-                        setSliderValue(prefValue)
+                        setSliderValue(prefValue.toFloat())
                         isDialogOpen.value = true
                     }
                 ),
@@ -85,7 +85,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                 title = title,
                 confirmLabel = stringResource(android.R.string.ok),
                 onConfirm = {
-                    pref.set(sliderValue)
+                    pref.set(convertToV(sliderValue))
                     isDialogOpen.value = false
                 },
                 dismissLabel = stringResource(android.R.string.cancel),
@@ -98,15 +98,15 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
             ) {
                 Column {
                     Text(
-                        text = unit.formatValue(sliderValue),
+                        text = unit.formatValue(convertToV(sliderValue)),
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                     )
                     Slider(
-                        value = sliderValue.toFloat(),
+                        value = sliderValue,
                         valueRange = min.toFloat()..max.toFloat(),
                         steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
                         onValueChange = {
-                            setSliderValue(convertToV(it))
+                            setSliderValue(it)
                         },
                         colors = SliderDefaults.colors(
                             thumbColor = MaterialTheme.colors.primary,
