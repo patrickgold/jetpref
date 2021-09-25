@@ -3,6 +3,36 @@
 A preference library (custom data handling + UI in JetPack Compose) mainly developed for use in
 [FlorisBoard](https://github.com/florisboard/florisboard). Currently in early alpha phase.
 
+## Usage
+
+Disclaimer: This library is still in early alpha and therefore not ready for production use.
+It is currently tested out in the beta channel of FlorisBoard, so bugs or other issues
+in runtime use can be found and fixed. Still, if you want to play around with this
+library, here's how to include JetPref in your app:
+
+First, add JitPack to the list of repositories in your global `build.gradle.kts`:
+
+```kts
+subprojects {
+    repositories {
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+Then in your app module `build.gradle.kts`, add the dependencies:
+
+```kt
+// JetPref Datastore module
+implementation("dev.patrickgold.jetpref:jetpref-datastore-model:0.1.0-alpha08")
+
+// JetPref Compose UI module
+implementation("dev.patrickgold.jetpref:jetpref-ui-compose:0.1.0-alpha08")
+```
+
+As this library is very experimental, there's currently no documentation. It is best
+if you look at the example app or the source code and see how the library is used.
+
 ## License
 ```
 Copyright 2021 Patrick Goldinger
