@@ -4,26 +4,28 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import dev.patrickgold.jetpref.datastore.preferenceModel
+import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
 
 class MainActivity : ComponentActivity() {
-    private val prefs by preferenceModel(AppPrefs::class, ::AppPrefs)
+    private val prefs by examplePreferenceModel()
 
     init {
-        prefs.test.isButtonShowing.observe(this) { newValue ->
-            Toast.makeText(this@MainActivity, "Hello $newValue", Toast.LENGTH_SHORT).show()
+        prefs.example.isButtonShowing.observe(this) { newValue ->
+            Toast.makeText(this@MainActivity, "Value $newValue", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -32,7 +34,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
 
-            JetPrefTheme {
+            val appTheme by prefs.theme.observeAsState()
+            val isDark = when (appTheme) {
+                Theme.AUTO -> isSystemInDarkTheme()
+                Theme.LIGHT -> false
+                Theme.DARK -> true
+            }
+            JetPrefTheme(isDark) {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     AppContent(navController)
@@ -46,7 +54,7 @@ class MainActivity : ComponentActivity() {
 fun AppContent(navController: NavHostController) {
     Column {
         TopAppBar(
-            title = { Text(text = "Hello Android!") },
+            title = { Text(text = "Example JetPref App") },
             backgroundColor = MaterialTheme.colors.surface
         )
         NavHost(navController = navController, startDestination = "home") {
@@ -54,11 +62,3 @@ fun AppContent(navController: NavHostController) {
         }
     }
 }
-
-/*@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    JetPrefTheme {
-        Greeting("Android")
-    }
-}*/

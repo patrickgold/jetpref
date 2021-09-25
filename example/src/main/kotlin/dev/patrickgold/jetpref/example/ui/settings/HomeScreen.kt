@@ -17,90 +17,29 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.runtime.Composable
-import dev.patrickgold.jetpref.datastore.preferenceModel
-import dev.patrickgold.jetpref.example.AppPrefs
 import dev.patrickgold.jetpref.example.R
-import dev.patrickgold.jetpref.example.Step
+import dev.patrickgold.jetpref.example.Theme
+import dev.patrickgold.jetpref.example.examplePreferenceModel
 import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
 import dev.patrickgold.jetpref.ui.compose.ListPreference
-import dev.patrickgold.jetpref.ui.compose.Preference
 import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
 import dev.patrickgold.jetpref.ui.compose.PreferenceLayout
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
 import dev.patrickgold.jetpref.ui.compose.annotations.ExperimentalJetPrefUi
 import dev.patrickgold.jetpref.ui.compose.entry
-import java.util.*
 
 @OptIn(ExperimentalJetPrefUi::class)
 @Composable
-fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)) {
-    Preference(
-        iconId = R.drawable.ic_question_answer_black_24dp,
-        title = "Hello",
-        summary = "Test",
-        onClick = { },
-    )
+fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
     ListPreference(
-        prefs.language,
-        title = "Language",
-        entries = listOf(
-            "auto",
-            "ar",
-            "bg",
-            "bs",
-            "ca",
-            "ckb-IR",
-            "cs",
-            "da",
-            "de",
-            "el",
-            "en",
-            "eo",
-            "es",
-            "fa",
-            "fi",
-            "fr",
-            "hr",
-            "hu",
-            "in",
-            "it",
-            "iw",
-            "kmr-TR",
-            "ko-KR",
-            "lv-LV",
-            "mk",
-            "nds-DE",
-            "nl",
-            "no",
-            "pl",
-            "pt",
-            "pt-BR",
-            "ru",
-            "sk",
-            "sl",
-            "sr",
-            "sv",
-            "tr",
-            "uk",
-            "zgh",
-        ).map {
-            if (it == "auto") {
-                entry(
-                    key = "auto",
-                    label = "default",
-                )
-            } else {
-                entry(
-                    key = it,
-                    label = Locale(it).getDisplayName(Locale(it))
-                )
-            }
-        },
+        prefs.theme,
+        title = "Theme",
+        entries = Theme.listEntries(),
     )
     DialogSliderPreference(
         primaryPref = prefs.boxSizePortrait,
         secondaryPref = prefs.boxSizeLandscape,
-        title = "Button Size",
+        title = "Example integer slider",
         unit = "{v}%",
         primaryLabel = "Portrait",
         secondaryLabel = "Landscape",
@@ -108,44 +47,27 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
         max = 100,
         stepIncrement = 1,
     )
-    Preference(
-        iconId = R.drawable.ic_question_answer_black_24dp,
-        title = "This is a very very long sentence which does not fit in a title",
-        summary = "This is an even longer description which spans over multiple lines and is way too long. This is an even longer description which spans over multiple lines and is way too long.",
-        onClick = { },
-    )
-    Preference(
-        iconId = R.drawable.ic_question_answer_black_24dp,
-        title = "This is a very very long sentence which does not fit in a title",
-        summary = "This is an even longer description which spans over multiple lines and is way too long. This is an even longer description which spans over multiple lines and is way too long.",
-        onClick = { },
-    )
-    Preference(
-        iconId = R.drawable.ic_question_answer_black_24dp,
-        title = "This is a very very long sentence which does not fit in a title",
-        summary = "This is an even longer description which spans over multiple lines and is way too long. This is an even longer description which spans over multiple lines and is way too long.",
-        onClick = { },
-    )
     SwitchPreference(
-        prefs.showTestGroup,
+        prefs.showExampleGroup,
         iconId = R.drawable.ic_question_answer_black_24dp,
-        title = "Show Test Group",
+        title = "Show example group",
+        summary = "Show/hide the example group",
     )
-    PreferenceGroup(title = "Hello", enabledIf = { prefs.showTestGroup isEqualTo true }) {
+    PreferenceGroup(title = "Example group", visibleIf = { prefs.showExampleGroup isEqualTo true }) {
         SwitchPreference(
-            prefs.test.isButtonShowing,
+            prefs.example.isButtonShowing,
             title = "isBtnShow",
         )
         SwitchPreference(
-            prefs.test.isButtonShowing2,
+            prefs.example.isButtonShowing2,
             iconId = R.drawable.ic_question_answer_black_24dp,
             title = "isBtnShow2",
             summaryOn = "Hello",
             summaryOff = "Bye",
-            enabledIf = { prefs.test.isButtonShowing isEqualTo true },
+            enabledIf = { prefs.example.isButtonShowing isEqualTo true },
         )
         DialogSliderPreference(
-            prefs.test.buttonSize,
+            prefs.example.buttonSize,
             title = "Button Size",
             min = 0,
             max = 100,
@@ -153,7 +75,7 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
             unit = "{v}%",
         )
         DialogSliderPreference(
-            prefs.test.buttonWidth,
+            prefs.example.buttonWidth,
             title = "Button Size",
             min = 0,
             max = 100,
@@ -161,7 +83,7 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
             unit = "{v} dp",
         )
         DialogSliderPreference(
-            prefs.test.mainFontSize,
+            prefs.example.mainFontSize,
             title = "Main Font Size",
             min = 0.0,
             max = 100.0,
@@ -169,7 +91,7 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
             unit = "{v} sp",
         )
         DialogSliderPreference(
-            prefs.test.fontSize,
+            prefs.example.fontSize,
             title = "Font Size",
             min = 0.0f,
             max = 100.0f,
@@ -178,7 +100,7 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
         )
     }
     ListPreference(
-        prefs.test.title,
+        prefs.example.title,
         title = "Some lengthy title about this entry some lengthy title about this entry.",
         entries = listOf(
             entry(
@@ -202,8 +124,8 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
         ),
     )
     ListPreference(
-        listPref = prefs.test.title,
-        switchPref = prefs.test.showTitle,
+        listPref = prefs.example.title,
+        switchPref = prefs.example.showTitle,
         title = "Some lengthy title about this entry some lengthy title about this entry.",
         summarySwitchDisabled = "off",
         entries = listOf(
@@ -224,24 +146,6 @@ fun HomeScreen() = PreferenceLayout(preferenceModel(AppPrefs::class, ::AppPrefs)
                 label = "String 3",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
-            ),
-        ),
-    )
-    ListPreference(
-        prefs.test.step,
-        title = "Step",
-        entries = listOf(
-            entry(
-                key = Step.ONE,
-                label = "Step 1",
-            ),
-            entry(
-                key = Step.TWO,
-                label = "Step 2",
-            ),
-            entry(
-                key = Step.THREE,
-                label = "Step 3",
             ),
         ),
     )

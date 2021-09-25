@@ -1,22 +1,45 @@
 package dev.patrickgold.jetpref.example
 
+import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import dev.patrickgold.jetpref.datastore.model.PreferenceSerializer
+import dev.patrickgold.jetpref.datastore.preferenceModel
+import dev.patrickgold.jetpref.ui.compose.entry
 
-enum class Step {
-    ONE,
-    TWO,
-    THREE;
+enum class Theme {
+    AUTO,
+    LIGHT,
+    DARK;
+
+    companion object {
+        @Composable
+        fun listEntries() = listOf(
+            entry(
+                key = AUTO,
+                label = "System default",
+            ),
+            entry(
+                key = LIGHT,
+                label = "Light",
+            ),
+            entry(
+                key = DARK,
+                label = "Dark",
+            ),
+        )
+    }
 }
 
-class AppPrefs : PreferenceModel("test-file") {
-    var showTestGroup = boolean(
-        key = "show_test_group",
-        default = true,
-    )
-    val language = string(
-        key = "language",
-        default = "auto",
+// Defining a getter function for easy retrieval of the AppPrefs model.
+// You can name this how you want, the convention is <projectName>PreferenceModel
+fun examplePreferenceModel() = preferenceModel(AppPrefs::class, ::AppPrefs)
+
+// Defining a preference model for our app prefs
+// The name we give here is the file name of the preferences and is saved
+// within the app's `jetpref` directory.
+class AppPrefs : PreferenceModel("example-app-preferences") {
+    val theme = enum(
+        key = "theme",
+        default = Theme.AUTO,
     )
     val boxSizePortrait = int(
         key = "box_size_portrait",
@@ -26,8 +49,15 @@ class AppPrefs : PreferenceModel("test-file") {
         key = "box_size_landscape",
         default = 20,
     )
-    val test = Test()
-    inner class Test {
+    var showExampleGroup = boolean(
+        key = "show_example_group",
+        default = true,
+    )
+
+    // You can also define groups for preferences by packing them
+    // into an inner class like below
+    val example = Example()
+    inner class Example {
         var isButtonShowing = boolean(
             key = "test__is_button_showing",
             default = true,
@@ -59,10 +89,6 @@ class AppPrefs : PreferenceModel("test-file") {
         val showTitle = boolean(
             key = "test__show_title",
             default = true,
-        )
-        val step = enum(
-            key = "test__step",
-            default = Step.ONE,
         )
     }
 }
