@@ -41,6 +41,8 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.ui.compose.annotations.ExperimentalJetPrefUi
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 @ExperimentalJetPrefUi
 @Composable
@@ -262,7 +264,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
         stepIncrement, enabledIf, visibleIf
-    ) { it.toInt() }
+    ) {
+        try {
+            it.roundToInt()
+        } catch (e: IllegalArgumentException) {
+            it.toInt()
+        }
+    }
 }
 
 @ExperimentalJetPrefUi
@@ -287,7 +295,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
         primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
         stepIncrement, enabledIf, visibleIf
-    ) { it.toInt() }
+    ) {
+        try {
+            it.roundToInt()
+        } catch (e: IllegalArgumentException) {
+            it.toInt()
+        }
+    }
 }
 
 @ExperimentalJetPrefUi
@@ -308,7 +322,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
         stepIncrement, enabledIf, visibleIf
-    ) { it.toLong() }
+    ) {
+        try {
+            it.roundToLong()
+        } catch (e: IllegalArgumentException) {
+            it.toLong()
+        }
+    }
 }
 
 @ExperimentalJetPrefUi
@@ -333,7 +353,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
         primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
         stepIncrement, enabledIf, visibleIf
-    ) { it.toLong() }
+    ) {
+        try {
+            it.roundToLong()
+        } catch (e: IllegalArgumentException) {
+            it.toLong()
+        }
+    }
 }
 
 @ExperimentalJetPrefUi
