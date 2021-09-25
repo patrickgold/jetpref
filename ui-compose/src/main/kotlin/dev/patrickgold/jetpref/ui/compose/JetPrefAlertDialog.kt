@@ -37,11 +37,65 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+
+data class DialogPreferenceStrings(
+    val confirmLabel: String,
+    val dismissLabel: String,
+    val neutralLabel: String,
+) {
+    companion object {
+        internal var defaultConfirmLabel: String? = null
+        internal var defaultDismissLabel: String? = null
+        internal var defaultNeutralLabel: String? = null
+
+        /**
+         * Sets the default button strings to use for all preferences
+         * which show a dialog.
+         *
+         * @param confirmLabel The label for the confirm button. Set to
+         *  null to unset the default value.
+         * @param dismissLabel The label for the dismiss button. Set to
+         *  null to unset the default value.
+         * @param neutralLabel The label for the neutral button. Set to
+         *  null to unset the default value.
+         */
+        fun setDefaultStrings(
+            confirmLabel: String? = null,
+            dismissLabel: String? = null,
+            neutralLabel: String? = null,
+        ) {
+            defaultConfirmLabel = confirmLabel
+            defaultDismissLabel = dismissLabel
+            defaultNeutralLabel = neutralLabel
+        }
+    }
+}
+
+/**
+ * Creates a dialog preference string set for the button labels.
+ *
+ * @param confirmLabel The label of the confirm button. Defaults to the
+ *  value set in [DialogPreferenceStrings.setDefaultStrings] or "Ok".
+ * @param dismissLabel The label of the dismiss button. Defaults to the
+ *  value set in [DialogPreferenceStrings.setDefaultStrings] or "Cancel".
+ * @param neutralLabel The label of the neutral button. Defaults to the
+ *  value set in [DialogPreferenceStrings.setDefaultStrings] or "Default".
+ *
+ * @return A [DialogPreferenceStrings] object containing all necessary
+ *  labels for the button row.
+ */
+@Composable
+fun dialogPrefStrings(
+    confirmLabel: String = DialogPreferenceStrings.defaultConfirmLabel ?: stringResource(android.R.string.ok),
+    dismissLabel: String = DialogPreferenceStrings.defaultDismissLabel ?: stringResource(android.R.string.cancel),
+    neutralLabel: String = DialogPreferenceStrings.defaultNeutralLabel ?: "Default",
+) = DialogPreferenceStrings(confirmLabel, dismissLabel, neutralLabel)
 
 @Composable
 fun JetPrefAlertDialog(

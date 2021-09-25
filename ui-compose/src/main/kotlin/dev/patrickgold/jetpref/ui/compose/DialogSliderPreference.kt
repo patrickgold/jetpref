@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -56,6 +55,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     min: V,
     max: V,
     stepIncrement: V,
+    dialogStrings: DialogPreferenceStrings,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
     convertToV: (Float) -> V,
@@ -85,14 +85,14 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
         if (isDialogOpen.value) {
             JetPrefAlertDialog(
                 title = title,
-                confirmLabel = stringResource(android.R.string.ok),
+                confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     pref.set(convertToV(sliderValue))
                     isDialogOpen.value = false
                 },
-                dismissLabel = stringResource(android.R.string.cancel),
+                dismissLabel = dialogStrings.dismissLabel,
                 onDismiss = { isDialogOpen.value = false },
-                neutralLabel = "Default",
+                neutralLabel = dialogStrings.neutralLabel,
                 onNeutral = {
                     pref.reset()
                     isDialogOpen.value = false
@@ -142,6 +142,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     min: V,
     max: V,
     stepIncrement: V,
+    dialogStrings: DialogPreferenceStrings,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
     convertToV: (Float) -> V,
@@ -174,15 +175,15 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
         if (isDialogOpen.value) {
             JetPrefAlertDialog(
                 title = title,
-                confirmLabel = stringResource(android.R.string.ok),
+                confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     primaryPref.set(primarySliderValue)
                     secondaryPref.set(secondarySliderValue)
                     isDialogOpen.value = false
                 },
-                dismissLabel = stringResource(android.R.string.cancel),
+                dismissLabel = dialogStrings.dismissLabel,
                 onDismiss = { isDialogOpen.value = false },
-                neutralLabel = "Default",
+                neutralLabel = dialogStrings.neutralLabel,
                 onNeutral = {
                     primaryPref.reset()
                     secondaryPref.reset()
@@ -258,12 +259,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Int,
     max: Int,
     stepIncrement: Int,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
         try {
             it.roundToInt()
@@ -288,13 +290,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Int,
     max: Int,
     stepIncrement: Int,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
         try {
             it.roundToInt()
@@ -316,12 +319,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Long,
     max: Long,
     stepIncrement: Long,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
         try {
             it.roundToLong()
@@ -346,13 +350,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Long,
     max: Long,
     stepIncrement: Long,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
         try {
             it.roundToLong()
@@ -374,12 +379,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Double,
     max: Double,
     stepIncrement: Double,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it.toDouble() }
 }
 
@@ -398,13 +404,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Double,
     max: Double,
     stepIncrement: Double,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it.toDouble() }
 }
 
@@ -420,12 +427,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Float,
     max: Float,
     stepIncrement: Float,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it }
 }
 
@@ -444,12 +452,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Float,
     max: Float,
     stepIncrement: Float,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, enabledIf, visibleIf
+        stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it }
 }
