@@ -40,6 +40,11 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
+val sourcesJar = tasks.register<Jar>("sourcesJar") {
+    archiveClassifier.set("sources")
+    from(sourceSets.getByName("main").java.srcDirs)
+}
+
 group = jetprefJitpackGroupId
 version = jetprefVersion
 
@@ -48,6 +53,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("datastoreAnnotationsRelease").apply {
                 from(components.findByName("java"))
+                artifact(sourcesJar)
 
                 groupId = jetprefMavenGroupId
                 artifactId = "jetpref-datastore-annotations"
@@ -71,8 +77,9 @@ afterEvaluate {
                         }
                     }
                     scm {
-                        connection.set("scm:git:git://github.com/patrickgold/jetpref.git")
-                        url.set("https://github.com/patrickgold/jetpref")
+                        connection.set("scm:git:https://github.com/patrickgold/jetpref/")
+                        developerConnection.set("scm:git:https://github.com/patrickgold/jetpref/")
+                        url.set("https://github.com/patrickgold/jetpref/")
                     }
                 }
             }
