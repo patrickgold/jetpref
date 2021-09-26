@@ -16,12 +16,14 @@
 
 package dev.patrickgold.jetpref.example.ui.settings
 
+import android.os.Build
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.Theme
 import dev.patrickgold.jetpref.example.examplePreferenceModel
 import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
 import dev.patrickgold.jetpref.ui.compose.ListPreference
+import dev.patrickgold.jetpref.ui.compose.LocalTimePickerPreference
 import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
 import dev.patrickgold.jetpref.ui.compose.PreferenceLayout
 import dev.patrickgold.jetpref.ui.compose.SwitchPreference
@@ -47,6 +49,12 @@ fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
         max = 100,
         stepIncrement = 1,
     )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        LocalTimePickerPreference(
+            prefs.exampleTime,
+            title = "Example time (Android 8+ only)",
+        )
+    }
     SwitchPreference(
         prefs.showExampleGroup,
         iconId = R.drawable.ic_question_answer_black_24dp,

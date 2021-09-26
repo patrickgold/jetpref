@@ -1,9 +1,12 @@
 package dev.patrickgold.jetpref.example
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.preferenceModel
 import dev.patrickgold.jetpref.ui.compose.entry
+import java.time.LocalTime
 
 enum class Theme {
     AUTO,
@@ -48,6 +51,11 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
     val boxSizeLandscape = int(
         key = "box_size_landscape",
         default = 20,
+    )
+    @RequiresApi(Build.VERSION_CODES.O)
+    val exampleTime = localTime(
+        key = "example_time",
+        default = LocalTime.of(12, 0),
     )
     var showExampleGroup = boolean(
         key = "show_example_group",

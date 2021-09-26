@@ -16,6 +16,8 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import dev.patrickgold.jetpref.datastore.JetPrefManager
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("SameParameterValue")
@@ -116,6 +119,22 @@ abstract class PreferenceModel(val name: String) {
                 null
             }
         }
+    }
+
+    /**
+     * Requires core library desugaring if minSdk < 26:
+     *  https://developer.android.com/studio/write/java8-support#library-desugaring
+     *
+     * Currently constrained to Android 8+ so no desugaring is needed.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    protected fun localTime(
+        @PreferenceKey key: String,
+        default: LocalTime,
+    ): PreferenceData<LocalTime> {
+        val prefData = LocalTimePreferenceData(this, key, default)
+        registryAdd(prefData)
+        return prefData
     }
 
     @Deprecated(
