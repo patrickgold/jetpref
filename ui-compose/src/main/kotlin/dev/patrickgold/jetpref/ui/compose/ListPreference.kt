@@ -36,7 +36,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
@@ -99,6 +98,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summarySwitchDisabled: String? = null,
+    dialogStrings: DialogPreferenceStrings = dialogPrefStrings(),
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     entries: List<ListPreferenceEntry<V>>,
@@ -146,15 +146,15 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
         if (isDialogOpen.value) {
             JetPrefAlertDialog(
                 title = title,
-                confirmLabel = stringResource(android.R.string.ok),
+                confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     listPref.set(tmpListPrefValue)
                     switchPref?.set(tmpSwitchPrefValue)
                     isDialogOpen.value = false
                 },
-                dismissLabel = stringResource(android.R.string.cancel),
+                dismissLabel = dialogStrings.dismissLabel,
                 onDismiss = { isDialogOpen.value = false },
-                neutralLabel = "Default",
+                neutralLabel = dialogStrings.neutralLabel,
                 onNeutral = {
                     listPref.reset()
                     switchPref?.reset()

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -35,6 +36,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -97,6 +99,7 @@ fun dialogPrefStrings(
     neutralLabel: String = DialogPreferenceStrings.defaultNeutralLabel ?: "Default",
 ) = DialogPreferenceStrings(confirmLabel, dismissLabel, neutralLabel)
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun JetPrefAlertDialog(
     title: String,
@@ -109,7 +112,7 @@ fun JetPrefAlertDialog(
     allowOutsideDismissal: Boolean = true,
     trailingIconTitle: @Composable () -> Unit = { },
     contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
-    properties: DialogProperties = DialogProperties(),
+    properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     backgroundColor: Color = MaterialTheme.colors.surface,
     contentColor: Color = contentColorFor(backgroundColor),
     content: @Composable () -> Unit,
@@ -120,7 +123,9 @@ fun JetPrefAlertDialog(
         properties = properties,
     ) {
         Surface(
-            modifier = Modifier.padding(vertical = 16.dp),
+            modifier = Modifier
+                .padding(vertical = 16.dp, horizontal = 16.dp)
+                .widthIn(max = 320.dp),
             shape = MaterialTheme.shapes.medium,
             color = backgroundColor,
             contentColor = contentColor,
