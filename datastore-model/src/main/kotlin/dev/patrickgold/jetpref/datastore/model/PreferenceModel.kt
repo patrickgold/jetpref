@@ -45,6 +45,7 @@ abstract class PreferenceModel(val name: String) {
     private var persistJob: Job? = null
 
     init {
+        Validator.validateFileName(name)
         scope.setupModel()
     }
 

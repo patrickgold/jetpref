@@ -60,9 +60,6 @@ interface PreferenceData<V : Any> {
      *  - `0-9` (not at the start though)
      *  - `_`
      *  - `-` (not at the start or end though)
-     *
-     * TODO: the key is currently not constrained either by lint, compile-time
-     *  check or at runtime. Can seriously mess up the serialization process.
      */
     @PreferenceKey val key: String
 
@@ -351,6 +348,10 @@ internal class BooleanPreferenceData(
     override val default: Boolean,
 ) : AbstractPreferenceData<Boolean>(model) {
 
+    init {
+        Validator.validateKey(key)
+    }
+
     override val type: PreferenceType = PreferenceType.boolean()
 
     override val serializer: PreferenceSerializer<Boolean> = BooleanPreferenceSerializer
@@ -361,6 +362,10 @@ internal class DoublePreferenceData(
     override val key: String,
     override val default: Double,
 ) : AbstractPreferenceData<Double>(model) {
+
+    init {
+        Validator.validateKey(key)
+    }
 
     override val type: PreferenceType = PreferenceType.double()
 
@@ -373,6 +378,10 @@ internal class FloatPreferenceData(
     override val default: Float,
 ) : AbstractPreferenceData<Float>(model) {
 
+    init {
+        Validator.validateKey(key)
+    }
+
     override val type: PreferenceType = PreferenceType.float()
 
     override val serializer: PreferenceSerializer<Float> = FloatPreferenceSerializer
@@ -383,6 +392,10 @@ internal class IntPreferenceData(
     override val key: String,
     override val default: Int,
 ) : AbstractPreferenceData<Int>(model) {
+
+    init {
+        Validator.validateKey(key)
+    }
 
     override val type: PreferenceType = PreferenceType.integer()
 
@@ -395,6 +408,10 @@ internal class LongPreferenceData(
     override val default: Long,
 ) : AbstractPreferenceData<Long>(model) {
 
+    init {
+        Validator.validateKey(key)
+    }
+
     override val type: PreferenceType = PreferenceType.long()
 
     override val serializer: PreferenceSerializer<Long> = LongPreferenceSerializer
@@ -405,6 +422,10 @@ internal class StringPreferenceData(
     override val key: String,
     override val default: String,
 ) : AbstractPreferenceData<String>(model) {
+
+    init {
+        Validator.validateKey(key)
+    }
 
     override val type: PreferenceType = PreferenceType.string()
 
@@ -417,6 +438,10 @@ internal class EnumPreferenceData<V : Enum<V>>(
     override val default: V,
     private val stringToEnum: (String) -> V?,
 ) : AbstractPreferenceData<V>(model) {
+
+    init {
+        Validator.validateKey(key)
+    }
 
     override val type: PreferenceType = PreferenceType.string()
 
@@ -442,6 +467,10 @@ internal class LocalTimePreferenceData(
     override val default: LocalTime,
 ) : AbstractPreferenceData<LocalTime>(model) {
 
+    init {
+        Validator.validateKey(key)
+    }
+
     override val type: PreferenceType = PreferenceType.string()
 
     override val serializer: PreferenceSerializer<LocalTime> = object : PreferenceSerializer<LocalTime> {
@@ -461,6 +490,10 @@ internal class CustomPreferenceData<V : Any>(
     override val default: V,
     override val serializer: PreferenceSerializer<V>,
 ) : AbstractPreferenceData<V>(model) {
+
+    init {
+        Validator.validateKey(key)
+    }
 
     override val type: PreferenceType = PreferenceType.string()
 }
