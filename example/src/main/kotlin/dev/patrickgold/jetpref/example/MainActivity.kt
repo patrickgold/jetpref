@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
+import dev.patrickgold.jetpref.ui.compose.ProvideDefaultDialogPrefStrings
 
 class MainActivity : ComponentActivity() {
     private val prefs by examplePreferenceModel()
@@ -52,13 +53,19 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppContent(navController: NavHostController) {
-    Column {
-        TopAppBar(
-            title = { Text(text = "Example JetPref App") },
-            backgroundColor = MaterialTheme.colors.surface
-        )
-        NavHost(navController = navController, startDestination = "home") {
-            composable("home") { HomeScreen() }
+    ProvideDefaultDialogPrefStrings(
+        confirmLabel = "Confirm",
+        dismissLabel = "Dismiss",
+        neutralLabel = "Def. value",
+    ) {
+        Column {
+            TopAppBar(
+                title = { Text(text = "Example JetPref App") },
+                backgroundColor = MaterialTheme.colors.surface
+            )
+            NavHost(navController = navController, startDestination = "home") {
+                composable("home") { HomeScreen() }
+            }
         }
     }
 }
