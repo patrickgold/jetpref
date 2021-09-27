@@ -49,6 +49,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onDestroy() {
+        prefs.forceSyncToDisk()
+        super.onDestroy()
+    }
 }
 
 @Composable

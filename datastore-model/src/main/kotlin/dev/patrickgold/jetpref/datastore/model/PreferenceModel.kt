@@ -27,6 +27,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -163,6 +164,21 @@ abstract class PreferenceModel(val name: String) {
         return prefData
     }
 
+    fun forceSyncToDisk() = runBlocking {
+        syncToDisk()
+    }
+
+    private suspend fun syncToDisk() = withContext(Dispatchers.IO) {
+        registryGuard.withLock {
+            JetPrefManager.savePrefFile(name) {
+                for (preferenceData in registry) {
+                    val serializedData = preferenceData.serialize() ?: continue
+                    it.appendLine(serializedData)
+                }
+            }
+        }
+    }
+
     private fun CoroutineScope.setupModel() = launch(Dispatchers.Main) {
         // Important: MUST launch in Main then switch to IO or registry won't be initialized correctly!!
         // TODO: research if this happens only by accident. If so, consider using codegen or reflection
@@ -197,14 +213,7 @@ abstract class PreferenceModel(val name: String) {
     private fun CoroutineScope.launchSyncJob() = launch(Dispatchers.IO) {
         while (isActive) {
             if (persistReq.getAndSet(false)) {
-                JetPrefManager.savePrefFile(name) {
-                    registryGuard.withLock {
-                        for (preferenceData in registry) {
-                            val serializedData = preferenceData.serialize() ?: continue
-                            it.appendLine(serializedData)
-                        }
-                    }
-                }
+                syncToDisk()
             }
             delay(JetPrefManager.saveIntervalMs)
         }
