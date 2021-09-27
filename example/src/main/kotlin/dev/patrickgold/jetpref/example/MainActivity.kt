@@ -25,9 +25,14 @@ class MainActivity : ComponentActivity() {
     private val prefs by examplePreferenceModel()
 
     init {
-        prefs.example.isButtonShowing.observe(this) { newValue ->
-            Toast.makeText(this@MainActivity, "Value $newValue", Toast.LENGTH_SHORT).show()
+        prefs.datastoreReadyStatus.observe(this) { newValue ->
+            if (newValue) {
+                Toast.makeText(this@MainActivity, "PrefLoaded", Toast.LENGTH_SHORT).show()
+            }
         }
+        /*prefs.example.isButtonShowing.observe(this) { newValue ->
+            Toast.makeText(this@MainActivity, "Value $newValue", Toast.LENGTH_SHORT).show()
+        }*/
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -40,12 +40,17 @@ abstract class PreferenceModel(val name: String) {
 
     private val registryGuard = Mutex()
     private val registry: MutableList<PreferenceData<*>> = mutableListOf()
+    val datastoreReadyStatus = boolean(
+        key = "__internal_datastore_ready_status",
+        default = false,
+    )
 
     private var persistReq: AtomicBoolean = AtomicBoolean(false)
     private var persistJob: Job? = null
 
     init {
         Validator.validateFileName(name)
+        datastoreReadyStatus.set(false, requestSync = false)
         scope.setupModel()
     }
 
@@ -207,6 +212,7 @@ abstract class PreferenceModel(val name: String) {
                     }
                 }
             }
+            datastoreReadyStatus.set(true, requestSync = false)
             persistJob = launchSyncJob()
         }
     }
