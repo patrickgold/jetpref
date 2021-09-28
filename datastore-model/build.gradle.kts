@@ -49,7 +49,7 @@ android {
 
 dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
     implementation(project(":datastore-annotations"))
 
     testImplementation("io.kotest:kotest-assertions-core:4.6.2")
