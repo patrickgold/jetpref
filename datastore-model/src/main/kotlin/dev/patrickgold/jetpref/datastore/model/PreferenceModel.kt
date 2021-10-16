@@ -226,33 +226,6 @@ abstract class PreferenceModel(val name: String) {
         }
     }
 
-    internal fun String.encode(): String {
-        val sb = StringBuilder()
-        sb.append("\"")
-        sb.append(
-            this.replace("\\", "\\\\")
-                .replace("\r", "\\r")
-                .replace("\n", "\\n")
-                .replace("\"", "\\\"")
-        )
-        sb.append("\"")
-        return sb.toString()
-    }
-
-    internal fun String.decode(): String {
-        val str = this.trim()
-        return if (str.startsWith("\"") && str.endsWith("\"") && str.length >= 2) {
-            str
-                .substring(1, length - 1)
-                .replace("\\\"", "\"")
-                .replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\\\", "\\")
-        } else {
-            ""
-        }
-    }
-
     private fun <V : Any> PreferenceData<V>.serialize(): String? {
         if (type.isInvalid() || !type.isPrimitive()) return null
         val rawValue = getOrNull()?.let { serializer.serialize(it) } ?: return null
@@ -262,7 +235,7 @@ abstract class PreferenceModel(val name: String) {
         sb.append(key)
         sb.append(JetPrefManager.DELIMITER)
         if (type.isString()) {
-            sb.append(rawValue.encode())
+            sb.append(StringEncoder.encode(rawValue))
         } else {
             sb.append(rawValue)
         }
@@ -272,7 +245,7 @@ abstract class PreferenceModel(val name: String) {
     private fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {
         if (type.isInvalid() || !type.isPrimitive()) return
         val value = if (type.isString()) {
-            serializer.deserialize(rawValue.decode())
+            serializer.deserialize(StringEncoder.decode(rawValue))
         } else {
             serializer.deserialize(rawValue)
         }

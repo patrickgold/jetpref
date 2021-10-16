@@ -16,7 +16,7 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
-object Validator {
+internal object Validator {
     private val FILE_NAME_REGEX = """^(([a-zA-Z_])|([a-zA-Z_][a-zA-Z0-9_-]*[a-zA-Z0-9_]))${'$'}""".toRegex()
     private val KEY_REGEX = """^(([a-zA-Z_])|([a-zA-Z_][a-zA-Z0-9_-]*[a-zA-Z0-9_]))${'$'}""".toRegex()
 
