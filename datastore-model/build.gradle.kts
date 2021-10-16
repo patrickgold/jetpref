@@ -25,6 +25,8 @@ val jetprefMavenGroupId: String by project
 val jetprefJitpackGroupId: String by project
 val jetprefVersion: String by project
 
+val kotestVersion: String by project
+
 android {
     compileSdk = 30
 
@@ -52,10 +54,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
     implementation(project(":datastore-annotations"))
 
-    testImplementation("io.kotest:kotest-assertions-core:4.6.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
+    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("io.kotest:kotest-property:$kotestVersion")
 }
 
 tasks.withType<Test> {
