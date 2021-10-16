@@ -118,7 +118,7 @@ abstract class PreferenceModel(val name: String) {
         @PreferenceKey key: String,
         default: V,
     ): PreferenceData<V> {
-        @Suppress("DEPRECATION") // this is the only intended call site for __enum()
+        @Suppress("DEPRECATION_ERROR") // this is the only intended call site for __enum()
         return __enum(key, default) {
             try {
                 enumValueOf(it)
@@ -126,6 +126,22 @@ abstract class PreferenceModel(val name: String) {
                 null
             }
         }
+    }
+
+    @Deprecated(
+        message = "Not for public use.",
+        level = DeprecationLevel.ERROR,
+        replaceWith = ReplaceWith("enum(key, default)"),
+    )
+    @Suppress("FunctionName")
+    protected fun <V : Enum<V>> __enum(
+        @PreferenceKey key: String,
+        default: V,
+        stringToEnum: (String) -> V?,
+    ): PreferenceData<V> {
+        val prefData = EnumPreferenceData(this, key, default, stringToEnum)
+        registryAdd(prefData)
+        return prefData
     }
 
     /**
@@ -140,22 +156,6 @@ abstract class PreferenceModel(val name: String) {
         default: LocalTime,
     ): PreferenceData<LocalTime> {
         val prefData = LocalTimePreferenceData(this, key, default)
-        registryAdd(prefData)
-        return prefData
-    }
-
-    @Deprecated(
-        message = "Not for public use.",
-        level = DeprecationLevel.WARNING,
-        replaceWith = ReplaceWith("enum(key, default)"),
-    )
-    @Suppress("FunctionName")
-    protected fun <V : Enum<V>> __enum(
-        @PreferenceKey key: String,
-        default: V,
-        stringToEnum: (String) -> V?,
-    ): PreferenceData<V> {
-        val prefData = EnumPreferenceData(this, key, default, stringToEnum)
         registryAdd(prefData)
         return prefData
     }
@@ -191,14 +191,14 @@ abstract class PreferenceModel(val name: String) {
         withContext(Dispatchers.IO) {
             JetPrefManager.loadPrefFile(name) {
                 registryGuard.withLock {
-                    android.util.Log.i("JetPref", registry.toString())
-                    for (line in it.lineSequence()) {
-                        if (line.isBlank()) continue
+                    //android.util.Log.i("JetPref", registry.toString())
+                    for (line in it.lineSequence()) launch line@ {
+                        if (line.isBlank()) return@line
                         val del1 = line.indexOf(JetPrefManager.DELIMITER)
-                        if (del1 < 0) continue
+                        if (del1 < 0) return@line
                         val type = PreferenceType.from(line.substring(0, del1))
                         val del2 = line.indexOf(JetPrefManager.DELIMITER, del1 + 1)
-                        if (del2 < 0) continue
+                        if (del2 < 0) return@line
                         val key = line.substring(del1 + 1, del2)
                         val preferenceData = registry.find { it.key == key }
                         if (preferenceData != null) {
