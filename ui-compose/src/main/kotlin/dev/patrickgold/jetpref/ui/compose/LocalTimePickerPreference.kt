@@ -73,7 +73,7 @@ object TimePickerDefaults {
  * [clockFormat] attributes are currently not respected (expect is24Hour)
  */
 @ExperimentalJetPrefUi
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.LocalTimePickerPreference(
     pref: PreferenceData<LocalTime>,

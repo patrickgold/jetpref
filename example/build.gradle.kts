@@ -14,6 +14,7 @@ android {
         targetSdk = 30
         versionCode = 1
         versionName = "0.1.0"
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,6 +36,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -67,6 +69,7 @@ dependencies {
     implementation("com.google.android.material:material:1.4.0")
     implementation(project(":datastore-model"))
     implementation(project(":ui-compose"))
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
 }

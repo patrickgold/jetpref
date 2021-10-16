@@ -30,10 +30,13 @@ android {
     compileSdk = 30
 
     defaultConfig {
+        minSdk = 23
         targetSdk = 30
+        multiDexEnabled = true
         consumerProguardFiles("proguard-rules.pro")
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -68,6 +71,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.6.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation(project(":datastore-model"))
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
 }

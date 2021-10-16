@@ -16,7 +16,6 @@
 
 package dev.patrickgold.jetpref.example.ui.settings
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.Theme
@@ -49,12 +48,10 @@ fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
         max = 100,
         stepIncrement = 1,
     )
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        LocalTimePickerPreference(
-            prefs.exampleTime,
-            title = "Example time (Android 8+ only)",
-        )
-    }
+    LocalTimePickerPreference(
+        prefs.exampleTime,
+        title = "Example time",
+    )
     SwitchPreference(
         prefs.showExampleGroup,
         iconId = R.drawable.ic_question_answer_black_24dp,
