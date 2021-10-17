@@ -31,19 +31,19 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun JetPrefListItem(
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    icon: @Composable (() -> Unit)? = null,
+    icon: (@Composable () -> Unit)? = null,
     overlineText: String? = null,
     text: String,
     secondaryText: String? = null,
-    trailing: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     ListItem(
         modifier = modifier.alpha(if (enabled) ContentAlpha.high else ContentAlpha.disabled),
         icon = icon,
-        overlineText = whenNotNullOrBlank(overlineText) {
+        overlineText = whenNotNullOrBlank(overlineText) { str ->
             Text(
-                text = it,
+                text = str,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -55,10 +55,10 @@ fun JetPrefListItem(
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        secondaryText = whenNotNullOrBlank(secondaryText) {
+        secondaryText = whenNotNullOrBlank(secondaryText) { str ->
             Text(
                 modifier = Modifier.padding(bottom = 16.dp),
-                text = it,
+                text = str,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )

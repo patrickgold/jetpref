@@ -27,10 +27,12 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summary: String? = null,
+    trailing: (@Composable () -> Unit)? = null,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     onClick: (() -> Unit)? = null,
@@ -39,18 +41,19 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
         val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = title,
-            secondaryText = summary,
             modifier = if (onClick != null) {
-                Modifier.clickable(
+                modifier.clickable(
                     enabled = isEnabled,
                     role = Role.Button,
                     onClick = onClick,
                 )
             } else {
-                Modifier
+                modifier
             },
+            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            text = title,
+            secondaryText = summary,
+            trailing = trailing,
             enabled = isEnabled,
         )
     }
