@@ -1,4 +1,4 @@
-# JetPref
+# JetPref [![](https://jitpack.io/v/dev.patrickgold/jetpref.svg)](https://jitpack.io/#dev.patrickgold/jetpref)
 
 A preference library (custom data handling + UI in JetPack Compose) mainly developed for use in
 [FlorisBoard](https://github.com/florisboard/florisboard). Currently in early alpha phase.
