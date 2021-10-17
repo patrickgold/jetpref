@@ -39,7 +39,7 @@ fun JetPrefListItem(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     ListItem(
-        modifier = modifier.alpha(if (enabled) ContentAlpha.high else ContentAlpha.disabled),
+        modifier = modifier.alpha(if (enabled) 1.0f else ContentAlpha.disabled),
         icon = icon,
         overlineText = whenNotNullOrBlank(overlineText) { str ->
             Text(
