@@ -36,12 +36,16 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("SameParameterValue")
 abstract class PreferenceModel(val name: String) {
+    companion object {
+        private const val INTERNAL_PREFIX = "__internal"
+    }
+
     internal val scope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
     private val registryGuard = Mutex()
     private val registry: MutableList<PreferenceData<*>> = mutableListOf()
     val datastoreReadyStatus = boolean(
-        key = "__internal_datastore_ready_status",
+        key = "${INTERNAL_PREFIX}_datastore_ready_status",
         default = false,
     )
 
@@ -57,7 +61,9 @@ abstract class PreferenceModel(val name: String) {
     internal fun notifyValueChanged() = persistReq.set(true)
 
     private fun registryAdd(prefData: PreferenceData<*>) = scope.launch {
-        registryGuard.withLock { registry.add(prefData) }
+        if (!prefData.key.startsWith(INTERNAL_PREFIX)) {
+            registryGuard.withLock { registry.add(prefData) }
+        }
     }
 
     protected fun boolean(
