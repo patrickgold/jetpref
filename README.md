@@ -24,10 +24,10 @@ Then in your app module `build.gradle.kts`, add the dependencies:
 
 ```kt
 // JetPref Datastore module
-implementation("dev.patrickgold.jetpref:jetpref-datastore-model:0.1.0-alpha08")
+implementation("dev.patrickgold.jetpref:jetpref-datastore-model:$version")
 
 // JetPref Compose UI module
-implementation("dev.patrickgold.jetpref:jetpref-ui-compose:0.1.0-alpha08")
+implementation("dev.patrickgold.jetpref:jetpref-ui-compose:$version")
 ```
 
 As this library is very experimental, there's currently no documentation. It is best
