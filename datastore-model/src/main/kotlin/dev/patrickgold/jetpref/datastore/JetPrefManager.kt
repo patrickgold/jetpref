@@ -22,7 +22,6 @@ import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileNotFoundException
-import java.lang.ref.WeakReference
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -35,16 +34,11 @@ object JetPrefManager {
 
     private const val DEFAULT_SAVE_INTERVAL_MS: Long = 5_000
 
-    private var applicationContext: WeakReference<Context> = WeakReference(null)
     internal var saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS
 
     private val preferenceModelCache: MutableList<CachedPreferenceModel<*>> = mutableListOf()
 
-    fun init(
-        context: Context,
-        saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS,
-    ) {
-        this.applicationContext = WeakReference(context.applicationContext ?: context)
+    fun init(saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS) {
         this.saveIntervalMs = saveIntervalMs
     }
 
@@ -62,8 +56,7 @@ object JetPrefManager {
         }
     }
 
-    internal inline fun loadPrefFile(name: String, block: (BufferedReader) -> Unit) {
-        val context = applicationContext.get() ?: return
+    internal inline fun loadPrefFile(context: Context, name: String, block: (BufferedReader) -> Unit) {
         if (!setupJetPrefDir(context)) return
         val path = context.jetPrefPath(name)
         try {
@@ -75,8 +68,7 @@ object JetPrefManager {
         }
     }
 
-    internal inline fun savePrefFile(name: String, block: (BufferedWriter) -> Unit) {
-        val context = applicationContext.get() ?: return
+    internal inline fun savePrefFile(context: Context, name: String, block: (BufferedWriter) -> Unit) {
         if (!setupJetPrefDir(context)) return
         val path = context.jetPrefPath(name)
         try {
@@ -108,18 +100,6 @@ object JetPrefManager {
         val newCacheEntry = CachedPreferenceModel(kClass, newModel)
         preferenceModelCache.add(newCacheEntry)
         return@synchronized newCacheEntry
-    }
-
-    fun <T : PreferenceModel> preloadPreferenceModel(
-        kClass: KClass<T>,
-        factory: () -> T
-    ) = synchronized(preferenceModelCache) {
-        val cachedEntry = preferenceModelCache.find { it.kClass == kClass }
-        if (cachedEntry == null) {
-            val newModel = factory()
-            val newCacheEntry = CachedPreferenceModel(kClass, newModel)
-            preferenceModelCache.add(newCacheEntry)
-        }
     }
 }
 

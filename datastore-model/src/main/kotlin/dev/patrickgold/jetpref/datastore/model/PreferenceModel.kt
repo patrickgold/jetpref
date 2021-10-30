@@ -16,6 +16,7 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import dev.patrickgold.jetpref.datastore.JetPrefManager
@@ -31,6 +32,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.lang.ref.WeakReference
 import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -42,6 +44,7 @@ abstract class PreferenceModel(val name: String) {
 
     internal val scope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
+    private var appContext = WeakReference<Context?>(null)
     private val registryGuard = Mutex()
     private val registry: MutableList<PreferenceData<*>> = mutableListOf()
     val datastoreReadyStatus = boolean(
@@ -51,11 +54,11 @@ abstract class PreferenceModel(val name: String) {
 
     private var persistReq: AtomicBoolean = AtomicBoolean(false)
     private var persistJob: Job? = null
+    private var setupJob: Job? = null
 
     init {
         Validator.validateFileName(name)
         datastoreReadyStatus.set(false, requestSync = false)
-        scope.setupModel()
     }
 
     internal fun notifyValueChanged() = persistReq.set(true)
@@ -181,8 +184,9 @@ abstract class PreferenceModel(val name: String) {
     }
 
     private suspend fun syncToDisk() = withContext(Dispatchers.IO) {
+        val context = appContext.get() ?: return@withContext
         registryGuard.withLock {
-            JetPrefManager.savePrefFile(name) {
+            JetPrefManager.savePrefFile(context, name) {
                 for (preferenceData in registry) {
                     val serializedData = preferenceData.serialize() ?: continue
                     it.appendLine(serializedData)
@@ -191,36 +195,44 @@ abstract class PreferenceModel(val name: String) {
         }
     }
 
-    private fun CoroutineScope.setupModel() = launch(Dispatchers.Main) {
-        // Important: MUST launch in Main then switch to IO or registry won't be initialized correctly!!
-        // TODO: research if this happens only by accident. If so, consider using codegen or reflection
-        withContext(Dispatchers.IO) {
-            JetPrefManager.loadPrefFile(name) {
-                registryGuard.withLock {
-                    //android.util.Log.i("JetPref", registry.toString())
-                    for (line in it.lineSequence()) launch line@ {
-                        if (line.isBlank()) return@line
-                        val del1 = line.indexOf(JetPrefManager.DELIMITER)
-                        if (del1 < 0) return@line
-                        val type = PreferenceType.from(line.substring(0, del1))
-                        val del2 = line.indexOf(JetPrefManager.DELIMITER, del1 + 1)
-                        if (del2 < 0) return@line
-                        val key = line.substring(del1 + 1, del2)
-                        val preferenceData = registry.find { it.key == key }
-                        if (preferenceData != null) {
-                            if (preferenceData.type.id != type.id) {
-                                preferenceData.reset(requestSync = false)
-                            }
-                            preferenceData.deserialize(
-                                if (del2 + 1 == line.length) { "" } else { line.substring(del2 + 1) }
-                            )
+    fun initializeForContext(context: Context) {
+        persistJob?.cancel()
+        setupJob?.cancel()
+        persistReq.set(false)
+        appContext = WeakReference(context)
+        setupJob = scope.setupModel(context)
+    }
+
+    private fun CoroutineScope.setupModel(context: Context) = launch(Dispatchers.IO) {
+        datastoreReadyStatus.set(false, requestSync = false)
+        JetPrefManager.loadPrefFile(context, name) {
+            registryGuard.withLock {
+                for (prefData in registry) {
+                    prefData.reset(requestSync = false)
+                }
+                //android.util.Log.i("JetPref", registry.toString())
+                for (line in it.lineSequence()) launch line@ {
+                    if (line.isBlank()) return@line
+                    val del1 = line.indexOf(JetPrefManager.DELIMITER)
+                    if (del1 < 0) return@line
+                    val type = PreferenceType.from(line.substring(0, del1))
+                    val del2 = line.indexOf(JetPrefManager.DELIMITER, del1 + 1)
+                    if (del2 < 0) return@line
+                    val key = line.substring(del1 + 1, del2)
+                    val prefData = registry.find { it.key == key }
+                    if (prefData != null) {
+                        if (prefData.type.id != type.id) {
+                            return@line
                         }
+                        prefData.deserialize(
+                            if (del2 + 1 == line.length) { "" } else { line.substring(del2 + 1) }
+                        )
                     }
                 }
             }
-            datastoreReadyStatus.set(true, requestSync = false)
-            persistJob = launchSyncJob()
         }
+        datastoreReadyStatus.set(true, requestSync = false)
+        persistJob = launchSyncJob()
     }
 
     private fun CoroutineScope.launchSyncJob() = launch(Dispatchers.IO) {
@@ -255,9 +267,7 @@ abstract class PreferenceModel(val name: String) {
         } else {
             serializer.deserialize(rawValue)
         }
-        if (value == null) {
-            reset(requestSync = false)
-        } else {
+        if (value != null) {
             set(value, requestSync = false)
         }
     }
