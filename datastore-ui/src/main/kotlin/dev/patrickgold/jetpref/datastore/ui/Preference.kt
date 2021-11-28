@@ -33,7 +33,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summary: String? = null,
-    trailing: (@Composable () -> Unit)? = null,
+    trailing: @Composable (() -> Unit)? = null,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     onClick: (() -> Unit)? = null,

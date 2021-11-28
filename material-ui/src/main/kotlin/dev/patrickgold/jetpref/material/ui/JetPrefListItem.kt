@@ -27,16 +27,29 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+/**
+ * Material Design list item.
+ *
+ * @param modifier Modifier to be applied to the list item.
+ * @param icon The leading supporting visual of the list item.
+ * @param overlineText The text displayed above the primary text.
+ * @param text The primary text of the list item.
+ * @param secondaryText The secondary text of the list item.
+ * @param enabled If false, this list item will be grayed out.
+ * @param trailing The trailing meta text, icon, switch or checkbox.
+ *
+ * @see androidx.compose.material.ListItem
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun JetPrefListItem(
     modifier: Modifier = Modifier,
-    icon: (@Composable () -> Unit)? = null,
+    icon: @Composable (() -> Unit)? = null,
     overlineText: String? = null,
     text: String,
     secondaryText: String? = null,
     enabled: Boolean = true,
-    trailing: (@Composable () -> Unit)? = null,
+    trailing: @Composable (() -> Unit)? = null,
 ) {
     ListItem(
         modifier = modifier.alpha(if (enabled) 1.0f else ContentAlpha.disabled),
