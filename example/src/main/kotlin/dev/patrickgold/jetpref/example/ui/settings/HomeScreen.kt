@@ -24,7 +24,7 @@ import dev.patrickgold.jetpref.datastore.ui.LocalTimePickerPreference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.PreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
-import dev.patrickgold.jetpref.datastore.ui.entry
+import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.Theme
 import dev.patrickgold.jetpref.example.examplePreferenceModel
@@ -107,51 +107,51 @@ fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
     ListPreference(
         prefs.example.title,
         title = "Some lengthy title about this entry some lengthy title about this entry.",
-        entries = listOf(
+        entries = listPrefEntries {
             entry(
                 key = "str1",
                 label = "String 1",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
-            ),
+            )
             entry(
                 key = "str2",
                 label = "String 2",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
-            ),
+            )
             entry(
                 key = "str3",
                 label = "String 3",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
-            ),
-        ),
+            )
+        },
     )
     ListPreference(
         listPref = prefs.example.title,
         switchPref = prefs.example.showTitle,
         title = "Some lengthy title about this entry some lengthy title about this entry.",
         summarySwitchDisabled = "off",
-        entries = listOf(
+        entries = listPrefEntries {
             entry(
                 key = "str1",
                 label = "String 1",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
-            ),
+            )
             entry(
                 key = "str2",
                 label = "String 2",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
-            ),
+            )
             entry(
                 key = "str3",
                 label = "String 3",
                 description = "Some lengthy description about this entry.",
                 showDescriptionOnlyIfSelected = true,
-            ),
-        ),
+            )
+        },
     )
 }

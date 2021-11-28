@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.preferenceModel
-import dev.patrickgold.jetpref.datastore.ui.entry
+import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import java.time.LocalTime
 
 enum class Theme {
@@ -15,20 +15,20 @@ enum class Theme {
 
     companion object {
         @Composable
-        fun listEntries() = listOf(
+        fun listEntries() = listPrefEntries {
             entry(
                 key = AUTO,
                 label = "System default",
-            ),
+            )
             entry(
                 key = LIGHT,
                 label = "Light",
-            ),
+            )
             entry(
                 key = DARK,
                 label = "Dark",
-            ),
-        )
+            )
+        }
     }
 }
 

@@ -45,7 +45,26 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
+import kotlin.experimental.ExperimentalTypeInference
 
+/**
+ * Data class specifying a single list preference entry.
+ *
+ * @param V The type of the key, cannot be null.
+ *
+ * @property key The unique key of this entry, which is set as the value for the datastore model's
+ *  corresponding [PreferenceData].
+ * @property label The text which is used as the entry's list label.
+ * @property labelComposer The composer for the [label]. Should return a composable which uses
+ *  the passed description.
+ * @property description Optional string explaining an entry's purpose or what it does.
+ *  Passing a blank string indicates that no description should be shown.
+ * @property descriptionComposer The composer for the [description]. Should return a composable
+ *  which uses the passed description.
+ * @property showDescriptionOnlyIfSelected True if the description should be shown only if the
+ *  list entry is selected, false if it should be shown for all entries. This flag does nothing
+ *  if the description is a blank string and not showing for this entry.
+ */
 data class ListPreferenceEntry<V : Any>(
     val key: V,
     val label: String,
@@ -55,41 +74,116 @@ data class ListPreferenceEntry<V : Any>(
     val showDescriptionOnlyIfSelected: Boolean,
 )
 
-fun <V : Any> entry(
-    key: V,
-    label: String,
-): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, label, { Text(it) }, "", { }, false)
+/**
+ * Builder scope for creating a list of list preference entries.
+ *
+ * @param V The type of the entry keys.
+ */
+interface ListPreferenceEntriesScope<V : Any> {
+    /**
+     * Creates an entry without a description.
+     */
+    fun entry(
+        key: V,
+        label: String,
+    )
+
+    /**
+     * Creates an entry with a label + description.
+     */
+    fun entry(
+        key: V,
+        label: String,
+        description: String,
+        showDescriptionOnlyIfSelected: Boolean = false,
+    )
+
+    /**
+     * Creates an entry with a label + description and custom description composer.
+     */
+    fun entry(
+        key: V,
+        label: String,
+        description: String,
+        descriptionComposer: @Composable (String) -> Unit,
+        showDescriptionOnlyIfSelected: Boolean = false,
+    )
+
+    /**
+     * Creates an entry with a label + description and custom composers for both.
+     */
+    fun entry(
+        key: V,
+        label: String,
+        labelComposer: @Composable (String) -> Unit,
+        description: String,
+        descriptionComposer: @Composable (String) -> Unit,
+        showDescriptionOnlyIfSelected: Boolean = false,
+    )
 }
 
-fun <V : Any> entry(
-    key: V,
-    label: String,
-    description: String,
-    showDescriptionOnlyIfSelected: Boolean = false,
-): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, label, { Text(it) }, description, { Text(it) }, showDescriptionOnlyIfSelected)
+private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesScope<V> {
+    private val entries = mutableListOf<ListPreferenceEntry<V>>()
+
+    override fun entry(
+        key: V,
+        label: String,
+    ) {
+        entries.add(ListPreferenceEntry(key, label, { Text(it) }, "", { }, false))
+    }
+
+    override fun entry(
+        key: V,
+        label: String,
+        description: String,
+        showDescriptionOnlyIfSelected: Boolean,
+    ) {
+        entries.add(ListPreferenceEntry(key, label, { Text(it) }, description, { Text(it) }, showDescriptionOnlyIfSelected))
+    }
+
+    override fun entry(
+        key: V,
+        label: String,
+        description: String,
+        descriptionComposer: @Composable (String) -> Unit,
+        showDescriptionOnlyIfSelected: Boolean,
+    ) {
+        entries.add(ListPreferenceEntry(key, label, { Text(it) }, description, descriptionComposer, showDescriptionOnlyIfSelected))
+    }
+
+    override fun entry(
+        key: V,
+        label: String,
+        labelComposer: @Composable (String) -> Unit,
+        description: String,
+        descriptionComposer: @Composable (String) -> Unit,
+        showDescriptionOnlyIfSelected: Boolean,
+    ) {
+        entries.add(ListPreferenceEntry(key, label, labelComposer, description, descriptionComposer, showDescriptionOnlyIfSelected))
+    }
+
+    fun build(): List<ListPreferenceEntry<V>> {
+        return entries.toList()
+    }
 }
 
-fun <V : Any> entry(
-    key: V,
-    label: String,
-    description: String,
-    descriptionComposer: @Composable (String) -> Unit,
-    showDescriptionOnlyIfSelected: Boolean = false,
-): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, label, { Text(it) }, description, descriptionComposer, showDescriptionOnlyIfSelected)
-}
-
-fun <V : Any> entry(
-    key: V,
-    label: String,
-    labelComposer: @Composable (String) -> Unit,
-    description: String,
-    descriptionComposer: @Composable (String) -> Unit,
-    showDescriptionOnlyIfSelected: Boolean = false,
-): ListPreferenceEntry<V> {
-    return ListPreferenceEntry(key, label, labelComposer, description, descriptionComposer, showDescriptionOnlyIfSelected)
+/**
+ * List entries builder DSL for use with [ListPreference].
+ *
+ * @param V The type of the entry keys.
+ * @param scope THe builder scope for the entries list.
+ *
+ * @return A list of [ListPreferenceEntry] items.
+ */
+// TODO: Remove OptIn once upgraded to Kotlin 1.6
+@OptIn(ExperimentalTypeInference::class)
+@Composable
+fun <V : Any> listPrefEntries(
+    @BuilderInference scope: @Composable ListPreferenceEntriesScope<V>.() -> Unit,
+): List<ListPreferenceEntry<V>> {
+    val builder = ListPreferenceEntriesScopeImpl<V>()
+    scope(builder)
+    return builder.build()
 }
 
 @Composable
