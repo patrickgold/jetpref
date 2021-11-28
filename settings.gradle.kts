@@ -9,4 +9,5 @@ rootProject.name = "JetPref"
 include(":example")
 include(":datastore-annotations")
 include(":datastore-model")
-include(":ui-compose")
+include(":datastore-ui")
+include(":material-ui")

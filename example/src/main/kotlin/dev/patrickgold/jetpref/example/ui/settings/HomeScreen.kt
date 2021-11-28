@@ -17,19 +17,19 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.runtime.Composable
+import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
+import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
+import dev.patrickgold.jetpref.datastore.ui.ListPreference
+import dev.patrickgold.jetpref.datastore.ui.LocalTimePickerPreference
+import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
+import dev.patrickgold.jetpref.datastore.ui.PreferenceLayout
+import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
+import dev.patrickgold.jetpref.datastore.ui.entry
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.Theme
 import dev.patrickgold.jetpref.example.examplePreferenceModel
-import dev.patrickgold.jetpref.ui.compose.DialogSliderPreference
-import dev.patrickgold.jetpref.ui.compose.ListPreference
-import dev.patrickgold.jetpref.ui.compose.LocalTimePickerPreference
-import dev.patrickgold.jetpref.ui.compose.PreferenceGroup
-import dev.patrickgold.jetpref.ui.compose.PreferenceLayout
-import dev.patrickgold.jetpref.ui.compose.SwitchPreference
-import dev.patrickgold.jetpref.ui.compose.annotations.ExperimentalJetPrefUi
-import dev.patrickgold.jetpref.ui.compose.entry
 
-@OptIn(ExperimentalJetPrefUi::class)
+@OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
 fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
     ListPreference(

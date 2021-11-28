@@ -17,9 +17,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.ui.ProvideDefaultDialogPrefStrings
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
-import dev.patrickgold.jetpref.ui.compose.ProvideDefaultDialogPrefStrings
 
 class MainActivity : ComponentActivity() {
     private val prefs by examplePreferenceModel()

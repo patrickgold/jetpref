@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.preferenceModel
-import dev.patrickgold.jetpref.ui.compose.entry
+import dev.patrickgold.jetpref.datastore.ui.entry
 import java.time.LocalTime
 
 enum class Theme {
