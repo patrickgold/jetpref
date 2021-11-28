@@ -80,9 +80,8 @@ fun ProvideDefaultDialogPrefStrings(
         LocalDefaultConfirmLabel provides confirmLabel,
         LocalDefaultDismissLabel provides dismissLabel,
         LocalDefaultNeutralLabel provides neutralLabel,
-    ) {
-        content()
-    }
+        content = content,
+    )
 }
 
 /**
@@ -105,10 +104,47 @@ fun dialogPrefStrings(
     neutralLabel: String = LocalDefaultNeutralLabel.current ?: "Default",
 ) = DialogPreferenceStrings(confirmLabel, dismissLabel, neutralLabel)
 
+/**
+ * Material Design alert dialog allowing for full customization of the dialog appearance,
+ * content and behavior.
+ *
+ * @param title The title of the Dialog which should specify the purpose of the Dialog.
+ * @param modifier Modifier to be applied to the layout of the dialog.
+ * @param confirmLabel The label of the confirm button of this dialog. Used to control the
+ *  visibility of the confirm button. Passing null or a blank string will disable the button,
+ *  any other string will enable it.
+ * @param onConfirm Action to execute when the confirm button is pressed.
+ * @param neutralLabel The label of the neutral button of this dialog. Used to control the
+ *  visibility of the neutral button. Passing null or a blank string will disable the button,
+ *  any other string will enable it.
+ * @param onNeutral Action to execute when the neutral button is pressed.
+ * @param dismissLabel The label of the dismiss button of this dialog. Used to control the
+ *  visibility of the dismiss button. Passing null or a blank string will disable the button,
+ *  any other string will enable it.
+ * @param onDismiss Action to execute when the dismiss button is pressed.
+ * @param allowOutsideDismissal Specify if a user can dismiss the Dialog by clicking outside
+ *  or pressing the back button.
+ * @param onOutsideDismissal Action to execute when [allowOutsideDismissal] is true and an
+ *  outside dismissal occurs. This is not called when the dismiss button is pressed. Defaults
+ *  to the same action as [onDismiss].
+ * @param trailingIconTitle Specify an icon / UI control to be placed in trailing position to
+ *  the dialog title.
+ * @param properties Dialog properties for further customization of this dialog's behavior.
+ * @param scrollModifier The scroll modifier to apply to the inner content box. Defaults to
+ *  a simple vertical scroll modifier. Pass an empty modifier to disable scrolling entirely.
+ * @param backgroundColor The background color of this dialog.
+ * @param contentColor The content color of this dialog.
+ * @param contentPadding Specify a padding to apply to the inner content box.
+ * @param content The content to be displayed inside the dialog.
+ *
+ * @see androidx.compose.material.AlertDialog
+ * @see androidx.compose.ui.window.Dialog
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun JetPrefAlertDialog(
     title: String,
+    modifier: Modifier = Modifier,
     confirmLabel: String? = null,
     onConfirm: () -> Unit = { },
     neutralLabel: String? = null,
@@ -116,20 +152,21 @@ fun JetPrefAlertDialog(
     dismissLabel: String? = null,
     onDismiss: () -> Unit = { },
     allowOutsideDismissal: Boolean = true,
+    onOutsideDismissal: () -> Unit = onDismiss,
     trailingIconTitle: @Composable () -> Unit = { },
-    contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+    scrollModifier: Modifier = Modifier.verticalScroll(rememberScrollState()),
     backgroundColor: Color = MaterialTheme.colors.surface,
     contentColor: Color = contentColorFor(backgroundColor),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     content: @Composable () -> Unit,
 ) {
-    val scrollState = rememberScrollState()
     Dialog(
-        onDismissRequest = { if (allowOutsideDismissal) onDismiss() },
+        onDismissRequest = { if (allowOutsideDismissal) onOutsideDismissal() },
         properties = properties,
     ) {
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .padding(vertical = 16.dp, horizontal = 16.dp)
                 .widthIn(max = 320.dp),
             shape = MaterialTheme.shapes.medium,
@@ -159,7 +196,7 @@ fun JetPrefAlertDialog(
                         .padding(contentPadding)
                         .weight(1.0f, fill = false)
                         .fillMaxWidth()
-                        .verticalScroll(scrollState),
+                        .then(scrollModifier),
                 ) {
                     content()
                 }
