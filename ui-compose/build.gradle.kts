@@ -20,6 +20,10 @@ plugins {
     id("maven-publish")
 }
 
+val jetprefCompileSdk: String by project
+val jetprefMinSdk: String by project
+val jetprefTargetSdk: String by project
+
 val jetprefMavenGroupId: String by project
 val jetprefJitpackGroupId: String by project
 val jetprefVersion: String by project
@@ -27,11 +31,11 @@ val jetprefVersion: String by project
 val composeVersion: String by project
 
 android {
-    compileSdk = 30
+    compileSdk = jetprefCompileSdk.toInt()
 
     defaultConfig {
-        minSdk = 23
-        targetSdk = 30
+        minSdk = jetprefMinSdk.toInt()
+        targetSdk = jetprefTargetSdk.toInt()
         multiDexEnabled = true
         consumerProguardFiles("proguard-rules.pro")
     }

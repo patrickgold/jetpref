@@ -3,15 +3,19 @@ plugins {
     id("kotlin-android")
 }
 
+val jetprefCompileSdk: String by project
+val jetprefMinSdk: String by project
+val jetprefTargetSdk: String by project
+
 val composeVersion: String by project
 
 android {
-    compileSdk = 31
+    compileSdk = jetprefCompileSdk.toInt()
 
     defaultConfig {
         applicationId = "dev.patrickgold.jetpref.example"
-        minSdk = 23
-        targetSdk = 30
+        minSdk = jetprefMinSdk.toInt()
+        targetSdk = jetprefTargetSdk.toInt()
         versionCode = 1
         versionName = "0.1.0"
         multiDexEnabled = true
