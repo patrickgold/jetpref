@@ -16,31 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import android.os.Build
-import android.widget.TimePicker
-import androidx.annotation.DrawableRes
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import dev.patrickgold.jetpref.datastore.model.PreferenceData
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import dev.patrickgold.jetpref.datastore.model.observeAsState
-import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
-import dev.patrickgold.jetpref.material.ui.JetPrefListItem
-import java.time.LocalTime
-
 @ExperimentalJetPrefDatastoreUi
 data class ClockFormat(
     val is24Hour: Boolean,
@@ -65,79 +40,5 @@ object TimePickerDefaults {
     ) = ClockFormat(is24Hour, showHours, showMinutes, showSeconds, showMilliseconds)
 }
 
-/**
- * Shows a time picker dialog for setting a local time.
- *
- * Colors are currently messed up and controls are limited. This implementation
- * is highly experimental and likely to change completely or be removed soon.
- *
- * [clockFormat] attributes are currently not respected (expect is24Hour)
- */
-@ExperimentalJetPrefDatastoreUi
-@RequiresApi(Build.VERSION_CODES.M)
-@Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.LocalTimePickerPreference(
-    pref: PreferenceData<LocalTime>,
-    @DrawableRes iconId: Int? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
-    title: String,
-    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
-    clockFormat: ClockFormat = TimePickerDefaults.clockFormat(),
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    val prefValue by pref.observeAsState()
-    var tmpDialogTimeValue by remember { mutableStateOf<LocalTime?>(null) }
-
-    val evalScope = PreferenceDataEvaluatorScope.instance()
-    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
-        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
-        JetPrefListItem(
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = title,
-            secondaryText = prefValue.toString(),
-            modifier = Modifier
-                .clickable(
-                    enabled = isEnabled,
-                    role = Role.Button,
-                    onClick = {
-                        tmpDialogTimeValue = prefValue
-                    },
-                ),
-            enabled = isEnabled,
-        )
-        if (tmpDialogTimeValue != null) {
-            JetPrefAlertDialog(
-                title = title,
-                confirmLabel = dialogStrings.confirmLabel,
-                onConfirm = {
-                    pref.set(tmpDialogTimeValue!!)
-                    tmpDialogTimeValue = null
-                },
-                dismissLabel = dialogStrings.dismissLabel,
-                onDismiss = { tmpDialogTimeValue = null },
-                neutralLabel = dialogStrings.neutralLabel,
-                onNeutral = {
-                    pref.reset()
-                    tmpDialogTimeValue = null
-                },
-                contentPadding = PaddingValues(horizontal = 24.dp),
-            ) {
-                Column {
-                    AndroidView(
-                        factory = { context ->
-                            TimePicker(context).also {
-                                it.setIs24HourView(clockFormat.is24Hour)
-                                it.hour = tmpDialogTimeValue!!.hour
-                                it.minute = tmpDialogTimeValue!!.minute
-                                it.setOnTimeChangedListener { _, hours, minutes ->
-                                    tmpDialogTimeValue = LocalTime.of(hours, minutes)
-                                }
-                            }
-                        },
-                    )
-                }
-            }
-        }
-    }
-}
+// TODO: re-implement a time picker preference which does not depend on the
+//       time picker Android view and core lib desugaring

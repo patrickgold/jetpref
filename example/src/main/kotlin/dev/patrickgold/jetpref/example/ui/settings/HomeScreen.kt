@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
-import dev.patrickgold.jetpref.datastore.ui.LocalTimePickerPreference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.PreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
@@ -48,10 +47,10 @@ fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
         max = 100,
         stepIncrement = 1,
     )
-    LocalTimePickerPreference(
-        prefs.exampleTime,
-        title = "Example time",
-    )
+    //LocalTimePickerPreference(
+    //    prefs.exampleTime,
+    //    title = "Example time",
+    //)
     SwitchPreference(
         prefs.showExampleGroup,
         iconId = R.drawable.ic_question_answer_black_24dp,

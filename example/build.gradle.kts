@@ -18,7 +18,6 @@ android {
         targetSdk = jetprefTargetSdk.toInt()
         versionCode = 1
         versionName = "0.1.0"
-        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -40,7 +39,6 @@ android {
         }
     }
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -69,11 +67,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
-    implementation("androidx.navigation:navigation-compose:2.4.0-beta02")
+    implementation("androidx.navigation:navigation-compose:2.4.0-rc01")
     implementation("com.google.android.material:material:1.4.0")
     implementation(project(":datastore-model"))
     implementation(project(":datastore-ui"))
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
 }
