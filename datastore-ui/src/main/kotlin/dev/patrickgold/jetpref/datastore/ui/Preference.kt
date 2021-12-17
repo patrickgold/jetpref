@@ -26,6 +26,29 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 
+/**
+ * Material list item which behaves and looks like a preference, but does not provide an
+ * automatic display of state for a datastore entry, unlike all other available preference
+ * composables. This can be used to manually add a custom preference or be used to allow for
+ * click-only actions in a preference screen, such as navigation to a sub screen or in the app's
+ * about screen.
+ *
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
+ * @param trailing Optional trailing composable, will be placed at the end of the list item.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ * @param onClick The action to perform if this preference is enabled and the user clicks on this
+ *  preference item.
+ *
+ * @since 0.1.0
+ */
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
     modifier: Modifier = Modifier,

@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
  * @param enabled If false, this list item will be grayed out.
  * @param trailing The trailing meta text, icon, switch or checkbox.
  *
+ * @since 0.1.0
+ *
  * @see androidx.compose.material.ListItem
  */
 @OptIn(ExperimentalMaterialApi::class)

@@ -78,6 +78,8 @@ import androidx.compose.ui.window.DialogProperties
  * @param contentPadding Specify a padding to apply to the inner content box.
  * @param content The content to be displayed inside the dialog.
  *
+ * @since 0.1.0
+ *
  * @see androidx.compose.material.AlertDialog
  * @see androidx.compose.ui.window.Dialog
  */

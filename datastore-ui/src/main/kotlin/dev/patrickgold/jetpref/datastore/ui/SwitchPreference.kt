@@ -30,6 +30,27 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 
+/**
+ * Material switch preference which provides a list item with a trailing switch.
+ *
+ * @param pref The boolean preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
+ * @param summaryOn The summary of this preference if the state is `true`. If this is specified it
+ *  will override provided [summary]. Shown as the list item secondary text (max 2 lines).
+ * @param summaryOff The summary of this preference if the state is `false`. If this is specified it
+ *  will override provided [summary]. Shown as the list item secondary text (max 2 lines).
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     pref: PreferenceData<Boolean>,

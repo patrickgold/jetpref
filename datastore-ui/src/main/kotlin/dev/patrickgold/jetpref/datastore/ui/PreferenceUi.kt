@@ -38,6 +38,11 @@ annotation class PreferenceUiScopeDsl
 
 typealias PreferenceUiContent<T> = @Composable @PreferenceUiScopeDsl PreferenceUiScope<T>.() -> Unit
 
+/**
+ * Preference UI scope which allows access to the current datastore model.
+ *
+ * @property prefs The current datastore model.
+ */
 class PreferenceUiScope<T : PreferenceModel>(
     val prefs: T,
     internal val iconSpaceReserved: Boolean,
@@ -46,6 +51,24 @@ class PreferenceUiScope<T : PreferenceModel>(
     columnScope: ColumnScope,
 ) : ColumnScope by columnScope
 
+/**
+ * Material preference layout which allows for easy access to the preference datastore.
+ * All preference composables within this layout will make use of the provided datastore
+ * automatically.
+ *
+ * @param cachedPrefModel The cached preference datastore model of your app.
+ * @param modifier Modifier to be applied to this layout.
+ * @param iconSpaceReserved Global setting if all sub-preference composables should reserve
+ *  an additional space if no icon is specified. Can be overridden for each individual preference
+ *  composable.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference layout
+ *  should be enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference layout
+ *  should be visible (true) or hidden (false).
+ * @param content The content of this preference layout.
+ *
+ * @since 0.1.0
+ */
 @Composable
 fun <T : PreferenceModel> PreferenceLayout(
     cachedPrefModel: CachedPreferenceModel<T>,
@@ -69,9 +92,28 @@ fun <T : PreferenceModel> PreferenceLayout(
     }
 }
 
+/**
+ * Material preference group which automatically provides a title UI.
+ *
+ * @param modifier Modifier to be applied to this group.
+ * @param iconId The icon ID of the group title icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided. Also acts as a local setting if all sub-preference composables
+ *  should reserve an additional space if no icon is specified. Can be overridden for each individual
+ *  preference composable.
+ * @param title The title of this preference group.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference layout
+ *  should be enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference layout
+ *  should be visible (true) or hidden (false).
+ * @param content The content of this preference group.
+ *
+ * @since 0.1.0
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -81,7 +123,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
 ) {
     val evalScope = PreferenceDataEvaluatorScope.instance()
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
-        Column {
+        Column(modifier = modifier) {
             val preferenceScope = PreferenceUiScope(
                 prefs = this@PreferenceGroup.prefs,
                 iconSpaceReserved = iconSpaceReserved,
