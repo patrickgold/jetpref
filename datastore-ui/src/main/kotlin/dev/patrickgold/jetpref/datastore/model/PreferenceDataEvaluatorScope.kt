@@ -60,4 +60,14 @@ class PreferenceDataEvaluatorScope {
     infix fun <V : Any> V.isNotEqualTo(other: PreferenceData<V>): Boolean {
         return !(this isEqualTo other)
     }
+
+    @Composable
+    fun PreferenceData<Boolean>.isTrue(): Boolean {
+        return this isEqualTo true
+    }
+
+    @Composable
+    fun PreferenceData<Boolean>.isFalse(): Boolean {
+        return this isEqualTo false
+    }
 }
