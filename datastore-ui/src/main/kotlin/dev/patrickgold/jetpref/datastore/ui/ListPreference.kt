@@ -16,6 +16,7 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -175,7 +176,6 @@ private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesSco
  *
  * @return A list of [ListPreferenceEntry] items.
  */
-// TODO: Remove OptIn once upgraded to Kotlin 1.6
 @OptIn(ExperimentalTypeInference::class)
 @Composable
 fun <V : Any> listPrefEntries(
@@ -186,10 +186,12 @@ fun <V : Any> listPrefEntries(
     return builder.build()
 }
 
+@SuppressLint("ModifierParameter")
 @Composable
 fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     listPref: PreferenceData<V>,
     switchPref: PreferenceData<Boolean>? = null,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -209,6 +211,18 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
         val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
+            modifier = modifier
+                .clickable(
+                    enabled = isEnabled,
+                    role = Role.Button,
+                    onClick = {
+                        setTmpListPrefValue(listPrefValue)
+                        if (switchPrefValue != null) {
+                            setTmpSwitchPrefValue(switchPrefValue.value)
+                        }
+                        isDialogOpen.value = true
+                    }
+                ),
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
             secondaryText = if (switchPrefValue?.value == true || switchPrefValue == null) {
@@ -225,18 +239,6 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                     )
                 }
             },
-            modifier = Modifier
-                .clickable(
-                    enabled = isEnabled,
-                    role = Role.Button,
-                    onClick = {
-                        setTmpListPrefValue(listPrefValue)
-                        if (switchPrefValue != null) {
-                            setTmpSwitchPrefValue(switchPrefValue.value)
-                        }
-                        isDialogOpen.value = true
-                    }
-                ),
             enabled = isEnabled,
         )
         if (isDialogOpen.value) {

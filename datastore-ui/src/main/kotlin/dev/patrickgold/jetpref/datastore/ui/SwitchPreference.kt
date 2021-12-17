@@ -33,6 +33,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     pref: PreferenceData<Boolean>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -48,6 +49,13 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
         val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
+            modifier = modifier
+                .toggleable(
+                    value = prefValue,
+                    enabled = isEnabled,
+                    role = Role.Switch,
+                    onValueChange = { pref.set(it) }
+                ),
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
             secondaryText = when {
@@ -63,13 +71,6 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                     enabled = isEnabled
                 )
             },
-            modifier = Modifier
-                .toggleable(
-                    value = prefValue,
-                    enabled = isEnabled,
-                    role = Role.Switch,
-                    onValueChange = { pref.set(it) }
-                ),
             enabled = isEnabled,
         )
     }

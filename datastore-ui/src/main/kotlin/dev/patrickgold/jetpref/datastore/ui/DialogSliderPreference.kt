@@ -48,6 +48,7 @@ import kotlin.math.roundToLong
 @Composable
 internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<V>,
+    modifier: Modifier,
     @DrawableRes iconId: Int?,
     iconSpaceReserved: Boolean,
     title: String,
@@ -69,10 +70,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
         val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = title,
-            secondaryText = summary.formatValue(prefValue),
-            modifier = Modifier
+            modifier = modifier
                 .clickable(
                     enabled = isEnabled,
                     role = Role.Button,
@@ -81,6 +79,9 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                         isDialogOpen.value = true
                     }
                 ),
+            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            text = title,
+            secondaryText = summary.formatValue(prefValue),
             enabled = isEnabled,
         )
         if (isDialogOpen.value) {
@@ -133,6 +134,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
 internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
+    modifier: Modifier,
     @DrawableRes iconId: Int?,
     iconSpaceReserved: Boolean,
     title: String,
@@ -158,10 +160,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
         val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
         JetPrefListItem(
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
-            text = title,
-            secondaryText = summary.formatValue(primaryPrefValue, secondaryPrefValue),
-            modifier = Modifier
+            modifier = modifier
                 .clickable(
                     enabled = isEnabled,
                     role = Role.Button,
@@ -171,6 +170,9 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                         isDialogOpen.value = true
                     }
                 ),
+            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            text = title,
+            secondaryText = summary.formatValue(primaryPrefValue, secondaryPrefValue),
             enabled = isEnabled,
         )
         if (isDialogOpen.value) {
@@ -252,6 +254,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Int>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -265,7 +268,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
+        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
         try {
@@ -281,6 +284,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Int>,
     secondaryPref: PreferenceData<Int>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -296,7 +300,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
+        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
@@ -312,6 +316,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Long>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -325,7 +330,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
+        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
         try {
@@ -341,6 +346,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Long>,
     secondaryPref: PreferenceData<Long>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -356,7 +362,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
+        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) {
@@ -372,6 +378,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Double>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -385,7 +392,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
+        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it.toDouble() }
 }
@@ -395,6 +402,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Double>,
     secondaryPref: PreferenceData<Double>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -410,7 +418,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
+        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it.toDouble() }
@@ -420,6 +428,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     ref: PreferenceData<Float>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -433,7 +442,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, iconId, iconSpaceReserved, title, summary, unit, min, max,
+        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it }
 }
@@ -443,6 +452,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Float>,
     secondaryPref: PreferenceData<Float>,
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
@@ -458,7 +468,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, iconId, iconSpaceReserved, title,
+        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
         primaryLabel, secondaryLabel, summary, unit, min, max,
         stepIncrement, dialogStrings, enabledIf, visibleIf
     ) { it }
