@@ -19,8 +19,6 @@ package dev.patrickgold.jetpref.datastore.ui
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
@@ -51,17 +49,12 @@ class PreferenceUiScope<T : PreferenceModel>(
 @Composable
 fun <T : PreferenceModel> PreferenceLayout(
     cachedPrefModel: CachedPreferenceModel<T>,
-    scrollable: Boolean = true,
+    modifier: Modifier = Modifier,
     iconSpaceReserved: Boolean = true,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     content: PreferenceUiContent<T>,
 ) {
-    val modifier = if (scrollable) {
-        Modifier.verticalScroll(rememberScrollState())
-    } else {
-        Modifier
-    }
     Column(modifier = modifier) {
         val prefModel by cachedPrefModel
         val preferenceScope = PreferenceUiScope(
