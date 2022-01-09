@@ -19,6 +19,8 @@ package dev.patrickgold.jetpref.datastore.ui
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
@@ -42,6 +44,8 @@ typealias PreferenceUiContent<T> = @Composable @PreferenceUiScopeDsl PreferenceU
  * Preference UI scope which allows access to the current datastore model.
  *
  * @property prefs The current datastore model.
+ *
+ * @since 0.1.0
  */
 class PreferenceUiScope<T : PreferenceModel>(
     val prefs: T,
@@ -90,6 +94,43 @@ fun <T : PreferenceModel> PreferenceLayout(
 
         content(preferenceScope)
     }
+}
+
+/**
+ * Material preference layout which allows for easy access to the preference datastore.
+ * All preference composables within this layout will make use of the provided datastore
+ * automatically. Additionally this layout also provides a default scroll modifier.
+ *
+ * @param cachedPrefModel The cached preference datastore model of your app.
+ * @param modifier Modifier to be applied to this layout.
+ * @param iconSpaceReserved Global setting if all sub-preference composables should reserve
+ *  an additional space if no icon is specified. Can be overridden for each individual preference
+ *  composable.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference layout
+ *  should be enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference layout
+ *  should be visible (true) or hidden (false).
+ * @param content The content of this preference layout.
+ *
+ * @since 0.1.0
+ */
+@Composable
+fun <T : PreferenceModel> ScrollablePreferenceLayout(
+    cachedPrefModel: CachedPreferenceModel<T>,
+    modifier: Modifier = Modifier,
+    iconSpaceReserved: Boolean = true,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+    content: PreferenceUiContent<T>,
+) {
+    PreferenceLayout(
+        cachedPrefModel = cachedPrefModel,
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        iconSpaceReserved = iconSpaceReserved,
+        enabledIf = enabledIf,
+        visibleIf = visibleIf,
+        content = content,
+    )
 }
 
 /**

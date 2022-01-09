@@ -21,7 +21,7 @@ import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
-import dev.patrickgold.jetpref.datastore.ui.PreferenceLayout
+import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.example.R
@@ -30,7 +30,7 @@ import dev.patrickgold.jetpref.example.examplePreferenceModel
 
 @OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
-fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
+fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     ListPreference(
         prefs.theme,
         title = "Theme",
