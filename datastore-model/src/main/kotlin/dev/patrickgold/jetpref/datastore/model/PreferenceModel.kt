@@ -196,7 +196,9 @@ abstract class PreferenceModel(val name: String) {
 
     private fun <V : Any> PreferenceData<V>.serialize(): String? {
         if (type.isInvalid() || !type.isPrimitive()) return null
-        val rawValue = getOrNull()?.let { serializer.serialize(it) } ?: return null
+        val rawValue = (if (JetPref.encodeDefaultValues) get() else getOrNull())?.let {
+            serializer.serialize(it)
+        } ?: return null
         val sb = StringBuilder()
         sb.append(type.id)
         sb.append(JetPref.DELIMITER)

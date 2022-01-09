@@ -24,50 +24,84 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
+/**
+ * Global JetPref object bundling the global config, default values and model caching.
+ */
 object JetPref {
-    private const val DEFAULT_SAVE_INTERVAL_MS: Long = 5_000
+    object Defaults {
+        const val SaveIntervalMs: Long = 1_000
+        const val EncodeDefaultValues: Boolean = false
+        val ErrorLogProcessor: (Throwable) -> Unit = {
+            Log.e("JetPref", it.message ?: "(no message provided)")
+        }
+    }
+
     internal const val DELIMITER = ";"
 
     const val JETPREF_DIR_NAME = "jetpref_datastore"
     const val JETPREF_FILE_EXT = "jetpref"
 
-    const val LOG_TAG = "JetPref"
+    private val preferenceModelCache: HashMap<KClass<*>, CachedPreferenceModel<*>> = hashMapOf()
 
-    private val preferenceModelCache: MutableList<CachedPreferenceModel<*>> = mutableListOf()
-    internal var saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS
+    internal var saveIntervalMs: Long = Defaults.SaveIntervalMs
+    internal var encodeDefaultValues: Boolean = Defaults.EncodeDefaultValues
+    internal var errorLogProcessor: (Throwable) -> Unit = Defaults.ErrorLogProcessor
 
-    fun init(saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS) {
+    /**
+     * Initialize the global JetPref config, which is applied to **all** datastore
+     * models across the application.
+     *
+     * @param saveIntervalMs The interval in which the datastore will persist its state.
+     *  Persistence will only be done if at least one preference data value has changed.
+     *  Defaults to 1000 milliseconds.
+     * @param encodeDefaultValues Specifies if default values should also be written to
+     *  the datastore file. Defaults to false.
+     * @param errorLogProcessor The error log processor which is responsible to handle
+     *  errors. By default errors are logged with Android LogCat. You can either pass
+     *  a processor which logs the error message to a custom logger or just pass an empty
+     *  logger to suppress all error messages.
+     */
+    fun configure(
+        saveIntervalMs: Long = Defaults.SaveIntervalMs,
+        encodeDefaultValues: Boolean = Defaults.EncodeDefaultValues,
+        errorLogProcessor: (Throwable) -> Unit = Defaults.ErrorLogProcessor,
+    ) {
         this.saveIntervalMs = saveIntervalMs
+        this.encodeDefaultValues = encodeDefaultValues
+        this.errorLogProcessor = errorLogProcessor
     }
 
+    /**
+     * Gets or creates a preference model and returns a [CachedPreferenceModel] wrapper.
+     * This method runs synchronized on the model cache and may block your thread for a
+     * short period of time.
+     *
+     * @param kClass The class of the preference model to get, is is used as a key for the
+     *  underlying cache.
+     * @param factory A factory function to create a new instance of the model in case it
+     *  does not exist yet.
+     */
     @Suppress("unchecked_cast")
     fun <T : PreferenceModel> getOrCreatePreferenceModel(
         kClass: KClass<T>,
-        factory: () -> T
+        factory: () -> T,
     ): CachedPreferenceModel<T> = synchronized(preferenceModelCache) {
-        val cachedEntry = preferenceModelCache.find { it.kClass == kClass }
-        if (cachedEntry != null) {
-            return cachedEntry as CachedPreferenceModel<T>
-        }
-        val newModel = factory()
-        val newCacheEntry = CachedPreferenceModel(kClass, newModel)
-        preferenceModelCache.add(newCacheEntry)
-        return@synchronized newCacheEntry
+        return preferenceModelCache.getOrPut(kClass) {
+            CachedPreferenceModel(factory())
+        } as CachedPreferenceModel<T>
     }
 }
 
-data class CachedPreferenceModel<T : PreferenceModel>(
-    val kClass: KClass<T>,
-    val preferenceModel: T
+/**
+ * Cached preference model wrapper. Allows to act as a delegate.
+ */
+class CachedPreferenceModel<T : PreferenceModel>(
+    private val preferenceModel: T,
 ) : ReadOnlyProperty<Any?, T> {
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         return preferenceModel
     }
-}
-
-fun <T : PreferenceModel> preferenceModel(kClass: KClass<T>, factory: () -> T): CachedPreferenceModel<T> {
-    return JetPref.getOrCreatePreferenceModel(kClass, factory)
 }
 
 /**
@@ -102,6 +136,6 @@ internal inline fun runSafely(block: () -> Unit) {
     try {
         block()
     } catch (e: Throwable) {
-        Log.e(JetPref.LOG_TAG, e.localizedMessage ?: "(no message provided)")
+        JetPref.errorLogProcessor(e)
     }
 }

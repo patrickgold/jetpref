@@ -3,8 +3,8 @@ package dev.patrickgold.jetpref.example
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import dev.patrickgold.jetpref.datastore.JetPref
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import dev.patrickgold.jetpref.datastore.preferenceModel
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import java.time.LocalTime
 
@@ -34,7 +34,7 @@ enum class Theme {
 
 // Defining a getter function for easy retrieval of the AppPrefs model.
 // You can name this how you want, the convention is <projectName>PreferenceModel
-fun examplePreferenceModel() = preferenceModel(AppPrefs::class, ::AppPrefs)
+fun examplePreferenceModel() = JetPref.getOrCreatePreferenceModel(AppPrefs::class, ::AppPrefs)
 
 // Defining a preference model for our app prefs
 // The name we give here is the file name of the preferences and is saved
