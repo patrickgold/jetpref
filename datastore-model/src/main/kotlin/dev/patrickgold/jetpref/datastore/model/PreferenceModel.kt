@@ -49,12 +49,12 @@ abstract class PreferenceModel(val name: String) {
 
     private val registryGuard = Mutex()
     private val registry: MutableList<PreferenceData<*>> = mutableListOf()
+    private var persistReq: AtomicBoolean = AtomicBoolean(false)
+
     val datastoreReadyStatus = boolean(
         key = "${INTERNAL_PREFIX}_datastore_ready_status",
         default = false,
     )
-    private var persistReq: AtomicBoolean = AtomicBoolean(false)
-
     var datastorePersistenceHandler: PersistenceHandler? = null
         private set
 

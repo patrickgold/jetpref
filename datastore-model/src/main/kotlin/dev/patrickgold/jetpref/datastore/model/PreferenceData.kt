@@ -34,18 +34,24 @@ import java.util.*
  * and allows to observe value changes. The default implementation and
  * behavior internally is very similar to Android's LiveData, but this
  * interface allows for any kind of custom implementation.
+ *
+ * @since 0.1.0
  */
 interface PreferenceData<V : Any> {
     /**
      * The type of this preference, useful especially in the serialization
      * process. If the preference type attribute is invalid, this preference
      * data will not work correctly.
+     *
+     * @since 0.1.0
      */
     val type: PreferenceType
 
     /**
      * The serializer for this preference data, used by the serialization
      * process to persist the cached preferences onto the device storage.
+     *
+     * @since 0.1.0
      */
     val serializer: PreferenceSerializer<V>
 
@@ -57,12 +63,16 @@ interface PreferenceData<V : Any> {
      *  - `0-9` (not at the start though)
      *  - `_`
      *  - `-` (not at the start or end though)
+     *
+     * @since 0.1.0
      */
     @PreferenceKey val key: String
 
     /**
      * The default value for this preference data. Is used if no valid persisted
      * value is existent or when resetting this preference data.
+     *
+     * @since 0.1.0
      */
     val default: V
 
@@ -70,6 +80,8 @@ interface PreferenceData<V : Any> {
      * Gets the cached value of this preference data.
      *
      * @return The value of this preference data or [default].
+     *
+     * @since 0.1.0
      */
     fun get(): V
 
@@ -77,6 +89,8 @@ interface PreferenceData<V : Any> {
      * Gets the cached value of this preference data.
      *
      * @return The value of this preference data or null.
+     *
+     * @since 0.1.0
      */
     fun getOrNull(): V?
 
@@ -86,6 +100,8 @@ interface PreferenceData<V : Any> {
      * @param value The new value to set for this preference data.
      * @param requestSync If true the [PreferenceModel] is requested to
      *  persist the cached values to storage.
+     *
+     * @since 0.1.0
      */
     fun set(value: V, requestSync: Boolean = true)
 
@@ -94,6 +110,8 @@ interface PreferenceData<V : Any> {
      *
      * @param requestSync If true the [PreferenceModel] is requested to
      *  persist the cached values to storage.
+     *
+     * @since 0.1.0
      */
     fun reset(requestSync: Boolean = true)
 
@@ -102,6 +120,8 @@ interface PreferenceData<V : Any> {
      * of their active state.
      *
      * @return True if at least one observer is attached, false otherwise.
+     *
+     * @since 0.1.0
      */
     fun hasObservers(): Boolean
 
@@ -112,6 +132,8 @@ interface PreferenceData<V : Any> {
      *
      * @param owner The owner lifecycle of the observer to be added.
      * @param observer The observer which will receive new values.
+     *
+     * @since 0.1.0
      */
     fun observe(owner: LifecycleOwner, observer: PreferenceObserver<V>)
 
@@ -120,6 +142,8 @@ interface PreferenceData<V : Any> {
      * be called. To remove the observer, call [removeObserver].
      *
      * @param observer The observer which will receive new values.
+     *
+     * @since 0.1.0
      */
     fun observeForever(observer: PreferenceObserver<V>)
 
@@ -128,11 +152,15 @@ interface PreferenceData<V : Any> {
      * if the observer is not attached to this preference data.
      *
      * @param observer The observer to remove.
+     *
+     * @since 0.1.0
      */
     fun removeObserver(observer: PreferenceObserver<V>)
 
     /**
      * Removes all observers from this preference data which belong to [owner].
+     *
+     * @since 0.1.0
      */
     fun removeObservers(owner: LifecycleOwner)
 }

@@ -17,7 +17,7 @@ class ExampleApplication : Application() {
             encodeDefaultValues = true,
         )
 
-        // Initialize your datastore here
+        // Initialize your datastore here (required)
         prefs.initializeBlocking(this)
     }
 }

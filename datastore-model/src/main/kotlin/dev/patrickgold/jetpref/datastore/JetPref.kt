@@ -26,6 +26,8 @@ import kotlin.reflect.KProperty
 
 /**
  * Global JetPref object bundling the global config, default values and model caching.
+ *
+ * @since 0.1.0
  */
 object JetPref {
     object Defaults {
@@ -60,6 +62,8 @@ object JetPref {
      *  errors. By default errors are logged with Android LogCat. You can either pass
      *  a processor which logs the error message to a custom logger or just pass an empty
      *  logger to suppress all error messages.
+     *
+     * @since 0.1.0
      */
     fun configure(
         saveIntervalMs: Long = Defaults.SaveIntervalMs,
@@ -80,6 +84,8 @@ object JetPref {
      *  underlying cache.
      * @param factory A factory function to create a new instance of the model in case it
      *  does not exist yet.
+     *
+     * @since 0.1.0
      */
     @Suppress("unchecked_cast")
     fun <T : PreferenceModel> getOrCreatePreferenceModel(
@@ -94,6 +100,8 @@ object JetPref {
 
 /**
  * Cached preference model wrapper. Allows to act as a delegate.
+ *
+ * @since 0.1.0
  */
 class CachedPreferenceModel<T : PreferenceModel>(
     private val preferenceModel: T,
@@ -110,6 +118,8 @@ class CachedPreferenceModel<T : PreferenceModel>(
  * so only relative paths should be stored.
  *
  * @return The path of the directory holding JetPref datastore files.
+ *
+ * @since 0.1.0
  */
 val Context.jetprefDatastoreDir: File
     get() = File(this.filesDir.parent, JetPref.JETPREF_DIR_NAME)
@@ -120,6 +130,8 @@ val Context.jetprefDatastoreDir: File
  * should at no point be preserved in automatic backups.
  *
  * @return The path of the directory holding temporary JetPref datastore files.
+ *
+ * @since 0.1.0
  */
 val Context.jetprefTempDir: File
     get() = File(this.cacheDir, JetPref.JETPREF_DIR_NAME)
