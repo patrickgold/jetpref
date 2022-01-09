@@ -17,8 +17,6 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -28,7 +26,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.time.LocalTime
 import java.util.*
 
 /**
@@ -452,34 +449,6 @@ internal class EnumPreferenceData<V : Enum<V>>(
 
         override fun deserialize(value: String): V? {
             return stringToEnum(value.uppercase())
-        }
-    }
-}
-
-/**
- * Requires library desugaring:
- *  https://developer.android.com/studio/write/java8-support#library-desugaring
- */
-@RequiresApi(Build.VERSION_CODES.O)
-internal class LocalTimePreferenceData(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: LocalTime,
-) : AbstractPreferenceData<LocalTime>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.string()
-
-    override val serializer: PreferenceSerializer<LocalTime> = object : PreferenceSerializer<LocalTime> {
-        override fun serialize(value: LocalTime): String {
-            return value.toString()
-        }
-
-        override fun deserialize(value: String): LocalTime? {
-            return LocalTime.parse(value)
         }
     }
 }

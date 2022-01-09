@@ -47,10 +47,6 @@ fun HomeScreen() = PreferenceLayout(examplePreferenceModel()) {
         max = 100,
         stepIncrement = 1,
     )
-    //LocalTimePickerPreference(
-    //    prefs.exampleTime,
-    //    title = "Example time",
-    //)
     SwitchPreference(
         prefs.showExampleGroup,
         iconId = R.drawable.ic_question_answer_black_24dp,
