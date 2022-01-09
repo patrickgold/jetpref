@@ -8,6 +8,6 @@ class ExampleApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        prefs.initializeForContext(this)
+        prefs.initializeBlocking(this)
     }
 }

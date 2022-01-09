@@ -17,69 +17,27 @@
 package dev.patrickgold.jetpref.datastore
 
 import android.content.Context
+import android.util.Log
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import java.io.BufferedReader
-import java.io.BufferedWriter
 import java.io.File
-import java.io.FileNotFoundException
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-object JetPrefManager {
+object JetPref {
     private const val DEFAULT_SAVE_INTERVAL_MS: Long = 5_000
     internal const val DELIMITER = ";"
 
     const val JETPREF_DIR_NAME = "jetpref_datastore"
     const val JETPREF_FILE_EXT = "jetpref"
 
+    const val LOG_TAG = "JetPref"
+
     private val preferenceModelCache: MutableList<CachedPreferenceModel<*>> = mutableListOf()
     internal var saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS
 
     fun init(saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS) {
         this.saveIntervalMs = saveIntervalMs
-    }
-
-    internal fun setupJetPrefDir(context: Context): Boolean {
-        val dir = context.jetprefDatastoreDir
-        return try {
-            dir.mkdirs()
-            true
-        } catch (e: SecurityException) {
-            android.util.Log.e("JetPref", "Cannot initialize datastore directory at '$dir'! Reason: ${e.message}")
-            false
-        } catch (e: FileNotFoundException) {
-            android.util.Log.e("JetPref", "Cannot initialize datastore directory at '$dir'! Reason: ${e.message}")
-            false
-        }
-    }
-
-    internal inline fun loadPrefFile(context: Context, name: String, block: (BufferedReader) -> Unit) {
-        if (!setupJetPrefDir(context)) return
-        val path = context.jetprefPath(name)
-        try {
-            path.bufferedReader().use { block(it) }
-        } catch (e: SecurityException) {
-            android.util.Log.e("JetPref", "Cannot read from $path! Reason: ${e.message}")
-        } catch (e: FileNotFoundException) {
-            android.util.Log.e("JetPref", "Cannot read from $path! Reason: ${e.message}")
-        }
-    }
-
-    internal inline fun savePrefFile(context: Context, name: String, block: (BufferedWriter) -> Unit) {
-        if (!setupJetPrefDir(context)) return
-        val path = context.jetprefPath(name)
-        try {
-            path.bufferedWriter().use { block(it) }
-        } catch (e: SecurityException) {
-            android.util.Log.e("JetPref", "Cannot write to $path! Reason: ${e.message}")
-        } catch (e: FileNotFoundException) {
-            android.util.Log.e("JetPref", "Cannot write to $path! Reason: ${e.message}")
-        }
-    }
-
-    private fun Context.jetprefPath(name: String): File {
-        return File(this.jetprefDatastoreDir, "$name.$JETPREF_FILE_EXT")
     }
 
     @Suppress("unchecked_cast")
@@ -109,7 +67,7 @@ data class CachedPreferenceModel<T : PreferenceModel>(
 }
 
 fun <T : PreferenceModel> preferenceModel(kClass: KClass<T>, factory: () -> T): CachedPreferenceModel<T> {
-    return JetPrefManager.getOrCreatePreferenceModel(kClass, factory)
+    return JetPref.getOrCreatePreferenceModel(kClass, factory)
 }
 
 /**
@@ -120,7 +78,7 @@ fun <T : PreferenceModel> preferenceModel(kClass: KClass<T>, factory: () -> T): 
  * @return The path of the directory holding JetPref datastore files.
  */
 val Context.jetprefDatastoreDir: File
-    get() = File(this.filesDir.parent, JetPrefManager.JETPREF_DIR_NAME)
+    get() = File(this.filesDir.parent, JetPref.JETPREF_DIR_NAME)
 
 /**
  * Returns the absolute path to the directory on the filesystem where temporary preference
@@ -130,5 +88,20 @@ val Context.jetprefDatastoreDir: File
  * @return The path of the directory holding temporary JetPref datastore files.
  */
 val Context.jetprefTempDir: File
-    get() = File(this.cacheDir, JetPrefManager.JETPREF_DIR_NAME)
+    get() = File(this.cacheDir, JetPref.JETPREF_DIR_NAME)
 
+internal fun File.jetprefDatastoreFile(name: String): File {
+    return File(this, "$name.${JetPref.JETPREF_FILE_EXT}")
+}
+
+internal fun File.jetprefTempFile(name: String): File {
+    return File(this, "$name.${JetPref.JETPREF_FILE_EXT}.tmp")
+}
+
+internal inline fun runSafely(block: () -> Unit) {
+    try {
+        block()
+    } catch (e: Throwable) {
+        Log.e(JetPref.LOG_TAG, e.localizedMessage ?: "(no message provided)")
+    }
+}

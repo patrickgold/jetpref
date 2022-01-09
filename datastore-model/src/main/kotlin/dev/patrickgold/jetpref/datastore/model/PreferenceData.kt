@@ -153,7 +153,7 @@ internal abstract class AbstractPreferenceData<V : Any>(private val model: Prefe
     private val observers: WeakHashMap<PreferenceObserver<V>, ObserverWrapper> = WeakHashMap()
 
     private val dispatchChannel: Channel<ObserverWrapper?> = Channel(Channel.UNLIMITED)
-    private val dispatcher = model.scope.launch {
+    private val dispatcher = model.mainScope.launch {
         for (wrapper in dispatchChannel) {
             if (wrapper != null) {
                 considerNotify(wrapper)
@@ -171,7 +171,7 @@ internal abstract class AbstractPreferenceData<V : Any>(private val model: Prefe
     final override fun getOrNull(): V? = cachedValue
 
     final override fun set(value: V, requestSync: Boolean) {
-        model.scope.launch {
+        model.mainScope.launch {
             cacheGuard.withLock {
                 if (cachedValue != value) {
                     cachedValue = value
@@ -186,7 +186,7 @@ internal abstract class AbstractPreferenceData<V : Any>(private val model: Prefe
     }
 
     final override fun reset(requestSync: Boolean) {
-        model.scope.launch {
+        model.mainScope.launch {
             cacheGuard.withLock {
                 if (cachedValue != null) {
                     cachedValue = null

@@ -19,12 +19,17 @@ package dev.patrickgold.jetpref.datastore.model
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import dev.patrickgold.jetpref.datastore.JetPrefManager
+import dev.patrickgold.jetpref.datastore.JetPref
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
+import dev.patrickgold.jetpref.datastore.jetprefDatastoreDir
+import dev.patrickgold.jetpref.datastore.jetprefDatastoreFile
+import dev.patrickgold.jetpref.datastore.jetprefTempDir
+import dev.patrickgold.jetpref.datastore.jetprefTempFile
+import dev.patrickgold.jetpref.datastore.runSafely
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -32,29 +37,29 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.lang.ref.WeakReference
+import java.io.File
 import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicBoolean
 
-@Suppress("SameParameterValue")
+@Suppress("SameParameterValue", "MemberVisibilityCanBePrivate")
 abstract class PreferenceModel(val name: String) {
     companion object {
         private const val INTERNAL_PREFIX = "__internal"
     }
 
-    internal val scope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    internal val mainScope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    internal val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private var appContext = WeakReference<Context?>(null)
     private val registryGuard = Mutex()
     private val registry: MutableList<PreferenceData<*>> = mutableListOf()
     val datastoreReadyStatus = boolean(
         key = "${INTERNAL_PREFIX}_datastore_ready_status",
         default = false,
     )
-
     private var persistReq: AtomicBoolean = AtomicBoolean(false)
-    private var persistJob: Job? = null
-    private var setupJob: Job? = null
+
+    var datastorePersistenceHandler: PersistenceHandler? = null
+        private set
 
     init {
         Validator.validateFileName(name)
@@ -63,7 +68,7 @@ abstract class PreferenceModel(val name: String) {
 
     internal fun notifyValueChanged() = persistReq.set(true)
 
-    private fun registryAdd(prefData: PreferenceData<*>) = scope.launch {
+    private fun registryAdd(prefData: PreferenceData<*>) = ioScope.launch {
         if (!prefData.key.startsWith(INTERNAL_PREFIX)) {
             registryGuard.withLock { registry.add(prefData) }
         }
@@ -179,69 +184,14 @@ abstract class PreferenceModel(val name: String) {
         return prefData
     }
 
-    fun forceSyncToDisk() = runBlocking {
-        syncToDisk()
-    }
-
-    private suspend fun syncToDisk() = withContext(Dispatchers.IO) {
-        val context = appContext.get() ?: return@withContext
-        registryGuard.withLock {
-            JetPrefManager.savePrefFile(context, name) {
-                for (preferenceData in registry) {
-                    val serializedData = preferenceData.serialize() ?: continue
-                    it.appendLine(serializedData)
-                }
-            }
-        }
-    }
-
-    fun initializeForContext(context: Context) {
-        persistJob?.cancel()
-        setupJob?.cancel()
+    suspend fun initialize(context: Context) = registryGuard.withLock {
+        runSafely { datastorePersistenceHandler?.cancelJobsAndJoin() }
         persistReq.set(false)
-        appContext = WeakReference(context)
-        setupJob = scope.setupModel(context)
+        runSafely { datastorePersistenceHandler = PersistenceHandler(context) }
     }
 
-    private fun CoroutineScope.setupModel(context: Context) = launch(Dispatchers.IO) {
-        datastoreReadyStatus.set(false, requestSync = false)
-        JetPrefManager.loadPrefFile(context, name) {
-            registryGuard.withLock {
-                for (prefData in registry) {
-                    prefData.reset(requestSync = false)
-                }
-                //android.util.Log.i("JetPref", registry.toString())
-                for (line in it.lineSequence()) launch line@ {
-                    if (line.isBlank()) return@line
-                    val del1 = line.indexOf(JetPrefManager.DELIMITER)
-                    if (del1 < 0) return@line
-                    val type = PreferenceType.from(line.substring(0, del1))
-                    val del2 = line.indexOf(JetPrefManager.DELIMITER, del1 + 1)
-                    if (del2 < 0) return@line
-                    val key = line.substring(del1 + 1, del2)
-                    val prefData = registry.find { it.key == key }
-                    if (prefData != null) {
-                        if (prefData.type.id != type.id) {
-                            return@line
-                        }
-                        prefData.deserialize(
-                            if (del2 + 1 == line.length) { "" } else { line.substring(del2 + 1) }
-                        )
-                    }
-                }
-            }
-        }
-        datastoreReadyStatus.set(true, requestSync = false)
-        persistJob = launchSyncJob()
-    }
-
-    private fun CoroutineScope.launchSyncJob() = launch(Dispatchers.IO) {
-        while (isActive) {
-            if (persistReq.getAndSet(false)) {
-                syncToDisk()
-            }
-            delay(JetPrefManager.saveIntervalMs)
-        }
+    fun initializeBlocking(context: Context) = runBlocking {
+        initialize(context)
     }
 
     private fun <V : Any> PreferenceData<V>.serialize(): String? {
@@ -249,9 +199,9 @@ abstract class PreferenceModel(val name: String) {
         val rawValue = getOrNull()?.let { serializer.serialize(it) } ?: return null
         val sb = StringBuilder()
         sb.append(type.id)
-        sb.append(JetPrefManager.DELIMITER)
+        sb.append(JetPref.DELIMITER)
         sb.append(key)
-        sb.append(JetPrefManager.DELIMITER)
+        sb.append(JetPref.DELIMITER)
         if (type.isString()) {
             sb.append(StringEncoder.encode(rawValue))
         } else {
@@ -269,6 +219,82 @@ abstract class PreferenceModel(val name: String) {
         }
         if (value != null) {
             set(value, requestSync = false)
+        }
+    }
+
+    inner class PersistenceHandler(context: Context) {
+        private val datastoreDir: File = context.jetprefDatastoreDir
+        private val datastoreFile = datastoreDir.jetprefDatastoreFile(name)
+        private val tempDir: File = context.jetprefTempDir
+        private val tempFile = tempDir.jetprefTempFile(name)
+
+        private val ioJob = ioScope.launch(Dispatchers.IO) {
+            runSafely { loadPrefs(datastoreFile, reset = true) }
+            while (isActive) {
+                if (persistReq.getAndSet(false)) {
+                    runSafely { persistPrefs() }
+                }
+                delay(JetPref.saveIntervalMs)
+            }
+        }
+
+        internal suspend fun cancelJobsAndJoin() {
+            ioJob.cancelAndJoin()
+        }
+
+        private fun mkdirs() {
+            datastoreDir.mkdirs()
+            tempDir.mkdirs()
+        }
+
+        suspend fun loadPrefs(file: File, reset: Boolean) = withContext(Dispatchers.IO) {
+            registryGuard.withLock {
+                mkdirs()
+                datastoreReadyStatus.set(false, requestSync = false)
+                if (reset) {
+                    for (prefData in registry) {
+                        prefData.reset(requestSync = false)
+                    }
+                }
+                file.bufferedReader().useLines { lines ->
+                    for (line in lines) ioScope.launch line@{
+                        if (line.isBlank()) return@line
+                        val del1 = line.indexOf(JetPref.DELIMITER)
+                        if (del1 < 0) return@line
+                        val type = PreferenceType.from(line.substring(0, del1))
+                        val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
+                        if (del2 < 0) return@line
+                        val key = line.substring(del1 + 1, del2)
+                        val prefData = registry.find { it.key == key }
+                        if (prefData != null) {
+                            if (prefData.type.id != type.id) {
+                                return@line
+                            }
+                            prefData.deserialize(
+                                if (del2 + 1 == line.length) {
+                                    ""
+                                } else {
+                                    line.substring(del2 + 1)
+                                }
+                            )
+                        }
+                    }
+                }
+                datastoreReadyStatus.set(true, requestSync = false)
+            }
+        }
+
+        suspend fun persistPrefs() = withContext(Dispatchers.IO) {
+            registryGuard.withLock {
+                mkdirs()
+                tempFile.bufferedWriter().use { writer ->
+                    for (prefData in registry) {
+                        val serializedData = prefData.serialize() ?: continue
+                        writer.appendLine(serializedData)
+                    }
+                }
+                tempFile.renameTo(datastoreFile)
+            }
         }
     }
 }
