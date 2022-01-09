@@ -27,23 +27,21 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
 object JetPrefManager {
-    private const val JETPREF_DIR_NAME = "jetpref_datastore"
-    private const val JETPREF_EXT = "jetpref"
-
+    private const val DEFAULT_SAVE_INTERVAL_MS: Long = 5_000
     internal const val DELIMITER = ";"
 
-    private const val DEFAULT_SAVE_INTERVAL_MS: Long = 5_000
-
-    internal var saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS
+    const val JETPREF_DIR_NAME = "jetpref_datastore"
+    const val JETPREF_FILE_EXT = "jetpref"
 
     private val preferenceModelCache: MutableList<CachedPreferenceModel<*>> = mutableListOf()
+    internal var saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS
 
     fun init(saveIntervalMs: Long = DEFAULT_SAVE_INTERVAL_MS) {
         this.saveIntervalMs = saveIntervalMs
     }
 
     internal fun setupJetPrefDir(context: Context): Boolean {
-        val dir = context.jetPrefDir
+        val dir = context.jetprefDatastoreDir
         return try {
             dir.mkdirs()
             true
@@ -58,7 +56,7 @@ object JetPrefManager {
 
     internal inline fun loadPrefFile(context: Context, name: String, block: (BufferedReader) -> Unit) {
         if (!setupJetPrefDir(context)) return
-        val path = context.jetPrefPath(name)
+        val path = context.jetprefPath(name)
         try {
             path.bufferedReader().use { block(it) }
         } catch (e: SecurityException) {
@@ -70,7 +68,7 @@ object JetPrefManager {
 
     internal inline fun savePrefFile(context: Context, name: String, block: (BufferedWriter) -> Unit) {
         if (!setupJetPrefDir(context)) return
-        val path = context.jetPrefPath(name)
+        val path = context.jetprefPath(name)
         try {
             path.bufferedWriter().use { block(it) }
         } catch (e: SecurityException) {
@@ -80,11 +78,8 @@ object JetPrefManager {
         }
     }
 
-    private val Context.jetPrefDir: File
-        get() = File(this.filesDir.parent, JETPREF_DIR_NAME)
-
-    private fun Context.jetPrefPath(name: String): File {
-        return File(this.jetPrefDir, "$name.$JETPREF_EXT")
+    private fun Context.jetprefPath(name: String): File {
+        return File(this.jetprefDatastoreDir, "$name.$JETPREF_FILE_EXT")
     }
 
     @Suppress("unchecked_cast")
@@ -116,4 +111,24 @@ data class CachedPreferenceModel<T : PreferenceModel>(
 fun <T : PreferenceModel> preferenceModel(kClass: KClass<T>, factory: () -> T): CachedPreferenceModel<T> {
     return JetPrefManager.getOrCreatePreferenceModel(kClass, factory)
 }
+
+/**
+ * Returns the absolute path to the directory on the filesystem where preference datastore
+ * files are created and used by JetPref are stored. Note that this path may change over time,
+ * so only relative paths should be stored.
+ *
+ * @return The path of the directory holding JetPref datastore files.
+ */
+val Context.jetprefDatastoreDir: File
+    get() = File(this.filesDir.parent, JetPrefManager.JETPREF_DIR_NAME)
+
+/**
+ * Returns the absolute path to the directory on the filesystem where temporary preference
+ * datastore files of JetPref are stored. Note that files in this path can be incomplete and
+ * should at no point be preserved in automatic backups.
+ *
+ * @return The path of the directory holding temporary JetPref datastore files.
+ */
+val Context.jetprefTempDir: File
+    get() = File(this.cacheDir, JetPrefManager.JETPREF_DIR_NAME)
 
