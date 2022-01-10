@@ -36,7 +36,7 @@ implementation("dev.patrickgold.jetpref:jetpref-material-ui:$version")
 ```
 
 This library is experimental, there's currently limited documentation. It is best
-if you look at the example app or the source code and see how the library is used,
+if you look at the [example app](https://github.com/patrickgold/jetpref/tree/main/example/src/main/kotlin/dev/patrickgold/jetpref/example) or the source code and see how the library is used,
 but especially for the `jetpref-material-ui` artifact there's already good documentation
 available in the source files.
 
@@ -45,7 +45,7 @@ more code is documented and the API stabilizes.
 
 ## License
 ```
-Copyright 2021 Patrick Goldinger
+Copyright 2021-2022 Patrick Goldinger
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
