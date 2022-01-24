@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -52,17 +53,20 @@ import androidx.compose.ui.window.DialogProperties
  * @param title The title of the Dialog which should specify the purpose of the Dialog.
  * @param modifier Modifier to be applied to the layout of the dialog.
  * @param confirmLabel The label of the confirm button of this dialog. Used to control the
- *  visibility of the confirm button. Passing null or a blank string will disable the button,
- *  any other string will enable it.
+ *  visibility of the confirm button. Passing null or a blank string will hide the button,
+ *  any other string will show it.
+ * @param confirmColors The colors to apply to the confirm button, if it is visible.
  * @param onConfirm Action to execute when the confirm button is pressed.
- * @param neutralLabel The label of the neutral button of this dialog. Used to control the
- *  visibility of the neutral button. Passing null or a blank string will disable the button,
- *  any other string will enable it.
- * @param onNeutral Action to execute when the neutral button is pressed.
  * @param dismissLabel The label of the dismiss button of this dialog. Used to control the
- *  visibility of the dismiss button. Passing null or a blank string will disable the button,
- *  any other string will enable it.
+ *  visibility of the dismiss button. Passing null or a blank string will hide the button,
+ *  any other string will show it.
+ * @param dismissColors The colors to apply to the dismiss button, if it is visible.
  * @param onDismiss Action to execute when the dismiss button is pressed.
+ * @param neutralLabel The label of the neutral button of this dialog. Used to control the
+ *  visibility of the neutral button. Passing null or a blank string will hide the button,
+ *  any other string will show it.
+ * @param neutralColors The colors to apply to the neutral button, if it is visible.
+ * @param onNeutral Action to execute when the neutral button is pressed.
  * @param allowOutsideDismissal Specify if a user can dismiss the Dialog by clicking outside
  *  or pressing the back button.
  * @param onOutsideDismissal Action to execute when [allowOutsideDismissal] is true and an
@@ -89,11 +93,14 @@ fun JetPrefAlertDialog(
     title: String,
     modifier: Modifier = Modifier,
     confirmLabel: String? = null,
+    confirmColors: ButtonColors = ButtonDefaults.textButtonColors(),
     onConfirm: () -> Unit = { },
-    neutralLabel: String? = null,
-    onNeutral: () -> Unit = { },
     dismissLabel: String? = null,
+    dismissColors: ButtonColors = ButtonDefaults.textButtonColors(),
     onDismiss: () -> Unit = { },
+    neutralLabel: String? = null,
+    neutralColors: ButtonColors = ButtonDefaults.textButtonColors(),
+    onNeutral: () -> Unit = { },
     allowOutsideDismissal: Boolean = true,
     onOutsideDismissal: () -> Unit = onDismiss,
     trailingIconTitle: @Composable () -> Unit = { },
@@ -144,12 +151,11 @@ fun JetPrefAlertDialog(
                     content()
                 }
                 Row(modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp)) {
-                    val colors = ButtonDefaults.textButtonColors()
                     val elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
                     if (neutralLabel != null && neutralLabel.isNotBlank()) {
                         Button(
                             onClick = onNeutral,
-                            colors = colors,
+                            colors = neutralColors,
                             elevation = elevation,
                         ) {
                             Text(neutralLabel)
@@ -159,7 +165,7 @@ fun JetPrefAlertDialog(
                     if (dismissLabel != null && dismissLabel.isNotBlank()) {
                         Button(
                             onClick = onDismiss,
-                            colors = colors,
+                            colors = dismissColors,
                             elevation = elevation,
                         ) {
                             Text(dismissLabel)
@@ -168,7 +174,7 @@ fun JetPrefAlertDialog(
                     if (confirmLabel != null && confirmLabel.isNotBlank()) {
                         Button(
                             onClick = onConfirm,
-                            colors = colors,
+                            colors = confirmColors,
                             elevation = elevation,
                         ) {
                             Text(confirmLabel)
