@@ -108,7 +108,7 @@ fun JetPrefAlertDialog(
     scrollModifier: Modifier = Modifier.verticalScroll(rememberScrollState()),
     backgroundColor: Color = MaterialTheme.colors.surface,
     contentColor: Color = contentColorFor(backgroundColor),
-    contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
+    contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
     content: @Composable () -> Unit,
 ) {
     Dialog(
@@ -118,7 +118,7 @@ fun JetPrefAlertDialog(
         Surface(
             modifier = modifier
                 .padding(vertical = 16.dp, horizontal = 16.dp)
-                .widthIn(max = 320.dp),
+                .widthIn(max = JetPrefAlertDialogDefaults.MaxDialogWidth),
             shape = MaterialTheme.shapes.medium,
             color = backgroundColor,
             contentColor = contentColor,
@@ -182,4 +182,19 @@ fun JetPrefAlertDialog(
             }
         }
     }
+}
+
+/**
+ * Contains the default values and other useful constants used by [JetPrefAlertDialog].
+ */
+object JetPrefAlertDialogDefaults {
+    /**
+     * The default content padding for [JetPrefAlertDialog].
+     */
+    val ContentPadding = PaddingValues(all = 24.dp)
+
+    /**
+     * The maximum dialog width for [JetPrefAlertDialog].
+     */
+    val MaxDialogWidth = 320.dp
 }
