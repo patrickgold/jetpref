@@ -28,12 +28,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -150,32 +150,30 @@ fun JetPrefAlertDialog(
                 ) {
                     content()
                 }
-                Row(modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp)) {
-                    val elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
+                Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
                     if (neutralLabel != null && neutralLabel.isNotBlank()) {
-                        Button(
+                        TextButton(
                             onClick = onNeutral,
+                            modifier = Modifier.padding(end = 8.dp),
                             colors = neutralColors,
-                            elevation = elevation,
                         ) {
                             Text(neutralLabel)
                         }
                     }
                     Spacer(modifier = Modifier.weight(1.0f))
                     if (dismissLabel != null && dismissLabel.isNotBlank()) {
-                        Button(
+                        TextButton(
                             onClick = onDismiss,
+                            modifier = Modifier.padding(end = 8.dp),
                             colors = dismissColors,
-                            elevation = elevation,
                         ) {
                             Text(dismissLabel)
                         }
                     }
                     if (confirmLabel != null && confirmLabel.isNotBlank()) {
-                        Button(
+                        TextButton(
                             onClick = onConfirm,
                             colors = confirmColors,
-                            elevation = elevation,
                         ) {
                             Text(confirmLabel)
                         }
