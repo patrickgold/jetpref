@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -77,6 +78,7 @@ import androidx.compose.ui.window.DialogProperties
  * @param properties Dialog properties for further customization of this dialog's behavior.
  * @param scrollModifier The scroll modifier to apply to the inner content box. Defaults to
  *  a simple vertical scroll modifier. Pass an empty modifier to disable scrolling entirely.
+ * @param shape The shape of this dialog.
  * @param backgroundColor The background color of this dialog.
  * @param contentColor The content color of this dialog.
  * @param contentPadding Specify a padding to apply to the inner content box.
@@ -106,6 +108,7 @@ fun JetPrefAlertDialog(
     trailingIconTitle: @Composable () -> Unit = { },
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     scrollModifier: Modifier = Modifier.verticalScroll(rememberScrollState()),
+    shape: Shape = MaterialTheme.shapes.medium,
     backgroundColor: Color = MaterialTheme.colors.surface,
     contentColor: Color = contentColorFor(backgroundColor),
     contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
@@ -119,7 +122,7 @@ fun JetPrefAlertDialog(
             modifier = modifier
                 .padding(vertical = 16.dp, horizontal = 16.dp)
                 .widthIn(max = JetPrefAlertDialogDefaults.MaxDialogWidth),
-            shape = MaterialTheme.shapes.medium,
+            shape = shape,
             color = backgroundColor,
             contentColor = contentColor,
         ) {
