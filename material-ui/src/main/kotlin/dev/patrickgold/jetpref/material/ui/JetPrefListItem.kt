@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
  * @param overlineText The text displayed above the primary text.
  * @param text The primary text of the list item.
  * @param secondaryText The secondary text of the list item.
+ * @param singleLineSecondaryText If the secondary text should be limited to a single line.
  * @param enabled If false, this list item will be grayed out.
  * @param trailing The trailing meta text, icon, switch or checkbox.
  *
@@ -46,12 +47,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun JetPrefListItem(
     modifier: Modifier = Modifier,
-    icon: @Composable (() -> Unit)? = null,
+    icon: (@Composable () -> Unit)? = null,
     overlineText: String? = null,
     text: String,
     secondaryText: String? = null,
+    singleLineSecondaryText: Boolean = false,
     enabled: Boolean = true,
-    trailing: @Composable (() -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     ListItem(
         modifier = modifier.alpha(if (enabled) 1.0f else ContentAlpha.disabled),
@@ -74,7 +76,7 @@ fun JetPrefListItem(
             Text(
                 modifier = Modifier.padding(bottom = 16.dp),
                 text = str,
-                maxLines = 2,
+                maxLines = if (singleLineSecondaryText) { 1 } else { 2 },
                 overflow = TextOverflow.Ellipsis,
             )
         },
