@@ -16,14 +16,17 @@
 
 package dev.patrickgold.jetpref.example.ui.settings
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
+import dev.patrickgold.jetpref.datastore.ui.Preference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
+import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.Theme
 import dev.patrickgold.jetpref.example.examplePreferenceModel
@@ -31,6 +34,13 @@ import dev.patrickgold.jetpref.example.examplePreferenceModel
 @OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
 fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
+    val navController = LocalNavController.current
+
+    ScrollState
+    Preference(
+        onClick = { navController.navigate("color-picker-demo") },
+        title = "Color Picker Demo",
+    )
     ListPreference(
         prefs.theme,
         title = "Theme",

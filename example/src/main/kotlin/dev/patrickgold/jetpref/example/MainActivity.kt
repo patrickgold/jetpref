@@ -11,15 +11,20 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.ProvideDefaultDialogPrefStrings
+import dev.patrickgold.jetpref.example.ui.settings.ColorPickerDemoScreen
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
+
+val LocalNavController = staticCompositionLocalOf<NavHostController> { error("not init") }
 
 class MainActivity : ComponentActivity() {
     private val prefs by examplePreferenceModel()
@@ -46,10 +51,12 @@ class MainActivity : ComponentActivity() {
                 Theme.LIGHT -> false
                 Theme.DARK -> true
             }
-            JetPrefTheme(isDark) {
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    AppContent(navController)
+            CompositionLocalProvider(LocalNavController provides navController) {
+                JetPrefTheme(isDark) {
+                    // A surface container using the 'background' color from the theme
+                    Surface(color = MaterialTheme.colors.background) {
+                        AppContent(navController)
+                    }
                 }
             }
         }
@@ -70,6 +77,7 @@ fun AppContent(navController: NavHostController) {
             )
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeScreen() }
+                composable("color-picker-demo") { ColorPickerDemoScreen() }
             }
         }
     }

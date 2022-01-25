@@ -71,6 +71,7 @@ dependencies {
     implementation("com.google.android.material:material:1.4.0")
     implementation(project(":datastore-model"))
     implementation(project(":datastore-ui"))
+    implementation(project(":material-ui"))
 
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
 }
