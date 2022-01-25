@@ -194,7 +194,7 @@ object JetPrefAlertDialogDefaults {
     /**
      * The default content padding for [JetPrefAlertDialog].
      */
-    val ContentPadding = PaddingValues(all = 24.dp)
+    val ContentPadding = PaddingValues(horizontal = 24.dp)
 
     /**
      * The maximum dialog width for [JetPrefAlertDialog].
