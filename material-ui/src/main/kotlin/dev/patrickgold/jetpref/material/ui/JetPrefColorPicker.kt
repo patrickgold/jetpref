@@ -234,7 +234,7 @@ private fun SaturationValueBox(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f),
+            .aspectRatio(1.5f),
     ) {
         val width = constraints.maxWidth
         val height = constraints.maxHeight
