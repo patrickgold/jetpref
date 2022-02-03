@@ -5,7 +5,7 @@ A preference library (custom data handling + UI in JetPack Compose) mainly devel
 
 ## Usage
 
-Disclaimer: This library is still in early alpha and therefore not recommended for production use.
+Disclaimer: This library is still in alpha and therefore not recommended for production use.
 It is currently tested out in the beta channel of FlorisBoard, so bugs or other issues
 in runtime use can be found and fixed. Feel free to ask if you need help using this library
 or to file feature requests / bug reports in the issue's page!
