@@ -61,6 +61,10 @@ android {
             }
         }
     }
+
+    publishing {
+        singleVariant("release")
+    }
 }
 
 dependencies {

@@ -52,6 +52,10 @@ android {
             java.srcDir("src/main/kotlin")
         }
     }
+
+    publishing {
+        singleVariant("release")
+    }
 }
 
 dependencies {
