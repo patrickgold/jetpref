@@ -17,9 +17,11 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,18 +34,45 @@ import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.example.examplePreferenceModel
 import dev.patrickgold.jetpref.material.ui.ExperimentalJetPrefMaterialUi
 import dev.patrickgold.jetpref.material.ui.JetPrefColorPicker
+import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 
 @OptIn(ExperimentalJetPrefMaterialUi::class)
 @Composable
 fun ColorPickerDemoScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
-    var color by remember { mutableStateOf(Color.Green) }
+    var color by remember { mutableStateOf(Color.White) }
     Column(modifier = Modifier.padding(all = 32.dp)) {
+        val colorPickerState = rememberJetPrefColorPickerState(initColor = color)
+
         Surface(
             modifier = Modifier.padding(bottom = 32.dp),
             color = color,
         ) { Text(text = "Color state outside the picker.") }
 
+        Row {
+            TextButton(onClick = {
+                colorPickerState.setColor(Color.Red)
+                color = Color.Red
+            }) {
+                Text(text = "Red")
+            }
+
+            TextButton(onClick = {
+                colorPickerState.setColor(Color.Green)
+                color = Color.Green
+            }) {
+                Text(text = "Green")
+            }
+
+            TextButton(onClick = {
+                colorPickerState.setColor(Color.Blue)
+                color = Color.Blue
+            }) {
+                Text(text = "Blue")
+            }
+        }
+
         JetPrefColorPicker(
+            state = colorPickerState,
             onColorChange = { color = it },
         )
     }

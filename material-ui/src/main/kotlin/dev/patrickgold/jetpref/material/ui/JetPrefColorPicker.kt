@@ -404,10 +404,17 @@ interface JetPrefColorPickerState {
     @OptIn(ExperimentalGraphicsApi::class)
     fun color(): Color = Color.hsv(hue, saturation, value, alpha)
 
-    @OptIn(ExperimentalGraphicsApi::class)
     @Composable
     fun rememberColor(): Color = remember(hue, saturation, value, alpha) {
         color()
+    }
+
+    fun setColor(color: Color) {
+        val (h, s, v, a) = color.toHsv()
+        hue = h
+        saturation = s
+        value = v
+        alpha = a
     }
 }
 
