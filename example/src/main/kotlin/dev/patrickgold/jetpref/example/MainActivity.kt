@@ -1,7 +1,6 @@
 package dev.patrickgold.jetpref.example
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -28,17 +27,6 @@ val LocalNavController = staticCompositionLocalOf<NavHostController> { error("no
 
 class MainActivity : ComponentActivity() {
     private val prefs by examplePreferenceModel()
-
-    init {
-        prefs.datastoreReadyStatus.observe(this) { newValue ->
-            if (newValue) {
-                Toast.makeText(this@MainActivity, "PrefLoaded", Toast.LENGTH_SHORT).show()
-            }
-        }
-        /*prefs.example.isButtonShowing.observe(this) { newValue ->
-            Toast.makeText(this@MainActivity, "Value $newValue", Toast.LENGTH_SHORT).show()
-        }*/
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

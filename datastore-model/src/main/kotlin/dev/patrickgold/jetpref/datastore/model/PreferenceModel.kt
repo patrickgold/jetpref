@@ -239,27 +239,29 @@ abstract class PreferenceModel(val name: String) {
                         prefData.reset(requestSync = false)
                     }
                 }
-                file.bufferedReader().useLines { lines ->
-                    for (line in lines) ioScope.launch line@{
-                        if (line.isBlank()) return@line
-                        val del1 = line.indexOf(JetPref.DELIMITER)
-                        if (del1 < 0) return@line
-                        val type = PreferenceType.from(line.substring(0, del1))
-                        val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
-                        if (del2 < 0) return@line
-                        val key = line.substring(del1 + 1, del2)
-                        val prefData = registry.find { it.key == key }
-                        if (prefData != null) {
-                            if (prefData.type.id != type.id) {
-                                return@line
-                            }
-                            prefData.deserialize(
-                                if (del2 + 1 == line.length) {
-                                    ""
-                                } else {
-                                    line.substring(del2 + 1)
+                if (file.exists()) {
+                    file.bufferedReader().useLines { lines ->
+                        for (line in lines) ioScope.launch line@{
+                            if (line.isBlank()) return@line
+                            val del1 = line.indexOf(JetPref.DELIMITER)
+                            if (del1 < 0) return@line
+                            val type = PreferenceType.from(line.substring(0, del1))
+                            val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
+                            if (del2 < 0) return@line
+                            val key = line.substring(del1 + 1, del2)
+                            val prefData = registry.find { it.key == key }
+                            if (prefData != null) {
+                                if (prefData.type.id != type.id) {
+                                    return@line
                                 }
-                            )
+                                prefData.deserialize(
+                                    if (del2 + 1 == line.length) {
+                                        ""
+                                    } else {
+                                        line.substring(del2 + 1)
+                                    }
+                                )
+                            }
                         }
                     }
                 }

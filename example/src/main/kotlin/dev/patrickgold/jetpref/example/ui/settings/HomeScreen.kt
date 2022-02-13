@@ -16,8 +16,10 @@
 
 package dev.patrickgold.jetpref.example.ui.settings
 
-import androidx.compose.foundation.ScrollState
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
@@ -36,7 +38,9 @@ import dev.patrickgold.jetpref.example.examplePreferenceModel
 fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     val navController = LocalNavController.current
 
-    ScrollState
+    val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
+    Text(text = "is datastore ready = $isDatastoreReady")
+
     Preference(
         onClick = { navController.navigate("color-picker-demo") },
         title = "Color Picker Demo",
