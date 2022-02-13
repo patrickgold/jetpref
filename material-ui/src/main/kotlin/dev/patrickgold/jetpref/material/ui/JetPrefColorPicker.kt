@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -45,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -57,12 +59,14 @@ import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.takeOrElse
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -126,6 +130,48 @@ fun JetPrefColorPicker(
                 if (alphaSlider) {
                     AlphaBar(onColorChange, state, strokeColor)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Adaptive checkered background which draws behind the content. Used to display semi or fully
+ * transparent surfaces to the user, when the transparency aspect of said surface must be clearly
+ * communicated.
+ *
+ * When using the default colors, this modifier will work for both light and dark themes by using
+ * (semi-)transparent grid colors.
+ *
+ * @param gridSize The grid size of the checkered background.
+ * @param evenColor The even color of this checkered background (zero-based indexing).
+ * @param oddColor The odd color of this checkered background (zero-based indexing).
+ *
+ * @since 0.1.0
+ */
+fun Modifier.checkeredBackground(
+    gridSize: Dp = Dp.Unspecified,
+    evenColor: Color = Color.Unspecified,
+    oddColor: Color = Color.Unspecified,
+): Modifier = composed {
+    val even = evenColor.takeOrElse { MaterialTheme.colors.onBackground.copy(alpha = 0.160784314f) }
+    val odd = oddColor.takeOrElse { Color.Transparent }
+
+    this.drawBehind {
+        val gridSizePx = gridSize.takeOrElse { SliderTrackHeight / 2f }.toPx()
+        val cellCountX = ceil(this.size.width / gridSizePx).toInt()
+        val cellCountY = ceil(this.size.height / gridSizePx).toInt()
+        for (i in 0 until cellCountX) {
+            for (j in 0 until cellCountY) {
+                val color = if ((i + j) % 2 == 0) even else odd
+
+                val x = i * gridSizePx
+                val y = j * gridSizePx
+                val size = Size(
+                    width = if (i + 1 < cellCountX) gridSizePx else this.size.width % gridSizePx,
+                    height = if (j + 1 < cellCountY) gridSizePx else this.size.height % gridSizePx,
+                )
+                drawRect(color, Offset(x, y), size)
             }
         }
     }
@@ -328,30 +374,6 @@ private fun Thumb(
         elevation = SliderThumbElevation,
         content = { },
     )
-}
-
-/**
- * This method has been based on the following source:
- *  https://github.com/godaddy/compose-color-picker/blob/e2380bd8aad375539bd9ad3d01e2f69d5f215133/color-picker/src/commonMain/kotlin/com/godaddy/android/colorpicker/AlphaBar.kt#L90-L106
- */
-private fun Modifier.checkeredBackground(): Modifier {
-    return this.drawBehind {
-        val darkColor = Color.LightGray
-        val lightColor = Color.White
-
-        val gridSizePx = SliderTrackHeight.toPx() / 2
-        val cellCountX = ceil(this.size.width / gridSizePx).toInt()
-        val cellCountY = ceil(this.size.height / gridSizePx).toInt()
-        for (i in 0 until cellCountX) {
-            for (j in 0 until cellCountY) {
-                val color = if ((i + j) % 2 == 0) darkColor else lightColor
-
-                val x = i * gridSizePx
-                val y = j * gridSizePx
-                drawRect(color, Offset(x, y), Size(gridSizePx, gridSizePx))
-            }
-        }
-    }
 }
 
 private data class HsvColor(

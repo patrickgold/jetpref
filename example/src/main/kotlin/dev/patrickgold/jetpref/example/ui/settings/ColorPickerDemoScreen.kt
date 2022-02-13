@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2022 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -34,6 +35,7 @@ import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.example.examplePreferenceModel
 import dev.patrickgold.jetpref.material.ui.ExperimentalJetPrefMaterialUi
 import dev.patrickgold.jetpref.material.ui.JetPrefColorPicker
+import dev.patrickgold.jetpref.material.ui.checkeredBackground
 import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 
 @OptIn(ExperimentalJetPrefMaterialUi::class)
@@ -44,9 +46,14 @@ fun ColorPickerDemoScreen() = ScrollablePreferenceLayout(examplePreferenceModel(
         val colorPickerState = rememberJetPrefColorPickerState(initColor = color)
 
         Surface(
-            modifier = Modifier.padding(bottom = 32.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp)
+                .checkeredBackground(),
             color = color,
-        ) { Text(text = "Color state outside the picker.") }
+        ) {
+            Text(text = "Color state outside the picker.")
+        }
 
         Row {
             TextButton(onClick = {
