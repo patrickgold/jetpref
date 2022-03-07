@@ -61,14 +61,14 @@ android {
 
 dependencies {
     implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.appcompat:appcompat:1.4.0")
+    implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
-    implementation("androidx.navigation:navigation-compose:2.4.0-rc01")
-    implementation("com.google.android.material:material:1.4.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+    implementation("androidx.navigation:navigation-compose:2.4.1")
+    implementation("com.google.android.material:material:1.5.0")
     implementation(project(":datastore-model"))
     implementation(project(":datastore-ui"))
     implementation(project(":material-ui"))
