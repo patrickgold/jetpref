@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2022 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+// Suppress needed until https://youtrack.jetbrains.com/issue/KTIJ-19369 is fixed
+@file:Suppress("DSL_SCOPE_VIOLATION")
+
 plugins {
-    id("com.android.library")
-    id("kotlin-android")
+    alias(libs.plugins.agp.library)
+    alias(libs.plugins.kotlin.android)
     id("maven-publish")
 }
 
@@ -27,8 +30,6 @@ val jetprefTargetSdk: String by project
 val jetprefMavenGroupId: String by project
 val jetprefJitpackGroupId: String by project
 val jetprefVersion: String by project
-
-val composeVersion: String by project
 
 android {
     compileSdk = jetprefCompileSdk.toInt()
@@ -51,7 +52,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = composeVersion
+        kotlinCompilerExtensionVersion = libs.versions.androidx.compose.get()
     }
 
     sourceSets {
@@ -68,11 +69,11 @@ android {
 }
 
 dependencies {
-    implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
 
-    debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {

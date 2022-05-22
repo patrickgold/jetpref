@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2022 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+// Suppress needed until https://youtrack.jetbrains.com/issue/KTIJ-19369 is fixed
+@file:Suppress("DSL_SCOPE_VIOLATION")
+
 plugins {
-    id("com.android.library")
-    id("kotlin-android")
+    alias(libs.plugins.agp.library)
+    alias(libs.plugins.kotlin.android)
     id("maven-publish")
-    id("de.mannodermaus.android-junit5")
+    alias(libs.plugins.mannodermaus.android.junit5)
 }
 
 val jetprefCompileSdk: String by project
@@ -28,8 +31,6 @@ val jetprefTargetSdk: String by project
 val jetprefMavenGroupId: String by project
 val jetprefJitpackGroupId: String by project
 val jetprefVersion: String by project
-
-val kotestVersion: String by project
 
 android {
     compileSdk = jetprefCompileSdk.toInt()
@@ -59,13 +60,13 @@ android {
 }
 
 dependencies {
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.kotlinx.coroutines)
     implementation(project(":datastore-annotations"))
 
-    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
-    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
-    testImplementation("io.kotest:kotest-property:$kotestVersion")
+    testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.kotest.property)
+    testImplementation(libs.kotest.runner.junit5)
 }
 
 tasks.withType<Test> {
