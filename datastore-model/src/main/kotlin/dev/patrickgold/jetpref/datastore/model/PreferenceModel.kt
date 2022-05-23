@@ -214,7 +214,7 @@ abstract class PreferenceModel(val name: String) {
         private val ioJob = ioScope.launch(Dispatchers.IO) {
             runSafely { loadPrefs(datastoreFile, reset = true) }
             while (isActive) {
-                if (persistReq.getAndSet(false)) {
+                if (datastoreReadyStatus.get() && persistReq.getAndSet(false)) {
                     runSafely { persistPrefs() }
                 }
                 delay(JetPref.saveIntervalMs)
