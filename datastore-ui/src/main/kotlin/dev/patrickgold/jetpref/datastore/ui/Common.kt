@@ -38,11 +38,3 @@ internal fun maybeJetIcon(
         else -> null
     }
 }
-
-internal fun String.formatValue(vararg values: Any?): String {
-    var string = this
-    for (value in values) {
-        string = string.replaceFirst("{v}", value.toString())
-    }
-    return string
-}

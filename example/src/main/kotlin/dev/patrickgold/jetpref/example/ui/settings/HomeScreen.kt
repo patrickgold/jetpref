@@ -54,10 +54,10 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         primaryPref = prefs.boxSizePortrait,
         secondaryPref = prefs.boxSizeLandscape,
         title = "Example integer slider",
-        unit = "{v}%",
+        valueLabel = { if (it == -1) "Automatic" else "$it%" },
         primaryLabel = "Portrait",
         secondaryLabel = "Landscape",
-        min = 0,
+        min = -1,
         max = 100,
         stepIncrement = 1,
     )
@@ -83,34 +83,34 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         DialogSliderPreference(
             prefs.example.buttonSize,
             title = "Button Size",
+            valueLabel = { "$it%" },
             min = 0,
             max = 100,
             stepIncrement = 1,
-            unit = "{v}%",
         )
         DialogSliderPreference(
             prefs.example.buttonWidth,
             title = "Button Size",
+            valueLabel = { "$it dp" },
             min = 0,
             max = 100,
             stepIncrement = 5,
-            unit = "{v} dp",
         )
         DialogSliderPreference(
             prefs.example.mainFontSize,
             title = "Main Font Size",
+            valueLabel = { "$it sp" },
             min = 0.0,
             max = 100.0,
             stepIncrement = 5.0,
-            unit = "{v} sp",
         )
         DialogSliderPreference(
             prefs.example.fontSize,
             title = "Font Size",
+            valueLabel = { "$it sp" },
             min = 0.0f,
             max = 100.0f,
             stepIncrement = 5.0f,
-            unit = "{v} sp",
         )
     }
     ListPreference(

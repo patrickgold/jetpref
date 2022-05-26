@@ -46,14 +46,14 @@ import kotlin.math.roundToLong
 
 @ExperimentalJetPrefDatastoreUi
 @Composable
-internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSliderPreference(
+internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<V>,
     modifier: Modifier,
     @DrawableRes iconId: Int?,
     iconSpaceReserved: Boolean,
     title: String,
-    summary: String,
-    unit: String,
+    valueLabel: (V) -> String,
+    summary: (V) -> String,
     min: V,
     max: V,
     stepIncrement: V,
@@ -61,7 +61,10 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
     convertToV: (Float) -> V,
-) {
+) where V : Number, V : Comparable<V> {
+    require(stepIncrement > convertToV(0f)) { "Step increment must be greater than 0!" }
+    require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
+
     val prefValue by pref.observeAsState()
     val (sliderValue, setSliderValue) = remember { mutableStateOf(0.0f) }
     val isDialogOpen = remember { mutableStateOf(false) }
@@ -81,7 +84,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                 ),
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
-            secondaryText = summary.formatValue(prefValue),
+            secondaryText = summary(prefValue),
             enabled = isEnabled,
         )
         if (isDialogOpen.value) {
@@ -102,7 +105,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
             ) {
                 Column {
                     Text(
-                        text = unit.formatValue(convertToV(sliderValue)),
+                        text = valueLabel(convertToV(sliderValue)),
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                     )
                     Slider(
@@ -131,7 +134,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
 
 @ExperimentalJetPrefDatastoreUi
 @Composable
-internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSliderPreference(
+internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     modifier: Modifier,
@@ -140,8 +143,8 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
-    summary: String,
-    unit: String,
+    valueLabel: (V) -> String,
+    summary: (V, V) -> String,
     min: V,
     max: V,
     stepIncrement: V,
@@ -149,7 +152,10 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
     convertToV: (Float) -> V,
-) {
+) where V : Number, V : Comparable<V> {
+    require(stepIncrement > convertToV(0f)) { "Step increment must be greater than 0!" }
+    require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
+
     val primaryPrefValue by primaryPref.observeAsState()
     val secondaryPrefValue by secondaryPref.observeAsState()
     val (primarySliderValue, setPrimarySliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
@@ -172,7 +178,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                 ),
             icon = maybeJetIcon(iconId, iconSpaceReserved),
             text = title,
-            secondaryText = summary.formatValue(primaryPrefValue, secondaryPrefValue),
+            secondaryText = summary(primaryPrefValue, secondaryPrefValue),
             enabled = isEnabled,
         )
         if (isDialogOpen.value) {
@@ -199,7 +205,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(primaryLabel)
-                        Text(unit.formatValue(primarySliderValue))
+                        Text(valueLabel(primarySliderValue))
                     }
                     Slider(
                         value = primarySliderValue.toFloat(),
@@ -224,7 +230,7 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(secondaryLabel)
-                        Text(unit.formatValue(secondarySliderValue))
+                        Text(valueLabel(secondarySliderValue))
                     }
                     Slider(
                         value = secondarySliderValue.toFloat(),
@@ -250,16 +256,40 @@ internal fun <T : PreferenceModel, V : Number> PreferenceUiScope<T>.DialogSlider
     }
 }
 
+/**
+ * Material preference which provides a dialog with a slider for choosing a value.
+ *
+ * @param pref The integer preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
-    ref: PreferenceData<Int>,
+    pref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
-    unit: String = "{v}",
-    summary: String = unit,
+    valueLabel: (Int) -> String = { it.toString() },
+    summary: (Int) -> String = valueLabel,
     min: Int,
     max: Int,
     stepIncrement: Int,
@@ -268,8 +298,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToInt()
@@ -279,6 +309,33 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     }
 }
 
+/**
+ * Material preference which provides a dialog with two sliders for choosing two values at once.
+ *
+ * @param primaryPref The primary integer preference data entry from the datastore.
+ * @param secondaryPref The secondary integer preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param primaryLabel The label to display above the primary slider in the dialog.
+ * @param secondaryLabel The label to display above the secondary slider in the dialog.
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel] / [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
@@ -290,8 +347,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
-    unit: String = "{v}",
-    summary: String = "$unit / $unit",
+    valueLabel: (Int) -> String = { it.toString() },
+    summary: (Int, Int) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
     min: Int,
     max: Int,
     stepIncrement: Int,
@@ -301,8 +358,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToInt()
@@ -312,16 +369,40 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     }
 }
 
+/**
+ * Material preference which provides a dialog with a slider for choosing a value.
+ *
+ * @param pref The long preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
-    ref: PreferenceData<Long>,
+    pref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
-    unit: String = "{v}",
-    summary: String = unit,
+    valueLabel: (Long) -> String = { it.toString() },
+    summary: (Long) -> String = valueLabel,
     min: Long,
     max: Long,
     stepIncrement: Long,
@@ -330,8 +411,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToLong()
@@ -341,6 +422,33 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     }
 }
 
+/**
+ * Material preference which provides a dialog with two sliders for choosing two values at once.
+ *
+ * @param primaryPref The primary long preference data entry from the datastore.
+ * @param secondaryPref The secondary long preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param primaryLabel The label to display above the primary slider in the dialog.
+ * @param secondaryLabel The label to display above the secondary slider in the dialog.
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel] / [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
@@ -352,8 +460,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
-    unit: String = "{v}",
-    summary: String = "$unit / $unit",
+    valueLabel: (Long) -> String = { it.toString() },
+    summary: (Long, Long) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
     min: Long,
     max: Long,
     stepIncrement: Long,
@@ -363,8 +471,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToLong()
@@ -374,16 +482,40 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     }
 }
 
+/**
+ * Material preference which provides a dialog with a slider for choosing a value.
+ *
+ * @param pref The double preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
-    ref: PreferenceData<Double>,
+    pref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
-    unit: String = "{v}",
-    summary: String = unit,
+    valueLabel: (Double) -> String = { it.toString() },
+    summary: (Double) -> String = valueLabel,
     min: Double,
     max: Double,
     stepIncrement: Double,
@@ -392,11 +524,38 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
 
+/**
+ * Material preference which provides a dialog with two sliders for choosing two values at once.
+ *
+ * @param primaryPref The primary double preference data entry from the datastore.
+ * @param secondaryPref The secondary double preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param primaryLabel The label to display above the primary slider in the dialog.
+ * @param secondaryLabel The label to display above the secondary slider in the dialog.
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel] / [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
@@ -408,8 +567,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
-    unit: String = "{v}",
-    summary: String = "$unit / $unit",
+    valueLabel: (Double) -> String = { it.toString() },
+    summary: (Double, Double) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
     min: Double,
     max: Double,
     stepIncrement: Double,
@@ -419,21 +578,45 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
 
+/**
+ * Material preference which provides a dialog with a slider for choosing a value.
+ *
+ * @param pref The float preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
-    ref: PreferenceData<Float>,
+    pref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
-    unit: String = "{v}",
-    summary: String = unit,
+    valueLabel: (Float) -> String = { it.toString() },
+    summary: (Float) -> String = valueLabel,
     min: Float,
     max: Float,
     stepIncrement: Float,
@@ -442,11 +625,38 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        ref, modifier, iconId, iconSpaceReserved, title, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
 
+/**
+ * Material preference which provides a dialog with two sliders for choosing two values at once.
+ *
+ * @param primaryPref The primary float preference data entry from the datastore.
+ * @param secondaryPref The secondary float preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param iconId The icon ID of the list entry icon.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param primaryLabel The label to display above the primary slider in the dialog.
+ * @param secondaryLabel The label to display above the secondary slider in the dialog.
+ * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
+ *  value (e.g. -1 -> System default).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
+ *  [valueLabel] / [valueLabel].
+ * @param min The minimum value allowed on the slider. Must be smaller than [max].
+ * @param max The maximum value allowed on the slider. Must be greater than [min].
+ * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.1.0
+ */
 @ExperimentalJetPrefDatastoreUi
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
@@ -458,8 +668,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
-    unit: String = "{v}",
-    summary: String = "$unit / $unit",
+    valueLabel: (Float) -> String = { it.toString() },
+    summary: (Float, Float) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
     min: Float,
     max: Float,
     stepIncrement: Float,
@@ -469,7 +679,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, summary, unit, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
+        stepIncrement, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
