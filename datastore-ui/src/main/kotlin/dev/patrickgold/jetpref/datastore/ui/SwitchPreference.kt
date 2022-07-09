@@ -17,11 +17,13 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -87,6 +89,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
             },
             trailing = {
                 Switch(
+                    modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize),
                     checked = prefValue,
                     onCheckedChange = null,
                     enabled = isEnabled
