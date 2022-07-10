@@ -1,41 +1,16 @@
 package dev.patrickgold.jetpref.example
 
-import androidx.compose.runtime.Composable
 import dev.patrickgold.jetpref.datastore.JetPref
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
-
-enum class Theme {
-    AUTO,
-    LIGHT,
-    DARK;
-
-    companion object {
-        @Composable
-        fun listEntries() = listPrefEntries {
-            entry(
-                key = AUTO,
-                label = "System default",
-            )
-            entry(
-                key = LIGHT,
-                label = "Light",
-            )
-            entry(
-                key = DARK,
-                label = "Dark",
-            )
-        }
-    }
-}
+import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 // Defining a getter function for easy retrieval of the AppPrefs model.
-// You can name this how you want, the convention is <projectName>PreferenceModel
+// You can name this however you want, the convention is <projectName>PreferenceModel
 fun examplePreferenceModel() = JetPref.getOrCreatePreferenceModel(AppPrefs::class, ::AppPrefs)
 
 // Defining a preference model for our app prefs
 // The name we give here is the file name of the preferences and is saved
-// within the app's `jetpref` directory.
+// within the app's `jetpref_datastore` directory.
 class AppPrefs : PreferenceModel("example-app-preferences") {
     val theme = enum(
         key = "theme",
@@ -49,20 +24,21 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
         key = "box_size_landscape",
         default = 20,
     )
-    var showExampleGroup = boolean(
+    val showExampleGroup = boolean(
         key = "show_example_group",
         default = true,
     )
 
-    // You can also define groups for preferences by packing them
-    // into an inner class like below
+    // You can also define groups for preferences by packing them into an inner class like below. Groups are only for
+    // improved usage in your code, for the model this is completely irrelevant. Thus a key must still be completely
+    // unique to not only this group, but all groups in this model.
     val example = Example()
     inner class Example {
-        var isButtonShowing = boolean(
+        val isButtonShowing = boolean(
             key = "test__is_button_showing",
             default = true,
         )
-        var isButtonShowing2 = boolean(
+        val isButtonShowing2 = boolean(
             key = "test__is_button_showing2",
             default = true,
         )

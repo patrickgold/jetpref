@@ -30,8 +30,8 @@ import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
-import dev.patrickgold.jetpref.example.Theme
 import dev.patrickgold.jetpref.example.examplePreferenceModel
+import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 @OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable

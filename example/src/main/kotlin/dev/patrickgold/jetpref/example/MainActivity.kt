@@ -22,6 +22,7 @@ import dev.patrickgold.jetpref.datastore.ui.ProvideDefaultDialogPrefStrings
 import dev.patrickgold.jetpref.example.ui.settings.ColorPickerDemoScreen
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
+import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 val LocalNavController = staticCompositionLocalOf<NavHostController> { error("not init") }
 

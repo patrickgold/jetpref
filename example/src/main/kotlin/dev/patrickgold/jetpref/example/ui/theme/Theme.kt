@@ -5,6 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -41,4 +42,28 @@ fun JetPrefTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
         shapes = Shapes,
         content = content
     )
+}
+
+enum class Theme {
+    AUTO,
+    LIGHT,
+    DARK;
+
+    companion object {
+        @Composable
+        fun listEntries() = listPrefEntries {
+            entry(
+                key = AUTO,
+                label = "System default",
+            )
+            entry(
+                key = LIGHT,
+                label = "Light",
+            )
+            entry(
+                key = DARK,
+                label = "Dark",
+            )
+        }
+    }
 }
