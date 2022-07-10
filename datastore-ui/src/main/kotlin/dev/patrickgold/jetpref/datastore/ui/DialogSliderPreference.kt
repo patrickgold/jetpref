@@ -57,6 +57,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     min: V,
     max: V,
     stepIncrement: V,
+    onPreviewSelectedValue: (V) -> Unit,
     dialogStrings: DialogPrefStrings,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
@@ -112,9 +113,8 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         value = sliderValue,
                         valueRange = min.toFloat()..max.toFloat(),
                         steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = {
-                            setSliderValue(it)
-                        },
+                        onValueChange = { setSliderValue(it) },
+                        onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
                         colors = SliderDefaults.colors(
                             thumbColor = MaterialTheme.colors.primary,
                             activeTrackColor = MaterialTheme.colors.primary,
@@ -148,6 +148,8 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     min: V,
     max: V,
     stepIncrement: V,
+    onPreviewSelectedPrimaryValue: (V) -> Unit,
+    onPreviewSelectedSecondaryValue: (V) -> Unit,
     dialogStrings: DialogPrefStrings,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
@@ -211,9 +213,8 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         value = primarySliderValue.toFloat(),
                         valueRange = min.toFloat()..max.toFloat(),
                         steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = {
-                            setPrimarySliderValue(convertToV(it))
-                        },
+                        onValueChange = { setPrimarySliderValue(convertToV(it)) },
+                        onValueChangeFinished = { onPreviewSelectedPrimaryValue(primarySliderValue) },
                         colors = SliderDefaults.colors(
                             thumbColor = MaterialTheme.colors.primary,
                             activeTrackColor = MaterialTheme.colors.primary,
@@ -236,9 +237,8 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         value = secondarySliderValue.toFloat(),
                         valueRange = min.toFloat()..max.toFloat(),
                         steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = {
-                            setSecondarySliderValue(convertToV(it))
-                        },
+                        onValueChange = { setSecondarySliderValue(convertToV(it)) },
+                        onValueChangeFinished = { onPreviewSelectedSecondaryValue(secondarySliderValue) },
                         colors = SliderDefaults.colors(
                             thumbColor = MaterialTheme.colors.primary,
                             activeTrackColor = MaterialTheme.colors.primary,
@@ -272,6 +272,9 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
+ *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
+ *  will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -293,13 +296,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Int,
     max: Int,
     stepIncrement: Int,
+    onPreviewSelectedValue: (Int) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToInt()
@@ -328,6 +332,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
+ *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
+ *  actual selected new primary value will be written to the preference once the user confirms it.
+ * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
+ *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
+ *  actual selected new secondary value will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -352,14 +362,16 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Int,
     max: Int,
     stepIncrement: Int,
+    onPreviewSelectedPrimaryValue: (Int) -> Unit = { },
+    onPreviewSelectedSecondaryValue: (Int) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
+        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToInt()
@@ -385,6 +397,9 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
+ *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
+ *  will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -406,13 +421,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Long,
     max: Long,
     stepIncrement: Long,
+    onPreviewSelectedValue: (Long) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToLong()
@@ -441,6 +457,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
+ *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
+ *  actual selected new primary value will be written to the preference once the user confirms it.
+ * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
+ *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
+ *  actual selected new secondary value will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -465,14 +487,16 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Long,
     max: Long,
     stepIncrement: Long,
+    onPreviewSelectedPrimaryValue: (Long) -> Unit = { },
+    onPreviewSelectedSecondaryValue: (Long) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
+        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToLong()
@@ -498,6 +522,9 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
+ *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
+ *  will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -519,13 +546,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Double,
     max: Double,
     stepIncrement: Double,
+    onPreviewSelectedValue: (Double) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
 
@@ -548,6 +576,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
+ *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
+ *  actual selected new primary value will be written to the preference once the user confirms it.
+ * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
+ *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
+ *  actual selected new secondary value will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -572,14 +606,16 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Double,
     max: Double,
     stepIncrement: Double,
+    onPreviewSelectedPrimaryValue: (Double) -> Unit = { },
+    onPreviewSelectedSecondaryValue: (Double) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
+        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
 
@@ -599,6 +635,9 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
+ *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
+ *  will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -620,13 +659,14 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Float,
     max: Float,
     stepIncrement: Float,
+    onPreviewSelectedValue: (Float) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
 
@@ -649,6 +689,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param min The minimum value allowed on the slider. Must be smaller than [max].
  * @param max The maximum value allowed on the slider. Must be greater than [min].
  * @param stepIncrement The step increment for the slider. Must be greater than 0.
+ * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
+ *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
+ *  actual selected new primary value will be written to the preference once the user confirms it.
+ * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
+ *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
+ *  actual selected new secondary value will be written to the preference once the user confirms it.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -673,13 +719,15 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     min: Float,
     max: Float,
     stepIncrement: Float,
+    onPreviewSelectedPrimaryValue: (Float) -> Unit = { },
+    onPreviewSelectedSecondaryValue: (Float) -> Unit = { },
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max,
-        stepIncrement, dialogStrings, enabledIf, visibleIf,
+        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
+        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
