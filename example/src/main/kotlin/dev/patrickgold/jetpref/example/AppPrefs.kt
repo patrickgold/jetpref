@@ -1,7 +1,9 @@
 package dev.patrickgold.jetpref.example
 
 import dev.patrickgold.jetpref.datastore.JetPref
+import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
+import dev.patrickgold.jetpref.datastore.model.PreferenceType
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 // Defining a getter function for easy retrieval of the AppPrefs model.
@@ -66,5 +68,37 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
             key = "test__show_title",
             default = true,
         )
+    }
+
+    // To migrate preferences, this method can be overridden (optional, if not overridden all entries are kept as is).
+    override fun migrate(entry: PreferenceMigrationEntry): PreferenceMigrationEntry {
+        return when {
+            // Given migration example situation: The app theme was previously saved as either AUTO, DAY or NIGHT, but
+            // since then it has changed to AUTO, LIGHT and DARK. As such we need to transform the DAY and NIGHT values.
+            entry.key == "theme" && entry.rawValue == "DAY" -> entry.transform(rawValue = Theme.LIGHT.toString())
+            entry.key == "theme" && entry.rawValue == "NIGHT" -> entry.transform(rawValue = Theme.DARK.toString())
+
+            // Given migration example situation: We renamed a preference.
+            entry.key == "show_group" -> entry.transform(key = "show_example_group")
+
+            // Given migration example situation: We expanded and renamed a simple switch pref to a list pref
+            entry.key == "foo_box_enabled" -> entry.transform(
+                type = PreferenceType.string(), // Important: we change the type and thus must set the new one!
+                key = "foo_box_mode", // New key
+                rawValue = if (entry.rawValue.toBoolean()) "ENABLED_COLLAPSING_MODE" else "DISABLED", // New value
+            )
+
+            // Given migration example situation: We changed the value format of a pref and want to reset the pref
+            // value it is in the old format (e.g. if there's a certain character in it, you can also use regex...)
+            // You could also provide a new value directly via transform(), using reset() however guarantees to reset
+            // it back to the default value you set above.
+            entry.key == "foo_box_names" && entry.rawValue.contains("#") -> entry.reset()
+
+            // If we have a pref that does not exist nor is needed anymore we need to do nothing, the delete happens
+            // automatically!
+
+            // By default we keep each entry as is (you could also return entry directly but this is more readable)
+            else -> entry.keepAsIs()
+        }
     }
 }

@@ -165,6 +165,29 @@ abstract class PreferenceModel(val name: String) {
         initialize(context)
     }
 
+    /**
+     * Called for each entry during the loading process to allow for potential migration of preference entries. In
+     * general, one of the following three results can be returned for each entry:
+     *
+     *  - `entry.keepAsIs()`        - if the entry has not changed
+     *  - `entry.reset()`           - if the entry should be set to default value (internally `null`)
+     *  - `entry.transform(...)`    - if the entry should be transformed (type ID, key and/or raw value)
+     *
+     * The order in which the entries are given for migration processing is unspecified. All entries, regardless of
+     * their actual type, are delivered with raw value strings (string preference values are properly decoded though).
+     * This means comparing values requires manual conversion and if needed type ID verification. The same rules apply
+     * for the result entry's raw value.
+     *
+     * @param entry The migration entry, which contains all the necessary data and verbose methods for returning an
+     *  entry result for migration.
+     *
+     * @return A result migration entry as described above.
+     */
+    protected open fun migrate(entry: PreferenceMigrationEntry): PreferenceMigrationEntry {
+        // By default keep as is
+        return entry.keepAsIs()
+    }
+
     private fun <V : Any> PreferenceData<V>.serialize(): String? {
         if (type.isInvalid() || !type.isPrimitive()) return null
         val rawValue = (if (JetPref.encodeDefaultValues) get() else getOrNull())?.let {
@@ -229,33 +252,57 @@ abstract class PreferenceModel(val name: String) {
                         prefData.reset(requestSync = false)
                     }
                 }
+                var requiresSyncAfterRead = false
                 if (file.exists()) {
                     file.bufferedReader().useLines { lines ->
                         for (line in lines) ioScope.launch line@{
                             if (line.isBlank()) return@line
                             val del1 = line.indexOf(JetPref.DELIMITER)
                             if (del1 < 0) return@line
-                            val type = PreferenceType.from(line.substring(0, del1))
+                            var type = PreferenceType.from(line.substring(0, del1))
                             val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
                             if (del2 < 0) return@line
-                            val key = line.substring(del1 + 1, del2)
+                            var key = line.substring(del1 + 1, del2)
+                            var rawValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
+
+                            // Handle preference data migration
+                            val migrationResult = migrate(PreferenceMigrationEntry(
+                                action = PreferenceMigrationEntry.Action.KEEP_AS_IS,
+                                type = type,
+                                key = key,
+                                rawValue = if (type.isString()) StringEncoder.decode(rawValue) else rawValue,
+                            ))
+                            when (migrationResult.action) {
+                                PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
+                                    /* Do nothing and continue as no migration is needed */
+                                }
+                                PreferenceMigrationEntry.Action.RESET -> {
+                                    requiresSyncAfterRead = true
+                                    return@line
+                                }
+                                PreferenceMigrationEntry.Action.TRANSFORM -> {
+                                    requiresSyncAfterRead = true
+                                    type = migrationResult.type
+                                    key = migrationResult.key
+                                    rawValue = if (type.isString()) {
+                                        StringEncoder.encode(migrationResult.rawValue)
+                                    } else {
+                                        migrationResult.rawValue
+                                    }
+                                }
+                            }
+
                             val prefData = registry.find { it.key == key }
                             if (prefData != null) {
                                 if (prefData.type.id != type.id) {
                                     return@line
                                 }
-                                prefData.deserialize(
-                                    if (del2 + 1 == line.length) {
-                                        ""
-                                    } else {
-                                        line.substring(del2 + 1)
-                                    }
-                                )
+                                prefData.deserialize(rawValue)
                             }
                         }
                     }
                 }
-                datastoreReadyStatus.set(true, requestSync = false)
+                datastoreReadyStatus.set(true, requestSync = requiresSyncAfterRead)
             }
         }
 
