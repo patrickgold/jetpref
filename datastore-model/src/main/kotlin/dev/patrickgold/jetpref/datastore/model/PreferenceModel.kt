@@ -129,30 +129,20 @@ abstract class PreferenceModel(val name: String) {
         @PreferenceKey key: String,
         default: V,
     ): PreferenceData<V> {
-        @Suppress("DEPRECATION_ERROR") // this is the only intended call site for __enum()
-        return __enum(key, default) {
-            try {
-                enumValueOf(it)
-            } catch(e: Throwable) {
-                null
+        val serializer = object : PreferenceSerializer<V> {
+            override fun serialize(value: V): String {
+                return value.toString()
+            }
+
+            override fun deserialize(value: String): V? {
+                return try {
+                    enumValueOf<V>(value)
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
-    }
-
-    @Deprecated(
-        message = "Not for public use.",
-        level = DeprecationLevel.ERROR,
-        replaceWith = ReplaceWith("enum(key, default)"),
-    )
-    @Suppress("FunctionName")
-    protected fun <V : Enum<V>> __enum(
-        @PreferenceKey key: String,
-        default: V,
-        stringToEnum: (String) -> V?,
-    ): PreferenceData<V> {
-        val prefData = EnumPreferenceData(this, key, default, stringToEnum)
-        registryAdd(prefData)
-        return prefData
+        return custom(key, default, serializer)
     }
 
     protected fun <V : Any> custom(
@@ -180,17 +170,17 @@ abstract class PreferenceModel(val name: String) {
         val rawValue = (if (JetPref.encodeDefaultValues) get() else getOrNull())?.let {
             serializer.serialize(it)
         } ?: return null
-        val sb = StringBuilder()
-        sb.append(type.id)
-        sb.append(JetPref.DELIMITER)
-        sb.append(key)
-        sb.append(JetPref.DELIMITER)
-        if (type.isString()) {
-            sb.append(StringEncoder.encode(rawValue))
-        } else {
-            sb.append(rawValue)
+        return buildString {
+            append(type.id)
+            append(JetPref.DELIMITER)
+            append(key)
+            append(JetPref.DELIMITER)
+            if (type.isString()) {
+                append(StringEncoder.encode(rawValue))
+            } else {
+                append(rawValue)
+            }
         }
-        return sb.toString()
     }
 
     private fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {

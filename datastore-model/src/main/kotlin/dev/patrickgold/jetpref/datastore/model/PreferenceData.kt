@@ -457,30 +457,6 @@ internal class StringPreferenceData(
     override val serializer: PreferenceSerializer<String> = StringPreferenceSerializer
 }
 
-internal class EnumPreferenceData<V : Enum<V>>(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: V,
-    private val stringToEnum: (String) -> V?,
-) : AbstractPreferenceData<V>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.string()
-
-    override val serializer: PreferenceSerializer<V> = object : PreferenceSerializer<V> {
-        override fun serialize(value: V): String {
-            return value.toString().lowercase()
-        }
-
-        override fun deserialize(value: String): V? {
-            return stringToEnum(value.uppercase())
-        }
-    }
-}
-
 internal class CustomPreferenceData<V : Any>(
     model: PreferenceModel,
     override val key: String,
