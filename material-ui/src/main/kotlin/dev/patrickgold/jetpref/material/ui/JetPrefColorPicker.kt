@@ -85,10 +85,10 @@ private val ZeroOneRange = 0f..1f
  * and optionally also alpha of a color and report the current color back via [onColorChange].
  *
  * @param onColorChange The callback to invoke when a color change has occurred. The color delivered here
- *  is always the end product, taking ass input fields in regard.
+ *  is always the end product, taking all input fields in regard.
  * @param modifier THe modifier to apply to this layout.
  * @param state The state for this color picker.
- * @param alphaSlider If true, the layout shows an slider for modifying the alpha of a color.
+ * @param alphaSlider If true, the layout shows a slider for modifying the alpha property of a color.
  * @param strokeColor The color of the thumb color.
  *
  * @since 0.1.0
@@ -323,7 +323,6 @@ private fun SaturationValueBox(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun ColorSlider(
     modifier: Modifier = Modifier,
@@ -404,6 +403,11 @@ private fun Color.toHsv(): HsvColor {
     return HsvColor(h, s, cMax, this.alpha)
 }
 
+/**
+ * Remembers a [JetPrefColorPickerState] and initializes it with [initColor].
+ *
+ * @since 0.1.0
+ */
 @Composable
 fun rememberJetPrefColorPickerState(initColor: Color) = remember<JetPrefColorPickerState> {
     if (initColor.isSpecified) {
@@ -414,23 +418,66 @@ fun rememberJetPrefColorPickerState(initColor: Color) = remember<JetPrefColorPic
     }
 }
 
+/**
+ * Interface for a color picker state, which holds the [hue], [saturation], [value] and [alpha] properties of a color,
+ * while also allowing outside control of the color.
+ *
+ * @since 0.1.0
+ *
+ * @see androidx.compose.ui.graphics.Color.hsv
+ */
 interface JetPrefColorPickerState {
+    /**
+     * The `hue` property of the state's color (0..360), where 0 is red, 120 is green, and 240 is blue.
+     *
+     * @since 0.1.0
+     */
     var hue: Float
 
+    /**
+     * The `saturation` property of the state's color (0..1), where 0 corresponds to no color and 1 to fully saturated.
+     *
+     * @since 0.1.0
+     */
     var saturation: Float
 
+    /**
+     * The `value` property of the state's color (0..1), where 0 is black.
+     *
+     * @since 0.1.0
+     */
     var value: Float
 
+    /**
+     * The `alpha` property of the state's color (0..1), where 0 represents fully transparent and 1 fully solid.
+     *
+     * @since 0.1.0
+     */
     var alpha: Float
 
+    /**
+     * Returns the current color of this state.
+     *
+     * @since 0.1.0
+     */
     @OptIn(ExperimentalGraphicsApi::class)
     fun color(): Color = Color.hsv(hue, saturation, value, alpha)
 
+    /**
+     * Returns the current color of this state while remembering it.
+     *
+     * @since 0.1.0
+     */
     @Composable
     fun rememberColor(): Color = remember(hue, saturation, value, alpha) {
         color()
     }
 
+    /**
+     * Set the [hue], [saturation], [value] and [alpha] properties of this state using provided [color].
+     *
+     * @since 0.1.0
+     */
     fun setColor(color: Color) {
         val (h, s, v, a) = color.toHsv()
         hue = h
