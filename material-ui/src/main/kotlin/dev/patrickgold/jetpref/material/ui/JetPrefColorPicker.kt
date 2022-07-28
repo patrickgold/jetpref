@@ -53,16 +53,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.takeOrElse
-import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -206,7 +205,7 @@ private fun HueBar(
                     val down = awaitFirstDown()
                     updateSlider(down.position)
                     drag(down.id) { change ->
-                        change.consumePositionChange()
+                        if (change.positionChange() != Offset.Zero) change.consume()
                         updateSlider(change.position)
                     }
                 }
@@ -253,7 +252,7 @@ private fun AlphaBar(
                     val down = awaitFirstDown()
                     updateSlider(down.position)
                     drag(down.id) { change ->
-                        change.consumePositionChange()
+                        if (change.positionChange() != Offset.Zero) change.consume()
                         updateSlider(change.position)
                     }
                 }
@@ -301,7 +300,7 @@ private fun SaturationValueBox(
                     val down = awaitFirstDown()
                     updateBox(down.position)
                     drag(down.id) { change ->
-                        change.consumePositionChange()
+                        if (change.positionChange() != Offset.Zero) change.consume()
                         updateBox(change.position)
                     }
                 }
@@ -460,7 +459,6 @@ interface JetPrefColorPickerState {
      *
      * @since 0.1.0
      */
-    @OptIn(ExperimentalGraphicsApi::class)
     fun color(): Color = Color.hsv(hue, saturation, value, alpha)
 
     /**
@@ -503,7 +501,6 @@ private fun JetPrefColorPickerState.setAlpha(pos: Float, length: Float) {
     this.alpha = (pos / length).coerceIn(ZeroOneRange)
 }
 
-@OptIn(ExperimentalGraphicsApi::class)
 @Composable
 private fun JetPrefColorPickerState.rememberHueColor(): Color {
     return remember(this.hue) {
@@ -511,7 +508,6 @@ private fun JetPrefColorPickerState.rememberHueColor(): Color {
     }
 }
 
-@OptIn(ExperimentalGraphicsApi::class)
 @Composable
 private fun JetPrefColorPickerState.rememberColorWithoutAlpha(): Color {
     return remember(this.hue, this.saturation, this.value) {
