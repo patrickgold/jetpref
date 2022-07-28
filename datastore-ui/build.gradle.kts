@@ -100,7 +100,7 @@ afterEvaluate {
                 version = jetprefVersion
 
                 pom {
-                    name.set("JetPref DataStore Model: Compose UI package")
+                    name.set("JetPref DataStore UI")
                     description.set("An AndroidX preference like UI for JetPref datastore settings, written in Jetpack Compose.")
                     url.set("https://patrickgold.dev/jetpref")
                     licenses {

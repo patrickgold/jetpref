@@ -63,7 +63,7 @@ afterEvaluate {
                 version = jetprefVersion
 
                 pom {
-                    name.set("JetPref DataStore Model")
+                    name.set("JetPref DataStore Annotations")
                     description.set("An alternative model to SharedPreferences.")
                     url.set("https://patrickgold.dev/jetpref")
                     licenses {

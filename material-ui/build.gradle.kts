@@ -95,7 +95,7 @@ afterEvaluate {
                 version = jetprefVersion
 
                 pom {
-                    name.set("JetPref Material Compose UI package")
+                    name.set("JetPref Material UI")
                     description.set("Material components for JetPref and general use, written in Jetpack Compose.")
                     url.set("https://patrickgold.dev/jetpref")
                     licenses {
