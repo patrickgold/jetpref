@@ -60,6 +60,10 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         min = -1,
         max = 100,
         stepIncrement = 1,
+        // Tapping causes an incorrect state to be print, see https://issuetracker.google.com/issues/181415195
+        // Dragging works fine though
+        onPreviewSelectedPrimaryValue = { android.util.Log.d("preview primary", it.toString()) },
+        onPreviewSelectedSecondaryValue = { android.util.Log.d("preview secondary", it.toString()) },
     )
     SwitchPreference(
         prefs.showExampleGroup,
