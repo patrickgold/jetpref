@@ -46,7 +46,6 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
-import kotlin.experimental.ExperimentalTypeInference
 
 /**
  * Data class specifying a single list preference entry.
@@ -176,10 +175,9 @@ private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesSco
  *
  * @return A list of [ListPreferenceEntry] items.
  */
-@OptIn(ExperimentalTypeInference::class)
 @Composable
 fun <V : Any> listPrefEntries(
-    @BuilderInference scope: @Composable ListPreferenceEntriesScope<V>.() -> Unit,
+    scope: @Composable ListPreferenceEntriesScope<V>.() -> Unit,
 ): List<ListPreferenceEntry<V>> {
     val builder = ListPreferenceEntriesScopeImpl<V>()
     scope(builder)
