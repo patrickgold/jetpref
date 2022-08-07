@@ -139,7 +139,7 @@ private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesSco
         description: String,
         showDescriptionOnlyIfSelected: Boolean,
     ) {
-        entries.add(ListPreferenceEntry(key, label, { Text(it) }, description, { Text(it) }, showDescriptionOnlyIfSelected))
+        entries.add(ListPreferenceEntry(key, label, { Text(it) }, description, { Text(it, style = MaterialTheme.typography.body2) }, showDescriptionOnlyIfSelected))
     }
 
     override fun entry(
