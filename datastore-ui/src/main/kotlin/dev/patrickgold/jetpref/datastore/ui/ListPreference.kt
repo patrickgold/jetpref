@@ -193,7 +193,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     @DrawableRes iconId: Int? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
-    summarySwitchDisabled: String? = "Disabled",
+    summarySwitchDisabled: String? = null,
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
