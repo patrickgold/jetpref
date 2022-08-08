@@ -19,12 +19,15 @@ package dev.patrickgold.jetpref.datastore.ui
 import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
@@ -35,9 +38,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -230,11 +238,32 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
             } else { summarySwitchDisabled },
             trailing = {
                 if (switchPrefValue != null) {
-                    Switch(
-                        checked = switchPrefValue.value,
-                        onCheckedChange = { switchPref.set(it) },
-                        enabled = isEnabled,
-                    )
+                    val dividerColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+                    Box(
+                        modifier = Modifier
+                            .size(LocalViewConfiguration.current.minimumTouchTargetSize + DpSize(8.dp, 0.dp))
+                            .toggleable(
+                                value = switchPrefValue.value,
+                                enabled = isEnabled,
+                                role = Role.Switch,
+                                onValueChange = { switchPref.set(it) },
+                            )
+                            .drawBehind {
+                                drawLine(
+                                    color = dividerColor,
+                                    start = Offset(0f, size.height * 0.1f),
+                                    end = Offset(0f, size.height * 0.9f),
+                                )
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Switch(
+                            modifier = Modifier.padding(start = 8.dp),
+                            checked = switchPrefValue.value,
+                            onCheckedChange = null,
+                            enabled = isEnabled,
+                        )
+                    }
                 }
             },
             enabled = isEnabled,
