@@ -9,7 +9,21 @@ you need help using this library or to file feature requests / bug reports in th
 
 ## Importing the library
 
-JetPref dependencies are currently hosted on [JitPack](https://jitpack.io/#dev.patrickgold/jetpref). Thus the JitPack
+### Since 0.1.0-beta14
+
+JetPref is hosted on Maven Central:
+
+```kts
+subprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+```
+
+### Until 0.1.0-beta14
+
+JetPref dependencies were hosted on [JitPack](https://jitpack.io/#dev.patrickgold/jetpref). Thus the JitPack
 repository needs to be added in your global repository config first:
 
 ```kts
@@ -19,6 +33,8 @@ subprojects {
     }
 }
 ```
+
+### Adding the dependencies
 
 Then in your app module `build.gradle.kts`, add the dependencies:
 
