@@ -23,4 +23,5 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.mannodermaus.android.junit5) apply false
+    alias(libs.plugins.vanniktech.maven.publish) apply false
 }

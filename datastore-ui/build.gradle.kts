@@ -20,25 +20,24 @@
 plugins {
     alias(libs.plugins.agp.library)
     alias(libs.plugins.kotlin.android)
-    id("maven-publish")
+    alias(libs.plugins.vanniktech.maven.publish)
 }
 
-val jetprefCompileSdk: String by project
-val jetprefMinSdk: String by project
-val jetprefTargetSdk: String by project
-
-val jetprefMavenGroupId: String by project
-val jetprefJitpackGroupId: String by project
-val jetprefVersion: String by project
+val projectCompileSdk: String by project
+val projectMinSdk: String by project
+val projectGroupId: String by project
+val artifactId = "jetpref-datastore-ui"
+val projectVersion: String by project
 
 android {
-    compileSdk = jetprefCompileSdk.toInt()
+    namespace = "dev.patrickgold.jetpref.datastore.ui"
+    compileSdk = projectCompileSdk.toInt()
 
     defaultConfig {
-        minSdk = jetprefMinSdk.toInt()
-        targetSdk = jetprefTargetSdk.toInt()
+        minSdk = projectMinSdk.toInt()
         consumerProguardFiles("proguard-rules.pro")
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -61,10 +60,6 @@ android {
             }
         }
     }
-
-    publishing {
-        singleVariant("release")
-    }
 }
 
 dependencies {
@@ -85,44 +80,6 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
     from(android.sourceSets.getByName("main").java.srcDirs)
 }
 
-group = jetprefJitpackGroupId
-version = jetprefVersion
-
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("datastoreUiRelease").apply {
-                from(components.findByName("release"))
-                artifact(sourcesJar)
-
-                groupId = jetprefMavenGroupId
-                artifactId = "jetpref-datastore-ui"
-                version = jetprefVersion
-
-                pom {
-                    name.set("JetPref DataStore UI")
-                    description.set("An AndroidX preference like UI for JetPref datastore settings, written in Jetpack Compose.")
-                    url.set("https://patrickgold.dev/jetpref")
-                    licenses {
-                        license {
-                            name.set("The Apache License, Version 2.0")
-                            url.set("http://www.apache.org/licenses/LICENSE-2.0")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set("patrickgold")
-                            name.set("Patrick Goldinger")
-                            email.set("patrick@patrickgold.dev")
-                        }
-                    }
-                    scm {
-                        connection.set("scm:git:https://github.com/patrickgold/jetpref/")
-                        developerConnection.set("scm:git:https://github.com/patrickgold/jetpref/")
-                        url.set("https://github.com/patrickgold/jetpref/")
-                    }
-                }
-            }
-        }
-    }
+mavenPublishing {
+    coordinates(projectGroupId, artifactId, projectVersion)
 }
