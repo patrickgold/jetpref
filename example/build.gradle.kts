@@ -22,20 +22,21 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
-val jetprefCompileSdk: String by project
-val jetprefMinSdk: String by project
-val jetprefTargetSdk: String by project
+val projectCompileSdk: String by project
+val projectMinSdk: String by project
+val projectTargetSdk: String by project
+val projectVersion: String by project
 
 android {
     namespace = "dev.patrickgold.jetpref.example"
-    compileSdk = jetprefCompileSdk.toInt()
+    compileSdk = projectCompileSdk.toInt()
 
     defaultConfig {
         applicationId = "dev.patrickgold.jetpref.example"
-        minSdk = jetprefMinSdk.toInt()
-        targetSdk = jetprefTargetSdk.toInt()
+        minSdk = projectMinSdk.toInt()
+        targetSdk = projectTargetSdk.toInt()
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = projectVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,7 +70,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.androidx.compose.compiler.get()
     }
-    packagingOptions {
+    packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }

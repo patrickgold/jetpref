@@ -19,12 +19,12 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    id("maven-publish")
+    alias(libs.plugins.vanniktech.maven.publish)
 }
 
-val jetprefMavenGroupId: String by project
-val jetprefJitpackGroupId: String by project
-val jetprefVersion: String by project
+val projectGroupId: String by project
+val artifactId = "jetpref-datastore-annotations"
+val projectVersion: String by project
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -48,44 +48,6 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
     from(sourceSets.getByName("main").java.srcDirs)
 }
 
-group = jetprefJitpackGroupId
-version = jetprefVersion
-
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("datastoreAnnotationsRelease").apply {
-                from(components.findByName("java"))
-                artifact(sourcesJar)
-
-                groupId = jetprefMavenGroupId
-                artifactId = "jetpref-datastore-annotations"
-                version = jetprefVersion
-
-                pom {
-                    name.set("JetPref DataStore Annotations")
-                    description.set("An alternative model to SharedPreferences.")
-                    url.set("https://patrickgold.dev/jetpref")
-                    licenses {
-                        license {
-                            name.set("The Apache License, Version 2.0")
-                            url.set("http://www.apache.org/licenses/LICENSE-2.0")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set("patrickgold")
-                            name.set("Patrick Goldinger")
-                            email.set("patrick@patrickgold.dev")
-                        }
-                    }
-                    scm {
-                        connection.set("scm:git:https://github.com/patrickgold/jetpref/")
-                        developerConnection.set("scm:git:https://github.com/patrickgold/jetpref/")
-                        url.set("https://github.com/patrickgold/jetpref/")
-                    }
-                }
-            }
-        }
-    }
+mavenPublishing {
+    coordinates(projectGroupId, artifactId, projectVersion)
 }
