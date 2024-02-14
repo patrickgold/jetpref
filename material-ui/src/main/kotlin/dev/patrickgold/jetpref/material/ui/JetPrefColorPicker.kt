@@ -18,9 +18,9 @@ package dev.patrickgold.jetpref.material.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -40,7 +40,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -153,7 +153,7 @@ fun Modifier.checkeredBackground(
     evenColor: Color = Color.Unspecified,
     oddColor: Color = Color.Unspecified,
 ): Modifier = composed {
-    val even = evenColor.takeOrElse { MaterialTheme.colors.onBackground.copy(alpha = 0.160784314f) }
+    val even = evenColor.takeOrElse { MaterialTheme.colors.onBackground.copy(alpha = 0.16078432f) }
     val odd = oddColor.takeOrElse { Color.Transparent }
 
     this.drawBehind {
@@ -200,14 +200,12 @@ private fun HueBar(
                 onColorChange(state.color())
             }
 
-            forEachGesture {
-                awaitPointerEventScope {
-                    val down = awaitFirstDown()
-                    updateSlider(down.position)
-                    drag(down.id) { change ->
-                        if (change.positionChange() != Offset.Zero) change.consume()
-                        updateSlider(change.position)
-                    }
+            awaitEachGesture {
+                val down = awaitFirstDown()
+                updateSlider(down.position)
+                drag(down.id) { change ->
+                    if (change.positionChange() != Offset.Zero) change.consume()
+                    updateSlider(change.position)
                 }
             }
         }
@@ -247,14 +245,12 @@ private fun AlphaBar(
                 onColorChange(state.color())
             }
 
-            forEachGesture {
-                awaitPointerEventScope {
-                    val down = awaitFirstDown()
-                    updateSlider(down.position)
-                    drag(down.id) { change ->
-                        if (change.positionChange() != Offset.Zero) change.consume()
-                        updateSlider(change.position)
-                    }
+            awaitEachGesture {
+                val down = awaitFirstDown()
+                updateSlider(down.position)
+                drag(down.id) { change ->
+                    if (change.positionChange() != Offset.Zero) change.consume()
+                    updateSlider(change.position)
                 }
             }
         }
@@ -295,14 +291,12 @@ private fun SaturationValueBox(
                 onColorChange(state.color())
             }
 
-            forEachGesture {
-                awaitPointerEventScope {
-                    val down = awaitFirstDown()
-                    updateBox(down.position)
-                    drag(down.id) { change ->
-                        if (change.positionChange() != Offset.Zero) change.consume()
-                        updateBox(change.position)
-                    }
+            awaitEachGesture {
+                val down = awaitFirstDown()
+                updateBox(down.position)
+                drag(down.id) { change ->
+                    if (change.positionChange() != Offset.Zero) change.consume()
+                    updateBox(change.position)
                 }
             }
         }
@@ -521,10 +515,10 @@ private class JetPrefColorPickerStateImpl(
     initValue: Float = 1f,
     initAlpha: Float = 1f,
 ) : JetPrefColorPickerState {
-    override var hue by mutableStateOf(initHue)
-    override var saturation by mutableStateOf(initSaturation)
-    override var value by mutableStateOf(initValue)
-    override var alpha by mutableStateOf(initAlpha)
+    override var hue by mutableFloatStateOf(initHue)
+    override var saturation by mutableFloatStateOf(initSaturation)
+    override var value by mutableFloatStateOf(initValue)
+    override var alpha by mutableFloatStateOf(initAlpha)
 }
 
 private interface ShaderBase {

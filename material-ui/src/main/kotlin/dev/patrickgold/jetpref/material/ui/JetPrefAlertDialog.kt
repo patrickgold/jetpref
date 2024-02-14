@@ -37,7 +37,6 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -89,7 +88,6 @@ import androidx.compose.ui.window.DialogProperties
  * @see androidx.compose.material.AlertDialog
  * @see androidx.compose.ui.window.Dialog
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun JetPrefAlertDialog(
     title: String,
@@ -154,7 +152,7 @@ fun JetPrefAlertDialog(
                     content()
                 }
                 Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
-                    if (neutralLabel != null && neutralLabel.isNotBlank()) {
+                    if (!neutralLabel.isNullOrBlank()) {
                         TextButton(
                             onClick = onNeutral,
                             modifier = Modifier.padding(end = 8.dp),
@@ -164,7 +162,7 @@ fun JetPrefAlertDialog(
                         }
                     }
                     Spacer(modifier = Modifier.weight(1.0f))
-                    if (dismissLabel != null && dismissLabel.isNotBlank()) {
+                    if (!dismissLabel.isNullOrBlank()) {
                         TextButton(
                             onClick = onDismiss,
                             modifier = Modifier.padding(end = 8.dp),
@@ -173,7 +171,7 @@ fun JetPrefAlertDialog(
                             Text(dismissLabel)
                         }
                     }
-                    if (confirmLabel != null && confirmLabel.isNotBlank()) {
+                    if (!confirmLabel.isNullOrBlank()) {
                         TextButton(
                             onClick = onConfirm,
                             colors = confirmColors,

@@ -17,7 +17,6 @@
 plugins {
     alias(libs.plugins.agp.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.mannodermaus.android.junit5)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 

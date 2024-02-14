@@ -24,7 +24,7 @@ internal inline fun whenNotNullOrBlank(
     crossinline composer: @Composable (text: String) -> Unit,
 ): @Composable (() -> Unit)? {
     return when {
-        string != null && string.isNotBlank() -> ({ composer(string) })
+        !string.isNullOrBlank() -> ({ composer(string) })
         else -> null
     }
 }

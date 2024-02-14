@@ -28,6 +28,7 @@ import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -67,7 +68,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
 
     val prefValue by pref.observeAsState()
-    val (sliderValue, setSliderValue) = remember { mutableStateOf(0.0f) }
+    val (sliderValue, setSliderValue) = remember { mutableFloatStateOf(0.0f) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     val evalScope = PreferenceDataEvaluatorScope.instance()
