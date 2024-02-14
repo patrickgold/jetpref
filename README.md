@@ -1,9 +1,9 @@
-# JetPref [![](https://jitpack.io/v/dev.patrickgold/jetpref.svg)](https://jitpack.io/#dev.patrickgold/jetpref)
+# JetPref [![Maven Central Version](https://img.shields.io/maven-central/v/dev.patrickgold.jetpref/jetpref-datastore-model)](https://mvnrepository.com/search?q=dev.patrickgold.jetpref)
 
 A preference library (custom data handling + UI in JetPack Compose) for Android 6.0+ mainly developed for use in
 [FlorisBoard](https://github.com/florisboard/florisboard). Currently in early-beta phase.
 
-Disclaimer: This library is still in early-beta and therefore should only be used with caution in production code. It is
+Disclaimer: This library is still in beta and therefore should only be used with caution in production code. It is
 currently tested out in FlorisBoard, so bugs or other issues in runtime use can be found and fixed. Feel free to ask if
 you need help using this library or to file feature requests / bug reports in the issue's page!
 
@@ -385,7 +385,7 @@ A separate documentation page (with dokka) for the API and improved tutorials / 
 ## License
 
 ```
-Copyright 2021-2022 Patrick Goldinger
+Copyright 2021-2024 Patrick Goldinger
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
