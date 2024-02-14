@@ -1,6 +1,6 @@
 [versions]
 # Main
-android-gradle-plugin = "8.0.0"
+android-gradle-plugin = "8.2.2"
 androidx-activity = "1.5.1"
 androidx-compose = "1.4.3"
 androidx-compose-compiler = "1.4.7"
