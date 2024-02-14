@@ -155,14 +155,14 @@ abstract class PreferenceModel(val name: String) {
         return prefData
     }
 
-    suspend fun initialize(context: Context) = registryGuard.withLock {
+    suspend fun initialize(context: Context, readOnly: Boolean = false) = registryGuard.withLock {
         runSafely { datastorePersistenceHandler?.cancelJobsAndJoin() }
         persistReq.set(false)
-        runSafely { datastorePersistenceHandler = PersistenceHandler(context) }
+        runSafely { datastorePersistenceHandler = PersistenceHandler(context, readOnly) }
     }
 
-    fun initializeBlocking(context: Context) = runBlocking {
-        initialize(context)
+    fun initializeBlocking(context: Context, readOnly: Boolean = false) = runBlocking {
+        initialize(context, readOnly)
     }
 
     /**
@@ -218,7 +218,7 @@ abstract class PreferenceModel(val name: String) {
         }
     }
 
-    inner class PersistenceHandler(context: Context) {
+    inner class PersistenceHandler(context: Context, readOnly: Boolean) {
         private val datastoreDir: File = context.jetprefDatastoreDir
         private val datastoreFile = datastoreDir.jetprefDatastoreFile(name)
         private val tempDir: File = context.jetprefTempDir
@@ -227,7 +227,7 @@ abstract class PreferenceModel(val name: String) {
         private val ioJob = ioScope.launch(Dispatchers.IO) {
             runSafely { loadPrefs(datastoreFile, reset = true) }
             while (isActive) {
-                if (datastoreReadyStatus.get() && persistReq.getAndSet(false)) {
+                if (datastoreReadyStatus.get() && persistReq.getAndSet(false) && !readOnly) {
                     runSafely { persistPrefs() }
                 }
                 delay(JetPref.saveIntervalMs)
