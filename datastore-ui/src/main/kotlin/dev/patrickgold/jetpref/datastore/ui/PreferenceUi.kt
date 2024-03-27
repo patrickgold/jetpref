@@ -16,7 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.rememberScrollState
@@ -137,10 +136,10 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
  * Material preference group which automatically provides a title UI.
  *
  * @param modifier Modifier to be applied to this group.
- * @param iconId The icon ID of the group title icon.
+ * @param icon The [JetIcon] of the group title.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
- *  space) if no icon ID is provided. Also acts as a local setting if all sub-preference composables
- *  should reserve an additional space if no icon is specified. Can be overridden for each individual
+ *  space) if no `icon` is provided. Also acts as a local setting if all sub-preference composables
+ *  should reserve an additional space if no icon is specified. It Can be overridden for each
  *  preference composable.
  * @param title The title of this preference group.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference layout
@@ -155,7 +154,7 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     enabledIf: PreferenceDataEvaluator = { true },
@@ -174,7 +173,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
             )
 
             ListItem(
-                icon = maybeJetIcon(iconId, iconSpaceReserved),
+                icon = icon?.getIcon(iconSpaceReserved),
                 text = { Text(
                     text = title,
                     color = MaterialTheme.colors.secondary,
