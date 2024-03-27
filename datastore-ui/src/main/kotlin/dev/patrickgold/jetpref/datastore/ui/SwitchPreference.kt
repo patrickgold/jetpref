@@ -56,7 +56,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     pref: PreferenceData<Boolean>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summary: String? = null,
@@ -78,7 +78,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                     role = Role.Switch,
                     onValueChange = { pref.set(it) }
                 ),
-            icon = icon?.getIcon(iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved),
             text = title,
             secondaryText = when {
                 prefValue && summaryOn != null -> summaryOn

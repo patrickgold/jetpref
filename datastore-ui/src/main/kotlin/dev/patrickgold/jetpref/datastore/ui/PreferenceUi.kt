@@ -154,7 +154,7 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     enabledIf: PreferenceDataEvaluator = { true },
@@ -173,7 +173,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
             )
 
             ListItem(
-                icon = icon?.getIcon(iconSpaceReserved),
+                icon = icon.getIcon(iconSpaceReserved),
                 text = { Text(
                     text = title,
                     color = MaterialTheme.colors.secondary,

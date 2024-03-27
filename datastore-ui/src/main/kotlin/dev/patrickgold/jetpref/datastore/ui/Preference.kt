@@ -51,7 +51,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summary: String? = null,
@@ -73,7 +73,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
             } else {
                 modifier
             },
-            icon = icon?.getIcon(iconSpaceReserved = iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved = iconSpaceReserved),
             text = title,
             secondaryText = summary,
             trailing = trailing,

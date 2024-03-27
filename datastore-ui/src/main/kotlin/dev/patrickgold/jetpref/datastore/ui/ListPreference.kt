@@ -197,7 +197,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     listPref: PreferenceData<V>,
     switchPref: PreferenceData<Boolean>? = null,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summarySwitchDisabled: String? = null,
@@ -228,7 +228,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                         isDialogOpen.value = true
                     }
                 ),
-            icon = icon?.getIcon(iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved),
             text = title,
             secondaryText = if (switchPrefValue?.value == true || switchPrefValue == null) {
                 entries.find {

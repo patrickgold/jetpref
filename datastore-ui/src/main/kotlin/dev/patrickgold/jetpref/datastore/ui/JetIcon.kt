@@ -34,8 +34,8 @@ class DrawableResIcon(@DrawableRes private val iconId: Int?) : JetIcon {
     }
 }
 
-val ImageVector?.jetIcon: ImageVectorIcon
-    get() = ImageVectorIcon(this)
+val ImageVector?.jetIcon: JetIcon
+    get() = if (this == null) { EmptyIcon } else { ImageVectorIcon(this) }
 
-val @receiver:DrawableRes Int?.jetIcon: DrawableResIcon
-    get() = DrawableResIcon(this)
+val @receiver:DrawableRes Int?.jetIcon: JetIcon
+    get() = if(this == null) { EmptyIcon } else { DrawableResIcon(this) }

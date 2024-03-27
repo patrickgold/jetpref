@@ -49,7 +49,7 @@ import kotlin.math.roundToLong
 internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<V>,
     modifier: Modifier,
-    icon: JetIcon?,
+    icon: JetIcon,
     iconSpaceReserved: Boolean,
     title: String,
     valueLabel: @Composable (V) -> String,
@@ -83,7 +83,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         isDialogOpen.value = true
                     }
                 ),
-            icon = icon?.getIcon(iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved),
             text = title,
             secondaryText = summary(prefValue),
             enabled = isEnabled,
@@ -138,7 +138,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     modifier: Modifier,
-    icon: JetIcon?,
+    icon: JetIcon,
     iconSpaceReserved: Boolean,
     title: String,
     primaryLabel: String,
@@ -178,7 +178,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         isDialogOpen.value = true
                     }
                 ),
-            icon = icon?.getIcon(iconSpaceReserved = iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved = iconSpaceReserved),
             text = title,
             secondaryText = summary(primaryPrefValue, secondaryPrefValue),
             enabled = isEnabled,
@@ -288,7 +288,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Int) -> String = { it.toString() },
@@ -352,7 +352,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Int>,
     secondaryPref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
@@ -413,7 +413,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Long) -> String = { it.toString() },
@@ -477,7 +477,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Long>,
     secondaryPref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
@@ -538,7 +538,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Double) -> String = { it.toString() },
@@ -596,7 +596,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Double>,
     secondaryPref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
@@ -651,7 +651,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Float) -> String = { it.toString() },
@@ -709,7 +709,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Float>,
     secondaryPref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
-    icon: JetIcon? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
