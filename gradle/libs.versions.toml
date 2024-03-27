@@ -6,6 +6,7 @@ androidx-compose = "1.6.1"
 androidx-compose-compiler = "1.5.9"
 androidx-core = "1.12.0"
 androidx-lifecycle = "2.7.0"
+androidx-material-icons = "1.6.4"
 androidx-navigation = "2.7.7"
 kotlin = "1.9.22"
 kotlinx-coroutines = "1.7.3"
@@ -25,6 +26,7 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", versi
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "androidx-compose" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-material-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "androidx-material-icons" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 
