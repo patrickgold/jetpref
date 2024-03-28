@@ -16,7 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,7 +49,7 @@ import kotlin.math.roundToLong
 internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<V>,
     modifier: Modifier,
-    @DrawableRes iconId: Int?,
+    icon: JetIcon,
     iconSpaceReserved: Boolean,
     title: String,
     valueLabel: @Composable (V) -> String,
@@ -84,7 +83,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         isDialogOpen.value = true
                     }
                 ),
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved),
             text = title,
             secondaryText = summary(prefValue),
             enabled = isEnabled,
@@ -139,7 +138,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     modifier: Modifier,
-    @DrawableRes iconId: Int?,
+    icon: JetIcon,
     iconSpaceReserved: Boolean,
     title: String,
     primaryLabel: String,
@@ -179,7 +178,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         isDialogOpen.value = true
                     }
                 ),
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved = iconSpaceReserved),
             text = title,
             secondaryText = summary(primaryPrefValue, secondaryPrefValue),
             enabled = isEnabled,
@@ -262,7 +261,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
  *
  * @param pref The integer preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -289,7 +288,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Int) -> String = { it.toString() },
@@ -303,7 +302,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
@@ -320,7 +319,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary integer preference data entry from the datastore.
  * @param secondaryPref The secondary integer preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -353,7 +352,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Int>,
     secondaryPref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
@@ -370,9 +369,9 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
-        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
+        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToInt()
@@ -387,7 +386,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The long preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -414,7 +413,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Long) -> String = { it.toString() },
@@ -428,7 +427,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
@@ -445,7 +444,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary long preference data entry from the datastore.
  * @param secondaryPref The secondary long preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -478,7 +477,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Long>,
     secondaryPref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
@@ -495,9 +494,9 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
-        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
+        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToLong()
@@ -512,7 +511,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The double preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -539,7 +538,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Double) -> String = { it.toString() },
@@ -553,7 +552,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
@@ -564,7 +563,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary double preference data entry from the datastore.
  * @param secondaryPref The secondary double preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -597,7 +596,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Double>,
     secondaryPref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
@@ -614,9 +613,9 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
-        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
+        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
 
@@ -625,7 +624,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The float preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -652,7 +651,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
 fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     pref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     valueLabel: @Composable (Float) -> String = { it.toString() },
@@ -666,7 +665,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, iconId, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
@@ -677,7 +676,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary float preference data entry from the datastore.
  * @param secondaryPref The secondary float preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -710,7 +709,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     primaryPref: PreferenceData<Float>,
     secondaryPref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     primaryLabel: String,
@@ -727,8 +726,8 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, iconId, iconSpaceReserved, title,
-        primaryLabel, secondaryLabel, valueLabel, summary, min, max, stepIncrement,
-        onPreviewSelectedPrimaryValue, onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
+        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }

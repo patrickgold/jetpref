@@ -17,7 +17,6 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import android.annotation.SuppressLint
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -198,7 +197,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     listPref: PreferenceData<V>,
     switchPref: PreferenceData<Boolean>? = null,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summarySwitchDisabled: String? = null,
@@ -229,7 +228,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                         isDialogOpen.value = true
                     }
                 ),
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved),
             text = title,
             secondaryText = if (switchPrefValue?.value == true || switchPrefValue == null) {
                 entries.find {

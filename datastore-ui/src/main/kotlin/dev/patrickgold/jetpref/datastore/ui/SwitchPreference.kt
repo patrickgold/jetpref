@@ -16,7 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Switch
@@ -37,9 +36,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  *
  * @param pref The boolean preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
- * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
- *  space) if no icon ID is provided.
+ * @param icon The [JetIcon] of the list entry.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
  * @param summaryOn The summary of this preference if the state is `true`. If this is specified it
@@ -51,13 +48,15 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
  *  visible (true) or hidden (false).
  *
+ * @see maybeJetIcon
+ *
  * @since 0.1.0
  */
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
     pref: PreferenceData<Boolean>,
     modifier: Modifier = Modifier,
-    @DrawableRes iconId: Int? = null,
+    icon: JetIcon = EmptyIcon,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summary: String? = null,
@@ -79,7 +78,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                     role = Role.Switch,
                     onValueChange = { pref.set(it) }
                 ),
-            icon = maybeJetIcon(iconId, iconSpaceReserved),
+            icon = icon.getIcon(iconSpaceReserved),
             text = title,
             secondaryText = when {
                 prefValue && summaryOn != null -> summaryOn

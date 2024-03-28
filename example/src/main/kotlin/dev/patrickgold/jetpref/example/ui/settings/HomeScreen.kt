@@ -17,6 +17,8 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import dev.patrickgold.jetpref.datastore.model.observeAsState
@@ -27,6 +29,7 @@ import dev.patrickgold.jetpref.datastore.ui.Preference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
+import dev.patrickgold.jetpref.datastore.ui.jetIcon
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
@@ -47,6 +50,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     )
     ListPreference(
         prefs.theme,
+        icon = Icons.Default.Palette.jetIcon,
         title = "Theme",
         entries = Theme.listEntries(),
     )
@@ -67,7 +71,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     )
     SwitchPreference(
         prefs.showExampleGroup,
-        iconId = R.drawable.ic_question_answer_black_24dp,
+        icon = R.drawable.ic_question_answer_black_24dp.jetIcon,
         title = "Show example group",
         summary = "Show/hide the example group",
     )
@@ -78,7 +82,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         )
         SwitchPreference(
             prefs.example.isButtonShowing2,
-            iconId = R.drawable.ic_question_answer_black_24dp,
+            icon = R.drawable.ic_question_answer_black_24dp.jetIcon,
             title = "isBtnShow2",
             summaryOn = "Hello",
             summaryOff = "Bye",
