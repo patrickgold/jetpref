@@ -261,7 +261,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
  *
  * @param pref The integer preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -319,7 +319,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary integer preference data entry from the datastore.
  * @param secondaryPref The secondary integer preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -386,7 +386,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The long preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -444,7 +444,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary long preference data entry from the datastore.
  * @param secondaryPref The secondary long preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -511,7 +511,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The double preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -563,7 +563,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary double preference data entry from the datastore.
  * @param secondaryPref The secondary double preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -624,7 +624,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The float preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -676,7 +676,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary float preference data entry from the datastore.
  * @param secondaryPref The secondary float preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [JetIcon] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
