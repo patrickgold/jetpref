@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
@@ -29,8 +30,8 @@ import dev.patrickgold.jetpref.datastore.ui.Preference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
-import dev.patrickgold.jetpref.datastore.ui.jetIcon
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
+import dev.patrickgold.jetpref.datastore.ui.vectorResource
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.examplePreferenceModel
@@ -41,6 +42,7 @@ import dev.patrickgold.jetpref.example.ui.theme.Theme
 fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     val navController = LocalNavController.current
 
+    val context = LocalContext.current
     val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
     Text(text = "is datastore ready = $isDatastoreReady")
 
@@ -50,7 +52,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     )
     ListPreference(
         prefs.theme,
-        icon = Icons.Default.Palette.jetIcon,
+        icon = Icons.Default.Palette,
         title = "Theme",
         entries = Theme.listEntries(),
     )
@@ -71,7 +73,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     )
     SwitchPreference(
         prefs.showExampleGroup,
-        icon = R.drawable.ic_question_answer_black_24dp.jetIcon,
+        icon = context.vectorResource(R.drawable.ic_question_answer_black_24dp),
         title = "Show example group",
         summary = "Show/hide the example group",
     )
@@ -82,7 +84,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         )
         SwitchPreference(
             prefs.example.isButtonShowing2,
-            icon = R.drawable.ic_question_answer_black_24dp.jetIcon,
+            icon = context.vectorResource(R.drawable.ic_question_answer_black_24dp),
             title = "isBtnShow2",
             summaryOn = "Hello",
             summaryOff = "Bye",
