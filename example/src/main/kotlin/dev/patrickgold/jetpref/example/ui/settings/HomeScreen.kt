@@ -42,7 +42,6 @@ import dev.patrickgold.jetpref.example.ui.theme.Theme
 fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     val navController = LocalNavController.current
 
-    val context = LocalContext.current
     val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
     Text(text = "is datastore ready = $isDatastoreReady")
 
@@ -73,7 +72,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     )
     SwitchPreference(
         prefs.showExampleGroup,
-        icon = context.vectorResource(R.drawable.ic_question_answer_black_24dp),
+        icon = vectorResource(R.drawable.ic_question_answer_black_24dp),
         title = "Show example group",
         summary = "Show/hide the example group",
     )
@@ -84,7 +83,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         )
         SwitchPreference(
             prefs.example.isButtonShowing2,
-            icon = context.vectorResource(R.drawable.ic_question_answer_black_24dp),
+            icon = vectorResource(R.drawable.ic_question_answer_black_24dp),
             title = "isBtnShow2",
             summaryOn = "Hello",
             summaryOff = "Bye",
