@@ -7,7 +7,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 
-
+/**
+ * Retrieves the [ImageVector] corresponding to the provided drawable resource ID.
+ *
+ * @param id The resource ID of the drawable.
+ * @return The [ImageVector] corresponding to the provided resource ID, or null if an error occurs.
+ *
+ * @since 0.1.0
+ */
 fun Context.vectorResource(@DrawableRes id: Int): ImageVector? {
     val theme = this.theme
     return try {
@@ -17,6 +24,14 @@ fun Context.vectorResource(@DrawableRes id: Int): ImageVector? {
     }
 }
 
+/**
+ * Retrieves the [ImageVector] corresponding to the provided drawable resource ID within the current Composable context.
+ *
+ * @param id The resource ID of the drawable.
+ * @return The [ImageVector] corresponding to the provided resource ID, or null if an error occurs.
+ *
+ * @since 0.1.0
+ */
 @Composable
 inline fun vectorResource(@DrawableRes id: Int): ImageVector? {
     val context = LocalContext.current
