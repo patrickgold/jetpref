@@ -26,6 +26,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import dev.patrickgold.jetpref.datastore.CachedPreferenceModel
@@ -154,7 +155,7 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
     modifier: Modifier = Modifier,
-    icon: JetIcon = EmptyIcon,
+    icon: ImageVector? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     enabledIf: PreferenceDataEvaluator = { true },
@@ -173,7 +174,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
             )
 
             ListItem(
-                icon = icon.getIcon(iconSpaceReserved),
+                icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
                 text = { Text(
                     text = title,
                     color = MaterialTheme.colors.secondary,

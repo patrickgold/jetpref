@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.DpSize
@@ -197,7 +198,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     listPref: PreferenceData<V>,
     switchPref: PreferenceData<Boolean>? = null,
     modifier: Modifier = Modifier,
-    icon: JetIcon = EmptyIcon,
+    icon: ImageVector? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summarySwitchDisabled: String? = null,
@@ -228,7 +229,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                         isDialogOpen.value = true
                     }
                 ),
-            icon = icon.getIcon(iconSpaceReserved),
+            icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
             text = title,
             secondaryText = if (switchPrefValue?.value == true || switchPrefValue == null) {
                 entries.find {

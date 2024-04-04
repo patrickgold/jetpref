@@ -19,6 +19,7 @@ package dev.patrickgold.jetpref.datastore.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
@@ -51,7 +52,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
     modifier: Modifier = Modifier,
-    icon: JetIcon = EmptyIcon,
+    icon: ImageVector? = null,
     iconSpaceReserved: Boolean = this.iconSpaceReserved,
     title: String,
     summary: String? = null,
@@ -73,7 +74,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
             } else {
                 modifier
             },
-            icon = icon.getIcon(iconSpaceReserved = iconSpaceReserved),
+            icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
             text = title,
             secondaryText = summary,
             trailing = trailing,

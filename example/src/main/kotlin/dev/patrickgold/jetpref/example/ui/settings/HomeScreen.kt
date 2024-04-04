@@ -29,8 +29,8 @@ import dev.patrickgold.jetpref.datastore.ui.Preference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
-import dev.patrickgold.jetpref.datastore.ui.jetIcon
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
+import dev.patrickgold.jetpref.datastore.ui.vectorResource
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.examplePreferenceModel
@@ -50,7 +50,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     )
     ListPreference(
         prefs.theme,
-        icon = Icons.Default.Palette.jetIcon,
+        icon = Icons.Default.Palette,
         title = "Theme",
         entries = Theme.listEntries(),
     )
@@ -71,7 +71,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     )
     SwitchPreference(
         prefs.showExampleGroup,
-        icon = R.drawable.ic_question_answer_black_24dp.jetIcon,
+        icon = vectorResource(R.drawable.ic_question_answer_black_24dp),
         title = "Show example group",
         summary = "Show/hide the example group",
     )
@@ -82,7 +82,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         )
         SwitchPreference(
             prefs.example.isButtonShowing2,
-            icon = R.drawable.ic_question_answer_black_24dp.jetIcon,
+            icon = vectorResource(R.drawable.ic_question_answer_black_24dp),
             title = "isBtnShow2",
             summaryOn = "Hello",
             summaryOff = "Bye",

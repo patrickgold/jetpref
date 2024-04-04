@@ -16,29 +16,10 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 
-@Composable
-internal fun maybeJetIcon(
-    @DrawableRes id: Int?,
-    iconSpaceReserved: Boolean,
-    contentDescription: String? = null,
-): @Composable (() -> Unit)? {
-    return when {
-        id != null -> ({
-            Icon(
-                painter = painterResource(id),
-                contentDescription = contentDescription,
-            )
-        })
-        iconSpaceReserved -> ({ })
-        else -> null
-    }
-}
 
 @Composable
 internal fun maybeJetIcon(
