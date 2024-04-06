@@ -10,7 +10,7 @@ androidx-material-icons = "1.6.4"
 androidx-navigation = "2.7.7"
 kotlin = "1.9.22"
 kotlinx-coroutines = "1.7.3"
-vanniktech-maven-publish = "0.25.2"
+vanniktech-maven-publish = "0.28.0"
 
 # Testing
 kotest = "5.4.0"
