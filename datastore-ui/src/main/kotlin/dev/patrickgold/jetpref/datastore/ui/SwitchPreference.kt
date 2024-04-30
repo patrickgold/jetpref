@@ -18,7 +18,7 @@ package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material.Switch
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -37,7 +37,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  *
  * @param pref The boolean preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
  * @param summaryOn The summary of this preference if the state is `true`. If this is specified it

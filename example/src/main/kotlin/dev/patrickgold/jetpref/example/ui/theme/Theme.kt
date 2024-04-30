@@ -1,22 +1,27 @@
 package dev.patrickgold.jetpref.example.ui.theme
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 
-private val DarkColorPalette = darkColors(
+private val DarkColorPalette = darkColorScheme(
     primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    secondary = Purple700,
+    tertiary = Teal200
 )
 
-private val LightColorPalette = lightColors(
+private val LightColorPalette = lightColorScheme(
     primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    secondary = Purple700,
+    tertiary = Teal200
 
     /* Other default colors to override
     background = Color.White,
@@ -29,15 +34,31 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
+private fun colors(darkTheme: Boolean) = if (darkTheme) {
+    DarkColorPalette
+} else {
+    LightColorPalette
+}
+
+@RequiresApi(Build.VERSION_CODES.S)
+@Composable
+private fun dynamicColors(darkTheme: Boolean) = if (darkTheme) {
+    dynamicDarkColorScheme(LocalContext.current)
+} else {
+    dynamicLightColorScheme(LocalContext.current)
+}
+
+@Composable
 fun JetPrefTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
+
+    val colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        dynamicColors(darkTheme = darkTheme)
     } else {
-        LightColorPalette
+        colors(darkTheme = darkTheme)
     }
 
     MaterialTheme(
-        colors = colors,
+        colorScheme = colors,
         typography = Typography,
         shapes = Shapes,
         content = content

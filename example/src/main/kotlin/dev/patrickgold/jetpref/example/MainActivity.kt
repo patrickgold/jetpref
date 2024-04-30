@@ -5,10 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -43,7 +45,7 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(LocalNavController provides navController) {
                 JetPrefTheme(isDark) {
                     // A surface container using the 'background' color from the theme
-                    Surface(color = MaterialTheme.colors.background) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
                         AppContent(navController)
                     }
                 }
@@ -52,6 +54,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppContent(navController: NavHostController) {
     ProvideDefaultDialogPrefStrings(
@@ -62,7 +65,7 @@ fun AppContent(navController: NavHostController) {
         Column {
             TopAppBar(
                 title = { Text(text = "Example JetPref App") },
-                backgroundColor = MaterialTheme.colors.surface
+                colors = TopAppBarDefaults.topAppBarColors()
             )
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeScreen() }

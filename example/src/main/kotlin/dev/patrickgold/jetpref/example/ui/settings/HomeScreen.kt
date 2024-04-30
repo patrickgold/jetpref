@@ -16,9 +16,9 @@
 
 package dev.patrickgold.jetpref.example.ui.settings
 
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import dev.patrickgold.jetpref.datastore.model.observeAsState
@@ -75,7 +75,11 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         title = "Show example group",
         summary = "Show/hide the example group",
     )
-    PreferenceGroup(title = "Example group", visibleIf = { prefs.showExampleGroup isEqualTo true }) {
+    PreferenceGroup(
+        title = "Example group",
+        visibleIf = { prefs.showExampleGroup isEqualTo true },
+        iconSpaceReserved = true,
+    ) {
         SwitchPreference(
             prefs.example.isButtonShowing,
             title = "isBtnShow",

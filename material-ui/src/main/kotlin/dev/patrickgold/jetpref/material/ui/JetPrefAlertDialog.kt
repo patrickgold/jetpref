@@ -17,33 +17,26 @@
 package dev.patrickgold.jetpref.material.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
 /**
@@ -85,9 +78,10 @@ import androidx.compose.ui.window.DialogProperties
  *
  * @since 0.1.0
  *
- * @see androidx.compose.material.AlertDialog
+ * @see androidx.compose.material3.AlertDialog
  * @see androidx.compose.ui.window.Dialog
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JetPrefAlertDialog(
     title: String,
@@ -106,16 +100,58 @@ fun JetPrefAlertDialog(
     trailingIconTitle: @Composable () -> Unit = { },
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     scrollModifier: Modifier = Modifier.verticalScroll(rememberScrollState()),
-    shape: Shape = MaterialTheme.shapes.medium,
-    backgroundColor: Color = MaterialTheme.colors.surface,
+    shape: Shape = MaterialTheme.shapes.extraLarge,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(backgroundColor),
     contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
     content: @Composable () -> Unit,
 ) {
-    Dialog(
+    AlertDialog(
         onDismissRequest = { if (allowOutsideDismissal) onOutsideDismissal() },
-        properties = properties,
-    ) {
+        confirmButton = {
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                if (!neutralLabel.isNullOrBlank()) {
+                    TextButton(
+                        onClick = onNeutral,
+                        modifier = Modifier.padding(end = 8.dp),
+                        colors = neutralColors,
+                    ) {
+                        Text(neutralLabel)
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1.0f))
+                if (!dismissLabel.isNullOrBlank()) {
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.padding(end = 8.dp),
+                        colors = dismissColors,
+                    ) {
+                        Text(dismissLabel)
+                    }
+                }
+                if (!confirmLabel.isNullOrBlank()) {
+                    TextButton(
+                        onClick = onConfirm,
+                        colors = confirmColors,
+                    ) {
+                        Text(confirmLabel)
+                    }
+                }
+            }
+        },
+        icon = trailingIconTitle,
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                //fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        text = content,
+    )
+    /*{
         Surface(
             modifier = modifier
                 .padding(vertical = 16.dp, horizontal = 16.dp)
@@ -135,7 +171,7 @@ fun JetPrefAlertDialog(
                     Text(
                         modifier = Modifier.weight(1.0f),
                         text = title,
-                        style = MaterialTheme.typography.subtitle1,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -151,38 +187,10 @@ fun JetPrefAlertDialog(
                 ) {
                     content()
                 }
-                Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
-                    if (!neutralLabel.isNullOrBlank()) {
-                        TextButton(
-                            onClick = onNeutral,
-                            modifier = Modifier.padding(end = 8.dp),
-                            colors = neutralColors,
-                        ) {
-                            Text(neutralLabel)
-                        }
-                    }
-                    Spacer(modifier = Modifier.weight(1.0f))
-                    if (!dismissLabel.isNullOrBlank()) {
-                        TextButton(
-                            onClick = onDismiss,
-                            modifier = Modifier.padding(end = 8.dp),
-                            colors = dismissColors,
-                        ) {
-                            Text(dismissLabel)
-                        }
-                    }
-                    if (!confirmLabel.isNullOrBlank()) {
-                        TextButton(
-                            onClick = onConfirm,
-                            colors = confirmColors,
-                        ) {
-                            Text(confirmLabel)
-                        }
-                    }
-                }
+
             }
         }
-    }
+    }*/
 }
 
 /**

@@ -25,4 +25,4 @@ package dev.patrickgold.jetpref.material.ui
 @Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION, AnnotationTarget.TYPEALIAS)
 @RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 @Retention(value = AnnotationRetention.BINARY)
-annotation class ExperimentalJetPrefMaterialUi
+annotation class ExperimentalJetPrefMaterial3Ui
