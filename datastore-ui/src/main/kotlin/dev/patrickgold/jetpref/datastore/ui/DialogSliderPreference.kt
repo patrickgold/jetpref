@@ -43,6 +43,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
+import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
@@ -115,7 +116,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         value = sliderValue,
                         valueRange = min.toFloat()..max.toFloat(),
                         steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).roundToInt() - 1,
-                        onValueChange = { sliderValue = it },
+                        onValueChange = { sliderValue = round(it) },
                         onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
                         colors = SliderDefaults.colors(
                             thumbColor = MaterialTheme.colorScheme.primary,
