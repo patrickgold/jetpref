@@ -175,4 +175,50 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
             )
         },
     )
+    ListPreference(
+        listPref = prefs.example.longListPref,
+        title = "Test the scoll behaviour",
+        entries = listPrefEntries {
+            entry(
+                "str1",
+                "String 1"
+            )
+            entry(
+                "str2",
+                "String 2"
+            )
+            entry(
+                "str3",
+                "String 3"
+            )
+            entry(
+                "str4",
+                "String 4"
+            )
+            entry(
+                "str5",
+                "String 5"
+            )
+            entry(
+                "str6",
+                "String 6"
+            )
+            entry(
+                "str7",
+                "String 7"
+            )
+            entry(
+                "str8",
+                "String 8"
+            )
+            entry(
+                "str9",
+                "String 9"
+            )
+            entry(
+                "str10",
+                "String 10"
+            )
+        }
+    )
 }

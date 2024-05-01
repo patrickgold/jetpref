@@ -136,7 +136,7 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
  * Material preference group which automatically provides a title UI.
  *
  * @param modifier Modifier to be applied to this group.
- * @param icon The [JetIcon] of the group title.
+ * @param icon The [ImageVector] of the group title.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no `icon` is provided. Also acts as a local setting if all sub-preference composables
  *  should reserve an additional space if no icon is specified. It Can be overridden for each

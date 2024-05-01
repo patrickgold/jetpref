@@ -40,17 +40,15 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param icon The [ImageVector] of the list entry.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
- * @param summaryOn The summary of this preference if the state is `true`. If this is specified it
- *  will override provided [summary]. Shown as the list item secondary text (max 2 lines).
- * @param summaryOff The summary of this preference if the state is `false`. If this is specified it
- *  will override provided [summary]. Shown as the list item secondary text (max 2 lines).
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
+ * @param summaryOn The summary of this preference if the state is `true`. If this is specified it will override
+ *     provided [summary]. Shown as the list item secondary text (max 2 lines).
+ * @param summaryOff The summary of this preference if the state is `false`. If this is specified it will override
+ *     provided [summary]. Shown as the list item secondary text (max 2 lines).
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be enabled (true) or
+ *     disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be visible (true) or
+ *     hidden (false).
  * @see maybeJetIcon
- *
  * @since 0.1.0
  */
 @Composable
