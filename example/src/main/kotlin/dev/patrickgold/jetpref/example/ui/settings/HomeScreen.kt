@@ -16,9 +16,9 @@
 
 package dev.patrickgold.jetpref.example.ui.settings
 
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import dev.patrickgold.jetpref.datastore.model.observeAsState
@@ -75,7 +75,11 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         title = "Show example group",
         summary = "Show/hide the example group",
     )
-    PreferenceGroup(title = "Example group", visibleIf = { prefs.showExampleGroup isEqualTo true }) {
+    PreferenceGroup(
+        title = "Example group",
+        visibleIf = { prefs.showExampleGroup isEqualTo true },
+        iconSpaceReserved = true,
+    ) {
         SwitchPreference(
             prefs.example.isButtonShowing,
             title = "isBtnShow",
@@ -170,5 +174,51 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
                 showDescriptionOnlyIfSelected = true,
             )
         },
+    )
+    ListPreference(
+        listPref = prefs.example.longListPref,
+        title = "Test the scoll behaviour",
+        entries = listPrefEntries {
+            entry(
+                "str1",
+                "String 1"
+            )
+            entry(
+                "str2",
+                "String 2"
+            )
+            entry(
+                "str3",
+                "String 3"
+            )
+            entry(
+                "str4",
+                "String 4"
+            )
+            entry(
+                "str5",
+                "String 5"
+            )
+            entry(
+                "str6",
+                "String 6"
+            )
+            entry(
+                "str7",
+                "String 7"
+            )
+            entry(
+                "str8",
+                "String 8"
+            )
+            entry(
+                "str9",
+                "String 9"
+            )
+            entry(
+                "str10",
+                "String 10"
+            )
+        }
     )
 }

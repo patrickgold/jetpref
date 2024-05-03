@@ -34,7 +34,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * about screen.
  *
  * @param modifier Modifier to be applied to the underlying list item.
- * @param iconId The icon ID of the list entry icon.
+ * @param icon The [ImageVector] of the list entry icon.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).

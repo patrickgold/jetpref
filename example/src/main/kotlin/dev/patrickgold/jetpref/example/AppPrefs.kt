@@ -68,6 +68,11 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
             key = "test__show_title",
             default = true,
         )
+
+        val longListPref = string(
+            key = "test__long_list",
+            default = "str1"
+        )
     }
 
     // To migrate preferences, this method can be overridden (optional, if not overridden all entries are kept as is).

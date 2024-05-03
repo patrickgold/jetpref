@@ -21,15 +21,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +43,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
+import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
@@ -68,7 +70,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
 
     val prefValue by pref.observeAsState()
-    val (sliderValue, setSliderValue) = remember { mutableFloatStateOf(0.0f) }
+    var sliderValue by remember { mutableFloatStateOf(0.0f) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     val evalScope = PreferenceDataEvaluatorScope.instance()
@@ -80,7 +82,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                     enabled = isEnabled,
                     role = Role.Button,
                     onClick = {
-                        setSliderValue(prefValue.toFloat())
+                        sliderValue = prefValue.toFloat()
                         isDialogOpen.value = true
                     }
                 ),
@@ -113,15 +115,15 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                     Slider(
                         value = sliderValue,
                         valueRange = min.toFloat()..max.toFloat(),
-                        steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = { setSliderValue(it) },
+                        steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).roundToInt() - 1,
+                        onValueChange = { sliderValue = round(it) },
                         onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
                         colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colors.primary,
-                            activeTrackColor = MaterialTheme.colors.primary,
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
                             activeTickColor = Color.Transparent,
-                            inactiveTrackColor = MaterialTheme.colors.onSurface.copy(
-                                alpha = SliderDefaults.InactiveTrackAlpha,
+                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
                             ),
                             inactiveTickColor = Color.Transparent,
                         ),
@@ -161,8 +163,8 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
 
     val primaryPrefValue by primaryPref.observeAsState()
     val secondaryPrefValue by secondaryPref.observeAsState()
-    val (primarySliderValue, setPrimarySliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
-    val (secondarySliderValue, setSecondarySliderValue) = remember { mutableStateOf(convertToV(0.0f)) }
+    var primarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
+    var secondarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     val evalScope = PreferenceDataEvaluatorScope.instance()
@@ -174,8 +176,8 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                     enabled = isEnabled,
                     role = Role.Button,
                     onClick = {
-                        setPrimarySliderValue(primaryPrefValue)
-                        setSecondarySliderValue(secondaryPrefValue)
+                        primarySliderValue = primaryPrefValue
+                        secondarySliderValue = secondaryPrefValue
                         isDialogOpen.value = true
                     }
                 ),
@@ -214,14 +216,14 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         value = primarySliderValue.toFloat(),
                         valueRange = min.toFloat()..max.toFloat(),
                         steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = { setPrimarySliderValue(convertToV(it)) },
+                        onValueChange = { primarySliderValue = convertToV(it) },
                         onValueChangeFinished = { onPreviewSelectedPrimaryValue(primarySliderValue) },
                         colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colors.primary,
-                            activeTrackColor = MaterialTheme.colors.primary,
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
                             activeTickColor = Color.Transparent,
-                            inactiveTrackColor = MaterialTheme.colors.onSurface.copy(
-                                alpha = SliderDefaults.InactiveTrackAlpha,
+                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
                             ),
                             inactiveTickColor = Color.Transparent,
                         ),
@@ -238,14 +240,14 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                         value = secondarySliderValue.toFloat(),
                         valueRange = min.toFloat()..max.toFloat(),
                         steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = { setSecondarySliderValue(convertToV(it)) },
+                        onValueChange = { secondarySliderValue = convertToV(it) },
                         onValueChangeFinished = { onPreviewSelectedSecondaryValue(secondarySliderValue) },
                         colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colors.primary,
-                            activeTrackColor = MaterialTheme.colors.primary,
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
                             activeTickColor = Color.Transparent,
-                            inactiveTrackColor = MaterialTheme.colors.onSurface.copy(
-                                alpha = SliderDefaults.InactiveTrackAlpha,
+                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
                             ),
                             inactiveTickColor = Color.Transparent,
                         ),
@@ -262,7 +264,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
  *
  * @param pref The integer preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -320,7 +322,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary integer preference data entry from the datastore.
  * @param secondaryPref The secondary integer preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -387,7 +389,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The long preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -445,7 +447,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary long preference data entry from the datastore.
  * @param secondaryPref The secondary long preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -512,7 +514,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The double preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -564,7 +566,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary double preference data entry from the datastore.
  * @param secondaryPref The secondary double preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -625,7 +627,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  *
  * @param pref The float preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
@@ -677,7 +679,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  * @param primaryPref The primary float preference data entry from the datastore.
  * @param secondaryPref The secondary float preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [JetIcon] of the list entry.
+ * @param icon The [ImageVector] of the list entry.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).

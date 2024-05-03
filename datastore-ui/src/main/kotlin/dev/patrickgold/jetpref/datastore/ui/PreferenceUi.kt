@@ -20,10 +20,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -137,7 +136,7 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
  * Material preference group which automatically provides a title UI.
  *
  * @param modifier Modifier to be applied to this group.
- * @param icon The [JetIcon] of the group title.
+ * @param icon The [ImageVector] of the group title.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no `icon` is provided. Also acts as a local setting if all sub-preference composables
  *  should reserve an additional space if no icon is specified. It Can be overridden for each
@@ -151,7 +150,6 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
  *
  * @since 0.1.0
  */
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
     modifier: Modifier = Modifier,
@@ -174,10 +172,10 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
             )
 
             ListItem(
-                icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-                text = { Text(
+                leadingContent = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                headlineContent = { Text(
                     text = title,
-                    color = MaterialTheme.colors.secondary,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

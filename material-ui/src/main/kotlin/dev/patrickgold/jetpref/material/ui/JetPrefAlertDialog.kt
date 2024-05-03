@@ -16,31 +16,30 @@
 
 package dev.patrickgold.jetpref.material.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -74,18 +73,18 @@ import androidx.compose.ui.window.DialogProperties
  *  to the same action as [onDismiss].
  * @param trailingIconTitle Specify an icon / UI control to be placed in trailing position to
  *  the dialog title.
- * @param properties Dialog properties for further customization of this dialog's behavior.
  * @param scrollModifier The scroll modifier to apply to the inner content box. Defaults to
  *  a simple vertical scroll modifier. Pass an empty modifier to disable scrolling entirely.
  * @param shape The shape of this dialog.
- * @param backgroundColor The background color of this dialog.
- * @param contentColor The content color of this dialog.
- * @param contentPadding Specify a padding to apply to the inner content box.
+ * @param containerColor The background color of this dialog.
+ * @param titleContentColor The color for the title of this dialog.
+ * @param textContentColor The content color of this dialog.
+ * @param properties Dialog properties for further customization of this dialog's behavior.
  * @param content The content to be displayed inside the dialog.
  *
  * @since 0.1.0
  *
- * @see androidx.compose.material.AlertDialog
+ * @see androidx.compose.material3.AlertDialog
  * @see androidx.compose.ui.window.Dialog
  */
 @Composable
@@ -101,42 +100,45 @@ fun JetPrefAlertDialog(
     neutralLabel: String? = null,
     neutralColors: ButtonColors = ButtonDefaults.textButtonColors(),
     onNeutral: () -> Unit = { },
+    contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
     allowOutsideDismissal: Boolean = true,
     onOutsideDismissal: () -> Unit = onDismiss,
     trailingIconTitle: @Composable () -> Unit = { },
-    properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     scrollModifier: Modifier = Modifier.verticalScroll(rememberScrollState()),
-    shape: Shape = MaterialTheme.shapes.medium,
-    backgroundColor: Color = MaterialTheme.colors.surface,
-    contentColor: Color = contentColorFor(backgroundColor),
-    contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
+    shape: Shape = AlertDialogDefaults.shape,
+    containerColor: Color = AlertDialogDefaults.containerColor,
+    titleContentColor: Color = AlertDialogDefaults.titleContentColor,
+    textContentColor: Color = AlertDialogDefaults.textContentColor,
+    properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = true),
     content: @Composable () -> Unit,
 ) {
     Dialog(
         onDismissRequest = { if (allowOutsideDismissal) onOutsideDismissal() },
-        properties = properties,
+        properties = properties
     ) {
-        Surface(
+        Card(
             modifier = modifier
                 .padding(vertical = 16.dp, horizontal = 16.dp)
                 .widthIn(max = JetPrefAlertDialogDefaults.MaxDialogWidth),
             shape = shape,
-            color = backgroundColor,
-            contentColor = contentColor,
+            colors = CardDefaults.cardColors(
+                containerColor = containerColor,
+                contentColor = textContentColor
+            )
         ) {
             Column {
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .height(64.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                        .padding(top = 16.dp, bottom = 8.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         modifier = Modifier.weight(1.0f),
                         text = title,
-                        style = MaterialTheme.typography.subtitle1,
-                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = titleContentColor,
+                        style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

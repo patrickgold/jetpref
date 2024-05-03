@@ -35,8 +35,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -92,7 +92,7 @@ private val ZeroOneRange = 0f..1f
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefMaterialUi
+@ExperimentalJetPrefMaterial3Ui
 @Composable
 fun JetPrefColorPicker(
     onColorChange: (Color) -> Unit,
@@ -153,7 +153,7 @@ fun Modifier.checkeredBackground(
     evenColor: Color = Color.Unspecified,
     oddColor: Color = Color.Unspecified,
 ): Modifier = composed {
-    val even = evenColor.takeOrElse { MaterialTheme.colors.onBackground.copy(alpha = 0.16078432f) }
+    val even = evenColor.takeOrElse { MaterialTheme.colorScheme.onBackground.copy(alpha = 0.16078432f) }
     val odd = oddColor.takeOrElse { Color.Transparent }
 
     this.drawBehind {
@@ -363,7 +363,7 @@ private fun Thumb(
         shape = CircleShape,
         color = fillColor.compositeOver(Color.White),
         border = BorderStroke(SliderThumbBorderSize, strokeColor),
-        elevation = SliderThumbElevation,
+        shadowElevation = SliderThumbElevation,
         content = { },
     )
 }

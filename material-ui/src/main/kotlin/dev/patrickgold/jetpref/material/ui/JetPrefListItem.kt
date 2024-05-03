@@ -16,16 +16,12 @@
 
 package dev.patrickgold.jetpref.material.ui
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 
 /**
  * Material Design list item.
@@ -41,9 +37,8 @@ import androidx.compose.ui.unit.dp
  *
  * @since 0.1.0
  *
- * @see androidx.compose.material.ListItem
+ * @see androidx.compose.material3.ListItem
  */
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun JetPrefListItem(
     modifier: Modifier = Modifier,
@@ -56,30 +51,29 @@ fun JetPrefListItem(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     ListItem(
-        modifier = modifier.alpha(if (enabled) 1.0f else ContentAlpha.disabled),
-        icon = icon,
-        overlineText = whenNotNullOrBlank(overlineText) { str ->
+        modifier = modifier.alpha(if (enabled) 1.0f else 0.38f),
+        leadingContent = icon,
+        overlineContent = whenNotNullOrBlank(overlineText) { str ->
             Text(
                 text = str,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        text = {
+        headlineContent = {
             Text(
                 text = text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        secondaryText = whenNotNullOrBlank(secondaryText) { str ->
+        supportingContent = whenNotNullOrBlank(secondaryText) { str ->
             Text(
-                modifier = Modifier.padding(bottom = 16.dp),
                 text = str,
                 maxLines = if (singleLineSecondaryText) { 1 } else { 2 },
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        trailing = trailing,
+        trailingContent = trailing,
     )
 }
