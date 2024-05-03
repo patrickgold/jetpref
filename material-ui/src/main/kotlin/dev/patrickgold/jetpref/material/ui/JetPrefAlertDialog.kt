@@ -16,31 +16,33 @@
 
 package dev.patrickgold.jetpref.material.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
 /**
@@ -71,12 +73,10 @@ import androidx.compose.ui.window.DialogProperties
  *  to the same action as [onDismiss].
  * @param trailingIconTitle Specify an icon / UI control to be placed in trailing position to
  *  the dialog title.
- * @param maxDialogHeight Specify the maximum dialog height.
  * @param scrollModifier The scroll modifier to apply to the inner content box. Defaults to
  *  a simple vertical scroll modifier. Pass an empty modifier to disable scrolling entirely.
  * @param shape The shape of this dialog.
  * @param containerColor The background color of this dialog.
- * @param iconContentColor The color for the icon of this dialog.
  * @param titleContentColor The color for the title of this dialog.
  * @param textContentColor The content color of this dialog.
  * @param properties Dialog properties for further customization of this dialog's behavior.
@@ -87,7 +87,6 @@ import androidx.compose.ui.window.DialogProperties
  * @see androidx.compose.material3.AlertDialog
  * @see androidx.compose.ui.window.Dialog
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JetPrefAlertDialog(
     title: String,
@@ -101,78 +100,91 @@ fun JetPrefAlertDialog(
     neutralLabel: String? = null,
     neutralColors: ButtonColors = ButtonDefaults.textButtonColors(),
     onNeutral: () -> Unit = { },
+    contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
     allowOutsideDismissal: Boolean = true,
     onOutsideDismissal: () -> Unit = onDismiss,
     trailingIconTitle: @Composable () -> Unit = { },
-    maxDialogHeight: Dp = JetPrefAlertDialogDefaults.MaxDialogHeight,
     scrollModifier: Modifier = Modifier.verticalScroll(rememberScrollState()),
     shape: Shape = AlertDialogDefaults.shape,
     containerColor: Color = AlertDialogDefaults.containerColor,
-    iconContentColor: Color = AlertDialogDefaults.iconContentColor,
     titleContentColor: Color = AlertDialogDefaults.titleContentColor,
     textContentColor: Color = AlertDialogDefaults.textContentColor,
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = true),
     content: @Composable () -> Unit,
 ) {
-    AlertDialog(
-        modifier = modifier,
+    Dialog(
         onDismissRequest = { if (allowOutsideDismissal) onOutsideDismissal() },
-        confirmButton = {
-            Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                if (!neutralLabel.isNullOrBlank()) {
-                    TextButton(
-                        onClick = onNeutral,
-                        modifier = Modifier.padding(end = 8.dp),
-                        colors = neutralColors,
-                    ) {
-                        Text(neutralLabel)
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1.0f))
-                if (!dismissLabel.isNullOrBlank()) {
-                    TextButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.padding(end = 8.dp),
-                        colors = dismissColors,
-                    ) {
-                        Text(dismissLabel)
-                    }
-                }
-                if (!confirmLabel.isNullOrBlank()) {
-                    TextButton(
-                        onClick = onConfirm,
-                        colors = confirmColors,
-                    ) {
-                        Text(confirmLabel)
-                    }
-                }
-            }
-        },
-        icon = trailingIconTitle,
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                //fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+        properties = properties
+    ) {
+        Card(
+            modifier = modifier
+                .padding(vertical = 16.dp, horizontal = 16.dp)
+                .widthIn(max = JetPrefAlertDialogDefaults.MaxDialogWidth),
+            shape = shape,
+            colors = CardDefaults.cardColors(
+                containerColor = containerColor,
+                contentColor = textContentColor
             )
-        },
-        text = {
-            Box(modifier = Modifier.heightIn(max = maxDialogHeight)) {
-                Column(modifier = scrollModifier) {
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .padding(top = 16.dp, bottom = 8.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.weight(1.0f),
+                        text = title,
+                        textAlign = TextAlign.Center,
+                        color = titleContentColor,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    trailingIconTitle()
+                }
+                Box(
+                    modifier = Modifier
+                        .padding(contentPadding)
+                        .weight(1.0f, fill = false)
+                        .fillMaxWidth()
+                        .then(scrollModifier),
+                ) {
                     content()
                 }
+                Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
+                    if (!neutralLabel.isNullOrBlank()) {
+                        TextButton(
+                            onClick = onNeutral,
+                            modifier = Modifier.padding(end = 8.dp),
+                            colors = neutralColors,
+                        ) {
+                            Text(neutralLabel)
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1.0f))
+                    if (!dismissLabel.isNullOrBlank()) {
+                        TextButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.padding(end = 8.dp),
+                            colors = dismissColors,
+                        ) {
+                            Text(dismissLabel)
+                        }
+                    }
+                    if (!confirmLabel.isNullOrBlank()) {
+                        TextButton(
+                            onClick = onConfirm,
+                            colors = confirmColors,
+                        ) {
+                            Text(confirmLabel)
+                        }
+                    }
+                }
             }
-
-        },
-        shape = shape,
-        properties = properties,
-        containerColor = containerColor,
-        textContentColor = textContentColor,
-        iconContentColor = iconContentColor,
-        titleContentColor = titleContentColor
-    )
+        }
+    }
 }
 
 /**
@@ -185,7 +197,7 @@ object JetPrefAlertDialogDefaults {
     val ContentPadding = PaddingValues(horizontal = 24.dp)
 
     /**
-     * The maximum dialog height for [JetPrefAlertDialog].
+     * The maximum dialog width for [JetPrefAlertDialog].
      */
-    val MaxDialogHeight = 320.dp
+    val MaxDialogWidth = 320.dp
 }
