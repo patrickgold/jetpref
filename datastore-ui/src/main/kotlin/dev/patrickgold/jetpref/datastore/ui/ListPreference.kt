@@ -237,7 +237,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
             } else { summarySwitchDisabled },
             trailing = {
                 if (switchPrefValue != null) {
-                    val dividerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    val dividerColor = MaterialTheme.colorScheme.outlineVariant
                     Box(
                         modifier = Modifier
                             .size(LocalViewConfiguration.current.minimumTouchTargetSize + DpSize(8.dp, 0.dp))
@@ -252,6 +252,7 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
                                     color = dividerColor,
                                     start = Offset(0f, size.height * 0.1f),
                                     end = Offset(0f, size.height * 0.9f),
+                                    strokeWidth = 2f
                                 )
                             },
                         contentAlignment = Alignment.Center,
