@@ -55,16 +55,19 @@ import androidx.compose.ui.window.DialogProperties
  *  visibility of the confirm button. Passing null or a blank string will hide the button,
  *  any other string will show it.
  * @param confirmColors The colors to apply to the confirm button, if it is visible.
+ * @param confirmEnabled Whether the confirm button should be enabled, if it is visible.
  * @param onConfirm Action to execute when the confirm button is pressed.
  * @param dismissLabel The label of the dismiss button of this dialog. Used to control the
  *  visibility of the dismiss button. Passing null or a blank string will hide the button,
  *  any other string will show it.
  * @param dismissColors The colors to apply to the dismiss button, if it is visible.
+ * @param dismissEnabled Whether the dismiss button should be enabled, if it is visible.
  * @param onDismiss Action to execute when the dismiss button is pressed.
  * @param neutralLabel The label of the neutral button of this dialog. Used to control the
  *  visibility of the neutral button. Passing null or a blank string will hide the button,
  *  any other string will show it.
  * @param neutralColors The colors to apply to the neutral button, if it is visible.
+ * @param neutralEnabled Whether the neutral button should be enabled, if it is visible.
  * @param onNeutral Action to execute when the neutral button is pressed.
  * @param allowOutsideDismissal Specify if a user can dismiss the Dialog by clicking outside
  *  or pressing the back button.
@@ -80,6 +83,9 @@ import androidx.compose.ui.window.DialogProperties
  * @param titleContentColor The color for the title of this dialog.
  * @param textContentColor The content color of this dialog.
  * @param properties Dialog properties for further customization of this dialog's behavior.
+ * @param titlePadding The padding to apply to the title of this dialog.
+ * @param contentPadding The padding to apply to the content of this dialog.
+ * @param buttonsPadding The padding to apply to the buttons of this dialog.
  * @param content The content to be displayed inside the dialog.
  *
  * @since 0.1.0
@@ -93,14 +99,16 @@ fun JetPrefAlertDialog(
     modifier: Modifier = Modifier,
     confirmLabel: String? = null,
     confirmColors: ButtonColors = ButtonDefaults.textButtonColors(),
+    confirmEnabled: Boolean = true,
     onConfirm: () -> Unit = { },
     dismissLabel: String? = null,
     dismissColors: ButtonColors = ButtonDefaults.textButtonColors(),
+    dismissEnabled: Boolean = true,
     onDismiss: () -> Unit = { },
     neutralLabel: String? = null,
     neutralColors: ButtonColors = ButtonDefaults.textButtonColors(),
+    neutralEnabled: Boolean = true,
     onNeutral: () -> Unit = { },
-    contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
     allowOutsideDismissal: Boolean = true,
     onOutsideDismissal: () -> Unit = onDismiss,
     trailingIconTitle: @Composable () -> Unit = { },
@@ -110,35 +118,39 @@ fun JetPrefAlertDialog(
     titleContentColor: Color = AlertDialogDefaults.titleContentColor,
     textContentColor: Color = AlertDialogDefaults.textContentColor,
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = true),
+    titlePadding: PaddingValues = JetPrefAlertDialogDefaults.TitlePadding,
+    contentPadding: PaddingValues = JetPrefAlertDialogDefaults.ContentPadding,
+    buttonsPadding: PaddingValues = JetPrefAlertDialogDefaults.ButtonsPadding,
     content: @Composable () -> Unit,
 ) {
     Dialog(
         onDismissRequest = { if (allowOutsideDismissal) onOutsideDismissal() },
-        properties = properties
+        properties = properties,
     ) {
         Card(
             modifier = modifier
-                .padding(vertical = 16.dp, horizontal = 16.dp)
-                .widthIn(max = JetPrefAlertDialogDefaults.MaxDialogWidth),
+                .padding(all = 16.dp)
+                .widthIn(
+                    min = JetPrefAlertDialogDefaults.MinDialogWidth,
+                    max = JetPrefAlertDialogDefaults.MaxDialogWidth,
+                ),
             shape = shape,
             colors = CardDefaults.cardColors(
                 containerColor = containerColor,
-                contentColor = textContentColor
-            )
+                contentColor = textContentColor,
+            ),
         ) {
             Column {
                 Row(
-                    modifier = Modifier
-                        .padding(top = 16.dp, bottom = 8.dp)
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.padding(titlePadding),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         modifier = Modifier.weight(1.0f),
                         text = title,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start,
                         color = titleContentColor,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -153,12 +165,13 @@ fun JetPrefAlertDialog(
                 ) {
                     content()
                 }
-                Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
+                Row(Modifier.padding(buttonsPadding)) {
                     if (!neutralLabel.isNullOrBlank()) {
                         TextButton(
-                            onClick = onNeutral,
                             modifier = Modifier.padding(end = 8.dp),
                             colors = neutralColors,
+                            enabled = neutralEnabled,
+                            onClick = onNeutral,
                         ) {
                             Text(neutralLabel)
                         }
@@ -166,17 +179,19 @@ fun JetPrefAlertDialog(
                     Spacer(modifier = Modifier.weight(1.0f))
                     if (!dismissLabel.isNullOrBlank()) {
                         TextButton(
-                            onClick = onDismiss,
                             modifier = Modifier.padding(end = 8.dp),
                             colors = dismissColors,
+                            enabled = dismissEnabled,
+                            onClick = onDismiss,
                         ) {
                             Text(dismissLabel)
                         }
                     }
                     if (!confirmLabel.isNullOrBlank()) {
                         TextButton(
-                            onClick = onConfirm,
                             colors = confirmColors,
+                            enabled = confirmEnabled,
+                            onClick = onConfirm,
                         ) {
                             Text(confirmLabel)
                         }
@@ -192,12 +207,27 @@ fun JetPrefAlertDialog(
  */
 object JetPrefAlertDialogDefaults {
     /**
+     * The default title padding for [JetPrefAlertDialog].
+     */
+    val TitlePadding = PaddingValues(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 16.dp)
+
+    /**
      * The default content padding for [JetPrefAlertDialog].
      */
-    val ContentPadding = PaddingValues(horizontal = 24.dp)
+    val ContentPadding = PaddingValues(start = 24.dp, top = 0.dp, end = 24.dp, bottom = 0.dp)
+
+    /**
+     * The default buttons padding for [JetPrefAlertDialog].
+     */
+    val ButtonsPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
+
+    /**
+     * The minimum dialog width for [JetPrefAlertDialog].
+     */
+    val MinDialogWidth = 280.dp
 
     /**
      * The maximum dialog width for [JetPrefAlertDialog].
      */
-    val MaxDialogWidth = 320.dp
+    val MaxDialogWidth = 560.dp
 }

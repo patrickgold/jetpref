@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2024 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package dev.patrickgold.jetpref.material.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 
 @Composable
 internal inline fun whenNotNullOrBlank(
@@ -27,4 +30,34 @@ internal inline fun whenNotNullOrBlank(
         !string.isNullOrBlank() -> ({ composer(string) })
         else -> null
     }
+}
+
+/**
+ * Copies the padding values and applies the given values if they are not null.
+ *
+ * @param start The start padding value to apply if not null.
+ * @param top The top padding value to apply if not null.
+ * @param end The end padding value to apply if not null.
+ * @param bottom The bottom padding value to apply if not null.
+ *
+ * @return The new [PaddingValues] with the applied padding values.
+ *
+ * @since 0.2.0
+ */
+fun PaddingValues.copy(
+    start: Dp? = null,
+    top: Dp? = null,
+    end: Dp? = null,
+    bottom: Dp? = null,
+): PaddingValues {
+    require(this::class != PaddingValues::Absolute::class) {
+        "Cannot copy absolute padding values with this helper."
+    }
+    // We can force LTR here because we are only copying and not in the layout process
+    return PaddingValues(
+        start = start ?: this.calculateLeftPadding(LayoutDirection.Ltr),
+        top = top ?: this.calculateTopPadding(),
+        end = end ?: this.calculateRightPadding(LayoutDirection.Ltr),
+        bottom = bottom ?: this.calculateBottomPadding(),
+    )
 }

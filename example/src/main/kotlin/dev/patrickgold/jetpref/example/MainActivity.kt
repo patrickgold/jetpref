@@ -58,9 +58,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppContent(navController: NavHostController) {
     ProvideDefaultDialogPrefStrings(
-        confirmLabel = "Confirm",
-        dismissLabel = "Dismiss",
-        neutralLabel = "Def. value",
+        confirmLabel = "OK",
+        dismissLabel = "Cancel",
+        neutralLabel = "Default",
     ) {
         Column {
             TopAppBar(
