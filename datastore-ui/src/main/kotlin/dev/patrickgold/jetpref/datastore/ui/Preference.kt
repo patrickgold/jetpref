@@ -18,12 +18,12 @@ package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 
 /**
@@ -45,40 +45,51 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
  *  visible (true) or hidden (false).
  * @param onClick The action to perform if this preference is enabled and the user clicks on this
- *  preference item.
+ *  preference item. Mutually exclusive with [eventModifier].
+ * @param eventModifier An optional modifier to apply to the preference item. This can be used to set up toggles or
+ *  other interactions. Mutually exclusive with [onClick].
  *
  * @since 0.1.0
  */
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.Preference(
+fun Preference(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summary: String? = null,
     trailing: @Composable (() -> Unit)? = null,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     onClick: (() -> Unit)? = null,
+    eventModifier: (@Composable () -> Modifier)? = null,
 ) {
-    val evalScope = PreferenceDataEvaluatorScope.instance()
-    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
-        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
-        JetPrefListItem(
-            modifier = if (onClick != null) {
-                modifier.clickable(
-                    enabled = isEnabled,
-                    role = Role.Button,
-                    onClick = onClick,
-                )
-            } else {
-                modifier
-            },
-            icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-            text = title,
-            secondaryText = summary,
-            trailing = trailing,
-            enabled = isEnabled,
-        )
+    require(!(onClick != null && eventModifier != null)) {
+        "You cannot provide both an onClick lambda and an eventModifier."
+    }
+    if (LocalIsPrefVisible.current && visibleIf(PreferenceDataEvaluatorScope)) {
+        val isEnabled = LocalIsPrefEnabled.current && enabledIf(PreferenceDataEvaluatorScope)
+        CompositionLocalProvider(
+            LocalIconSpaceReserved provides iconSpaceReserved,
+            LocalIsPrefEnabled provides isEnabled,
+            LocalIsPrefVisible provides true,
+        ) {
+            JetPrefListItem(
+                modifier = if (onClick != null) {
+                    modifier.clickable(
+                        enabled = isEnabled,
+                        role = Role.Button,
+                        onClick = onClick,
+                    )
+                } else {
+                    modifier.then(eventModifier?.invoke() ?: Modifier)
+                },
+                icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                text = title,
+                secondaryText = summary,
+                trailing = trailing,
+                enabled = isEnabled,
+            )
+        }
     }
 }

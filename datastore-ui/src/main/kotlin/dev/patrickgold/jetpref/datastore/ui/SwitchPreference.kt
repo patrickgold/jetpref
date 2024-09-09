@@ -27,10 +27,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
-import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 
 /**
  * Material switch preference which provides a list item with a trailing switch.
@@ -53,11 +50,11 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @since 0.1.0
  */
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
+fun SwitchPreference(
     pref: PreferenceData<Boolean>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summary: String? = null,
     summaryOn: String? = null,
@@ -67,34 +64,34 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
 ) {
     val prefValue by pref.observeAsState()
 
-    val evalScope = PreferenceDataEvaluatorScope.instance()
-    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
-        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
-        JetPrefListItem(
-            modifier = modifier
-                .toggleable(
-                    value = prefValue,
-                    enabled = isEnabled,
-                    role = Role.Switch,
-                    onValueChange = { pref.set(it) },
-                ),
-            icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-            text = title,
-            secondaryText = when {
-                prefValue && summaryOn != null -> summaryOn
-                !prefValue && summaryOff != null -> summaryOff
-                summary != null -> summary
-                else -> null
-            },
-            trailing = {
-                Switch(
-                    modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize),
-                    checked = prefValue,
-                    onCheckedChange = null,
-                    enabled = isEnabled,
-                )
-            },
-            enabled = isEnabled,
-        )
-    }
+    Preference(
+        modifier = modifier,
+        eventModifier = {
+            Modifier.toggleable(
+                value = prefValue,
+                enabled = LocalIsPrefEnabled.current,
+                role = Role.Switch,
+                onValueChange = { pref.set(it) },
+            )
+        },
+        icon = icon,
+        iconSpaceReserved = iconSpaceReserved,
+        title = title,
+        summary = when {
+            prefValue && summaryOn != null -> summaryOn
+            !prefValue && summaryOff != null -> summaryOff
+            summary != null -> summary
+            else -> null
+        },
+        trailing = {
+            Switch(
+                modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize),
+                checked = prefValue,
+                onCheckedChange = null,
+                enabled = LocalIsPrefEnabled.current,
+            )
+        },
+        enabledIf = enabledIf,
+        visibleIf = visibleIf,
+    )
 }

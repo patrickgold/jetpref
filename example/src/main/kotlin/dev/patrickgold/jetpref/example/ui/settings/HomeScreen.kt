@@ -177,13 +177,13 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         },
     )
     TextFieldPreference(
-        pref = prefs.example.description,
+        prefs.example.description,
         title = "Description",
         summaryIfBlank = "(blank)",
         summaryIfEmpty = "(empty)",
     )
     TextFieldPreference(
-        pref = prefs.example.itemKey,
+        prefs.example.itemKey,
         title = "Item key",
         validateValue = {
             "[a-z0-9_]+".toRegex().matches(it) || error("Invalid key")

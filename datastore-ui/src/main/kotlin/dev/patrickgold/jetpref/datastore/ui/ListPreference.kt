@@ -17,7 +17,6 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,12 +48,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialogDefaults
-import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 import dev.patrickgold.jetpref.material.ui.copy
 
 /**
@@ -233,12 +229,12 @@ fun <V : Any> listPrefEntries(
  */
 @SuppressLint("ModifierParameter")
 @Composable
-fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
+fun <V : Any> ListPreference(
     listPref: PreferenceData<V>,
     switchPref: PreferenceData<Boolean>? = null,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summarySwitchDisabled: String? = null,
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
@@ -252,144 +248,139 @@ fun <T : PreferenceModel, V : Any> PreferenceUiScope<T>.ListPreference(
     val (tmpSwitchPrefValue, setTmpSwitchPrefValue) = remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
 
-    val evalScope = PreferenceDataEvaluatorScope.instance()
-    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
-        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
-        JetPrefListItem(
-            modifier = modifier
-                .clickable(
-                    enabled = isEnabled,
-                    role = Role.Button,
-                    onClick = {
-                        setTmpListPrefValue(listPrefValue)
-                        if (switchPrefValue != null) {
-                            setTmpSwitchPrefValue(switchPrefValue.value)
-                        }
-                        isDialogOpen = true
-                    }
-                ),
-            icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-            text = title,
-            secondaryText = if (switchPrefValue?.value == true || switchPrefValue == null) {
-                entries.find {
-                    it.key == listPrefValue
-                }?.label ?: "!! invalid !!"
-            } else { summarySwitchDisabled },
-            trailing = {
-                if (switchPrefValue != null) {
-                    val dividerColor = MaterialTheme.colorScheme.outlineVariant
-                    Box(
-                        modifier = Modifier
-                            .size(LocalViewConfiguration.current.minimumTouchTargetSize + DpSize(8.dp, 0.dp))
-                            .toggleable(
-                                value = switchPrefValue.value,
-                                enabled = isEnabled,
-                                role = Role.Switch,
-                                onValueChange = { switchPref.set(it) },
-                            )
-                            .drawBehind {
-                                drawLine(
-                                    color = dividerColor,
-                                    start = Offset(0f, size.height * 0.1f),
-                                    end = Offset(0f, size.height * 0.9f),
-                                    strokeWidth = 2f
-                                )
-                            },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Switch(
-                            modifier = Modifier.padding(start = 8.dp),
-                            checked = switchPrefValue.value,
-                            onCheckedChange = null,
-                            enabled = isEnabled,
+    Preference(
+        modifier = modifier,
+        icon = icon,
+        iconSpaceReserved = iconSpaceReserved,
+        title = title,
+        summary = if (switchPrefValue?.value == true || switchPrefValue == null) {
+            entries.find {
+                it.key == listPrefValue
+            }?.label ?: "!! invalid !!"
+        } else { summarySwitchDisabled },
+        trailing = {
+            if (switchPrefValue != null) {
+                val dividerColor = MaterialTheme.colorScheme.outlineVariant
+                Box(
+                    modifier = Modifier
+                        .size(LocalViewConfiguration.current.minimumTouchTargetSize + DpSize(8.dp, 0.dp))
+                        .toggleable(
+                            value = switchPrefValue.value,
+                            enabled = LocalIsPrefEnabled.current,
+                            role = Role.Switch,
+                            onValueChange = { switchPref.set(it) },
                         )
-                    }
+                        .drawBehind {
+                            drawLine(
+                                color = dividerColor,
+                                start = Offset(0f, size.height * 0.1f),
+                                end = Offset(0f, size.height * 0.9f),
+                                strokeWidth = 2f
+                            )
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Switch(
+                        modifier = Modifier.padding(start = 8.dp),
+                        checked = switchPrefValue.value,
+                        onCheckedChange = null,
+                        enabled = LocalIsPrefEnabled.current,
+                    )
+                }
+            }
+        },
+        enabledIf = enabledIf,
+        visibleIf = visibleIf,
+        onClick = {
+            setTmpListPrefValue(listPrefValue)
+            if (switchPrefValue != null) {
+                setTmpSwitchPrefValue(switchPrefValue.value)
+            }
+            isDialogOpen = true
+        },
+    )
+
+    if (isDialogOpen) {
+        JetPrefAlertDialog(
+            title = title,
+            confirmLabel = dialogStrings.confirmLabel,
+            onConfirm = {
+                listPref.set(tmpListPrefValue)
+                switchPref?.set(tmpSwitchPrefValue)
+                isDialogOpen = false
+            },
+            dismissLabel = dialogStrings.dismissLabel,
+            onDismiss = {
+                isDialogOpen = false
+            },
+            neutralLabel = dialogStrings.neutralLabel,
+            onNeutral = {
+                listPref.reset()
+                switchPref?.reset()
+                isDialogOpen = false
+            },
+            trailingIconTitle = {
+                if (switchPrefValue != null) {
+                    Switch(
+                        modifier = Modifier.padding(start = 16.dp),
+                        checked = tmpSwitchPrefValue,
+                        onCheckedChange = { setTmpSwitchPrefValue(it) },
+                        enabled = true,
+                    )
                 }
             },
-            enabled = isEnabled,
-        )
-        if (isDialogOpen) {
-            JetPrefAlertDialog(
-                title = title,
-                confirmLabel = dialogStrings.confirmLabel,
-                onConfirm = {
-                    listPref.set(tmpListPrefValue)
-                    switchPref?.set(tmpSwitchPrefValue)
-                    isDialogOpen = false
-                },
-                dismissLabel = dialogStrings.dismissLabel,
-                onDismiss = {
-                    isDialogOpen = false
-                },
-                neutralLabel = dialogStrings.neutralLabel,
-                onNeutral = {
-                    listPref.reset()
-                    switchPref?.reset()
-                    isDialogOpen = false
-                },
-                trailingIconTitle = {
-                    if (switchPrefValue != null) {
-                        Switch(
-                            modifier = Modifier.padding(start = 16.dp),
-                            checked = tmpSwitchPrefValue,
-                            onCheckedChange = { setTmpSwitchPrefValue(it) },
-                            enabled = true,
+            titlePadding = remember(switchPrefValue) {
+                if (switchPrefValue != null) {
+                    JetPrefAlertDialogDefaults.TitlePadding.copy(top = 16.dp)
+                } else {
+                    JetPrefAlertDialogDefaults.TitlePadding
+                }
+            },
+            contentPadding = PaddingValues(horizontal = 8.dp),
+        ) {
+            Column {
+                val alpha = when {
+                    switchPrefValue == null -> 1f
+                    tmpSwitchPrefValue -> 1f
+                    else -> 0.38f
+                }
+                for (entry in entries) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = entry.key == tmpListPrefValue,
+                                enabled = switchPrefValue == null || tmpSwitchPrefValue,
+                                onClick = {
+                                    setTmpListPrefValue(entry.key)
+                                }
+                            )
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 8.dp,
+                            )
+                            .alpha(alpha)
+                    ) {
+                        RadioButton(
+                            selected = entry.key == tmpListPrefValue,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = MaterialTheme.colorScheme.primary,
+                            ),
+                            modifier = Modifier.padding(end = 12.dp),
                         )
-                    }
-                },
-                titlePadding = remember(switchPrefValue) {
-                    if (switchPrefValue != null) {
-                        JetPrefAlertDialogDefaults.TitlePadding.copy(top = 16.dp)
-                    } else {
-                        JetPrefAlertDialogDefaults.TitlePadding
-                    }
-                },
-                contentPadding = PaddingValues(horizontal = 8.dp),
-            ) {
-                Column {
-                    val alpha = when {
-                        switchPrefValue == null -> 1f
-                        tmpSwitchPrefValue -> 1f
-                        else -> 0.38f
-                    }
-                    for (entry in entries) {
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .selectable(
-                                    selected = entry.key == tmpListPrefValue,
-                                    enabled = switchPrefValue == null || tmpSwitchPrefValue,
-                                    onClick = {
-                                        setTmpListPrefValue(entry.key)
-                                    }
-                                )
-                                .padding(
-                                    horizontal = 16.dp,
-                                    vertical = 8.dp,
-                                )
-                                .alpha(alpha)
+                                .align(Alignment.CenterVertically),
                         ) {
-                            RadioButton(
-                                selected = entry.key == tmpListPrefValue,
-                                onClick = null,
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = MaterialTheme.colorScheme.primary,
-                                ),
-                                modifier = Modifier.padding(end = 12.dp),
-                            )
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.CenterVertically),
-                            ) {
-                                entry.labelComposer(entry.label)
-                                if (entry.showDescriptionOnlyIfSelected) {
-                                    if (entry.key == tmpListPrefValue) {
-                                        entry.descriptionComposer(entry.description)
-                                    }
-                                } else {
+                            entry.labelComposer(entry.label)
+                            if (entry.showDescriptionOnlyIfSelected) {
+                                if (entry.key == tmpListPrefValue) {
                                     entry.descriptionComposer(entry.description)
                                 }
+                            } else {
+                                entry.descriptionComposer(entry.description)
                             }
                         }
                     }

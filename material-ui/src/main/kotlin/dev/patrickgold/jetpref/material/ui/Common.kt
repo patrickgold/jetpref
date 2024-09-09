@@ -44,6 +44,28 @@ inline fun whenNotNullOrBlank(
 }
 
 /**
+ * Composable function to only execute the given composable function if the given object is not null.
+ * This is useful for conditional composable functions.
+ *
+ * @param obj The object to check for null.
+ * @param composer The composable function to execute if the object is not null.
+ *
+ * @return The composable function or null.
+ *
+ * @since 0.2.0
+ */
+@Composable
+inline fun <T : Any> whenNotNull(
+    obj: T?,
+    crossinline composer: @Composable (obj: T) -> Unit,
+): @Composable (() -> Unit)? {
+    return when {
+        obj != null -> ({ composer(obj) })
+        else -> null
+    }
+}
+
+/**
  * Copies the padding values and applies the given values if they are not null.
  *
  * @param start The start padding value to apply if not null.

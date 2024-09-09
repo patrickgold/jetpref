@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.whenNotNullOrBlank
@@ -57,11 +56,11 @@ import dev.patrickgold.jetpref.material.ui.whenNotNullOrBlank
  * @since 0.2.0
  */
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.TextFieldPreference(
+fun TextFieldPreference(
     pref: PreferenceData<String>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summaryIfBlank: String? = null,
     summaryIfEmpty: String? = null,
