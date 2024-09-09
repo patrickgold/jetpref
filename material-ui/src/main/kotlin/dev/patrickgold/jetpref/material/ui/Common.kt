@@ -21,8 +21,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 
+/**
+ * Composable function to only execute the given composable function if the given string is not null or blank.
+ * This is useful for conditional composable functions.
+ *
+ * @param string The string to check for null or blank.
+ * @param composer The composable function to execute if the string is not null or blank.
+ *
+ * @return The composable function or null.
+ *
+ * @since 0.2.0
+ */
 @Composable
-internal inline fun whenNotNullOrBlank(
+inline fun whenNotNullOrBlank(
     string: String?,
     crossinline composer: @Composable (text: String) -> Unit,
 ): @Composable (() -> Unit)? {

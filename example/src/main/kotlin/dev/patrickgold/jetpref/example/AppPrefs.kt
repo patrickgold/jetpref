@@ -68,6 +68,14 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
             key = "test__show_title",
             default = true,
         )
+        val description = string(
+            key = "test__description",
+            default = "",
+        )
+        val itemKey = string(
+            key = "test__item_key",
+            default = "abc_item_key",
+        )
 
         val longListPref = string(
             key = "test__long_list",

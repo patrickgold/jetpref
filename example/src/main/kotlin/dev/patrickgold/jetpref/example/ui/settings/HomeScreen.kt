@@ -29,6 +29,7 @@ import dev.patrickgold.jetpref.datastore.ui.Preference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
+import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.datastore.ui.vectorResource
 import dev.patrickgold.jetpref.example.LocalNavController
@@ -175,9 +176,23 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
             )
         },
     )
+    TextFieldPreference(
+        pref = prefs.example.description,
+        title = "Description",
+        summaryIfBlank = "(blank)",
+        summaryIfEmpty = "(empty)",
+    )
+    TextFieldPreference(
+        pref = prefs.example.itemKey,
+        title = "Item key",
+        validateValue = {
+            "[a-z0-9_]+".toRegex().matches(it) || error("Invalid key")
+        },
+        transformValue = { it.trim() },
+    )
     ListPreference(
         listPref = prefs.example.longListPref,
-        title = "Test the scoll behaviour",
+        title = "Test the scroll behaviour",
         entries = listPrefEntries {
             entry(
                 "str1",
