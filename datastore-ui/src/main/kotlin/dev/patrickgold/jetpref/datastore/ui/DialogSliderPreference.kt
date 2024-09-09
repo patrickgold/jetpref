@@ -71,7 +71,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
 
     val prefValue by pref.observeAsState()
     var sliderValue by remember { mutableFloatStateOf(0.0f) }
-    val isDialogOpen = remember { mutableStateOf(false) }
+    var isDialogOpen by remember { mutableStateOf(false) }
 
     val evalScope = PreferenceDataEvaluatorScope.instance()
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
@@ -83,7 +83,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                     role = Role.Button,
                     onClick = {
                         sliderValue = prefValue.toFloat()
-                        isDialogOpen.value = true
+                        isDialogOpen = true
                     }
                 ),
             icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
@@ -91,21 +91,23 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
             secondaryText = summary(prefValue),
             enabled = isEnabled,
         )
-        if (isDialogOpen.value) {
+        if (isDialogOpen) {
             JetPrefAlertDialog(
                 title = title,
                 confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     pref.set(convertToV(sliderValue))
-                    isDialogOpen.value = false
+                    isDialogOpen = false
                 },
                 dismissLabel = dialogStrings.dismissLabel,
-                onDismiss = { isDialogOpen.value = false },
+                onDismiss = {
+                    isDialogOpen = false
+                },
                 neutralLabel = dialogStrings.neutralLabel,
                 onNeutral = {
                     pref.reset()
-                    isDialogOpen.value = false
-                }
+                    isDialogOpen = false
+                },
             ) {
                 Column {
                     Text(
@@ -165,7 +167,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     val secondaryPrefValue by secondaryPref.observeAsState()
     var primarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
     var secondarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
-    val isDialogOpen = remember { mutableStateOf(false) }
+    var isDialogOpen by remember { mutableStateOf(false) }
 
     val evalScope = PreferenceDataEvaluatorScope.instance()
     if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
@@ -178,7 +180,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
                     onClick = {
                         primarySliderValue = primaryPrefValue
                         secondarySliderValue = secondaryPrefValue
-                        isDialogOpen.value = true
+                        isDialogOpen = true
                     }
                 ),
             icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
@@ -186,23 +188,25 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
             secondaryText = summary(primaryPrefValue, secondaryPrefValue),
             enabled = isEnabled,
         )
-        if (isDialogOpen.value) {
+        if (isDialogOpen) {
             JetPrefAlertDialog(
                 title = title,
                 confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     primaryPref.set(primarySliderValue)
                     secondaryPref.set(secondarySliderValue)
-                    isDialogOpen.value = false
+                    isDialogOpen = false
                 },
                 dismissLabel = dialogStrings.dismissLabel,
-                onDismiss = { isDialogOpen.value = false },
+                onDismiss = {
+                    isDialogOpen = false
+                },
                 neutralLabel = dialogStrings.neutralLabel,
                 onNeutral = {
                     primaryPref.reset()
                     secondaryPref.reset()
-                    isDialogOpen.value = false
-                }
+                    isDialogOpen = false
+                },
             ) {
                 Column {
                     Row(

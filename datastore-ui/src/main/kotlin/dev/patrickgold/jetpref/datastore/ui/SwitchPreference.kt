@@ -38,17 +38,18 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param pref The boolean preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
  * @param icon The [ImageVector] of the list entry.
+ * @param iconSpaceReserved Whether the icon space should be reserved even if no icon is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
  * @param summaryOn The summary of this preference if the state is `true`. If this is specified it will override
- *     provided [summary]. Shown as the list item secondary text (max 2 lines).
+ *  provided [summary]. Shown as the list item secondary text (max 2 lines).
  * @param summaryOff The summary of this preference if the state is `false`. If this is specified it will override
- *     provided [summary]. Shown as the list item secondary text (max 2 lines).
+ *  provided [summary]. Shown as the list item secondary text (max 2 lines).
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be enabled (true) or
- *     disabled (false).
+ *  disabled (false).
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be visible (true) or
- *     hidden (false).
- * @see maybeJetIcon
+ *  hidden (false).
+ *
  * @since 0.1.0
  */
 @Composable
@@ -75,7 +76,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                     value = prefValue,
                     enabled = isEnabled,
                     role = Role.Switch,
-                    onValueChange = { pref.set(it) }
+                    onValueChange = { pref.set(it) },
                 ),
             icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
             text = title,
@@ -90,7 +91,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.SwitchPreference(
                     modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize),
                     checked = prefValue,
                     onCheckedChange = null,
-                    enabled = isEnabled
+                    enabled = isEnabled,
                 )
             },
             enabled = isEnabled,
