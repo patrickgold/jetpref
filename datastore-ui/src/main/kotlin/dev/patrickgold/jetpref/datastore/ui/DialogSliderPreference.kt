@@ -16,7 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,21 +34,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
-import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 @ExperimentalJetPrefDatastoreUi
 @Composable
-internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreference(
+internal fun <V> DialogSliderPreference(
     pref: PreferenceData<V>,
     modifier: Modifier,
     icon: ImageVector? = null,
@@ -71,65 +66,62 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
 
     val prefValue by pref.observeAsState()
     var sliderValue by remember { mutableFloatStateOf(0.0f) }
-    val isDialogOpen = remember { mutableStateOf(false) }
+    var isDialogOpen by remember { mutableStateOf(false) }
 
-    val evalScope = PreferenceDataEvaluatorScope.instance()
-    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
-        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
-        JetPrefListItem(
-            modifier = modifier
-                .clickable(
-                    enabled = isEnabled,
-                    role = Role.Button,
-                    onClick = {
-                        sliderValue = prefValue.toFloat()
-                        isDialogOpen.value = true
-                    }
-                ),
-            icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-            text = title,
-            secondaryText = summary(prefValue),
-            enabled = isEnabled,
-        )
-        if (isDialogOpen.value) {
-            JetPrefAlertDialog(
-                title = title,
-                confirmLabel = dialogStrings.confirmLabel,
-                onConfirm = {
-                    pref.set(convertToV(sliderValue))
-                    isDialogOpen.value = false
-                },
-                dismissLabel = dialogStrings.dismissLabel,
-                onDismiss = { isDialogOpen.value = false },
-                neutralLabel = dialogStrings.neutralLabel,
-                onNeutral = {
-                    pref.reset()
-                    isDialogOpen.value = false
-                }
-            ) {
-                Column {
-                    Text(
-                        text = valueLabel(convertToV(sliderValue)),
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                    )
-                    Slider(
-                        value = sliderValue,
-                        valueRange = min.toFloat()..max.toFloat(),
-                        steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).roundToInt() - 1,
-                        onValueChange = { sliderValue = round(it) },
-                        onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            activeTickColor = Color.Transparent,
-                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
-                            ),
-                            inactiveTickColor = Color.Transparent,
+    Preference(
+        modifier = modifier,
+        icon = icon,
+        iconSpaceReserved = iconSpaceReserved,
+        title = title,
+        summary = summary(prefValue),
+        enabledIf = enabledIf,
+        visibleIf = visibleIf,
+        onClick = {
+            sliderValue = prefValue.toFloat()
+            isDialogOpen = true
+        },
+    )
+
+    if (isDialogOpen) {
+        JetPrefAlertDialog(
+            title = title,
+            confirmLabel = dialogStrings.confirmLabel,
+            onConfirm = {
+                pref.set(convertToV(sliderValue))
+                isDialogOpen = false
+            },
+            dismissLabel = dialogStrings.dismissLabel,
+            onDismiss = {
+                isDialogOpen = false
+            },
+            neutralLabel = dialogStrings.neutralLabel,
+            onNeutral = {
+                pref.reset()
+                isDialogOpen = false
+            },
+        ) {
+            Column {
+                Text(
+                    text = valueLabel(convertToV(sliderValue)),
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
+                Slider(
+                    value = sliderValue,
+                    valueRange = min.toFloat()..max.toFloat(),
+                    steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).roundToInt() - 1,
+                    onValueChange = { sliderValue = round(it) },
+                    onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        activeTickColor = Color.Transparent,
+                        inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
                         ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+                        inactiveTickColor = Color.Transparent,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -137,7 +129,7 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
 
 @ExperimentalJetPrefDatastoreUi
 @Composable
-internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreference(
+internal fun <V> DialogSliderPreference(
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     modifier: Modifier,
@@ -165,95 +157,92 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
     val secondaryPrefValue by secondaryPref.observeAsState()
     var primarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
     var secondarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
-    val isDialogOpen = remember { mutableStateOf(false) }
+    var isDialogOpen by remember { mutableStateOf(false) }
 
-    val evalScope = PreferenceDataEvaluatorScope.instance()
-    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
-        val isEnabled = this.enabledIf(evalScope) && enabledIf(evalScope)
-        JetPrefListItem(
-            modifier = modifier
-                .clickable(
-                    enabled = isEnabled,
-                    role = Role.Button,
-                    onClick = {
-                        primarySliderValue = primaryPrefValue
-                        secondarySliderValue = secondaryPrefValue
-                        isDialogOpen.value = true
-                    }
-                ),
-            icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-            text = title,
-            secondaryText = summary(primaryPrefValue, secondaryPrefValue),
-            enabled = isEnabled,
-        )
-        if (isDialogOpen.value) {
-            JetPrefAlertDialog(
-                title = title,
-                confirmLabel = dialogStrings.confirmLabel,
-                onConfirm = {
-                    primaryPref.set(primarySliderValue)
-                    secondaryPref.set(secondarySliderValue)
-                    isDialogOpen.value = false
-                },
-                dismissLabel = dialogStrings.dismissLabel,
-                onDismiss = { isDialogOpen.value = false },
-                neutralLabel = dialogStrings.neutralLabel,
-                onNeutral = {
-                    primaryPref.reset()
-                    secondaryPref.reset()
-                    isDialogOpen.value = false
+    Preference(
+        modifier = modifier,
+        icon = icon,
+        iconSpaceReserved = iconSpaceReserved,
+        title = title,
+        summary = summary(primaryPrefValue, secondaryPrefValue),
+        enabledIf = enabledIf,
+        visibleIf = visibleIf,
+        onClick = {
+            primarySliderValue = primaryPrefValue
+            secondarySliderValue = secondaryPrefValue
+            isDialogOpen = true
+        },
+    )
+
+    if (isDialogOpen) {
+        JetPrefAlertDialog(
+            title = title,
+            confirmLabel = dialogStrings.confirmLabel,
+            onConfirm = {
+                primaryPref.set(primarySliderValue)
+                secondaryPref.set(secondarySliderValue)
+                isDialogOpen = false
+            },
+            dismissLabel = dialogStrings.dismissLabel,
+            onDismiss = {
+                isDialogOpen = false
+            },
+            neutralLabel = dialogStrings.neutralLabel,
+            onNeutral = {
+                primaryPref.reset()
+                secondaryPref.reset()
+                isDialogOpen = false
+            },
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(primaryLabel)
+                    Text(valueLabel(primarySliderValue))
                 }
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(primaryLabel)
-                        Text(valueLabel(primarySliderValue))
-                    }
-                    Slider(
-                        value = primarySliderValue.toFloat(),
-                        valueRange = min.toFloat()..max.toFloat(),
-                        steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = { primarySliderValue = convertToV(it) },
-                        onValueChangeFinished = { onPreviewSelectedPrimaryValue(primarySliderValue) },
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            activeTickColor = Color.Transparent,
-                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
-                            ),
-                            inactiveTickColor = Color.Transparent,
+                Slider(
+                    value = primarySliderValue.toFloat(),
+                    valueRange = min.toFloat()..max.toFloat(),
+                    steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
+                    onValueChange = { primarySliderValue = convertToV(it) },
+                    onValueChangeFinished = { onPreviewSelectedPrimaryValue(primarySliderValue) },
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        activeTickColor = Color.Transparent,
+                        inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
                         ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(secondaryLabel)
-                        Text(valueLabel(secondarySliderValue))
-                    }
-                    Slider(
-                        value = secondarySliderValue.toFloat(),
-                        valueRange = min.toFloat()..max.toFloat(),
-                        steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
-                        onValueChange = { secondarySliderValue = convertToV(it) },
-                        onValueChangeFinished = { onPreviewSelectedSecondaryValue(secondarySliderValue) },
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            activeTickColor = Color.Transparent,
-                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
-                            ),
-                            inactiveTickColor = Color.Transparent,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                        inactiveTickColor = Color.Transparent,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(secondaryLabel)
+                    Text(valueLabel(secondarySliderValue))
                 }
+                Slider(
+                    value = secondarySliderValue.toFloat(),
+                    valueRange = min.toFloat()..max.toFloat(),
+                    steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
+                    onValueChange = { secondarySliderValue = convertToV(it) },
+                    onValueChangeFinished = { onPreviewSelectedSecondaryValue(secondarySliderValue) },
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        activeTickColor = Color.Transparent,
+                        inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
+                        ),
+                        inactiveTickColor = Color.Transparent,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -288,11 +277,11 @@ internal fun <T : PreferenceModel, V> PreferenceUiScope<T>.DialogSliderPreferenc
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     pref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     valueLabel: @Composable (Int) -> String = { it.toString() },
     summary: @Composable (Int) -> String = valueLabel,
@@ -351,12 +340,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     primaryPref: PreferenceData<Int>,
     secondaryPref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
@@ -413,11 +402,11 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     pref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     valueLabel: @Composable (Long) -> String = { it.toString() },
     summary: @Composable (Long) -> String = valueLabel,
@@ -476,12 +465,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     primaryPref: PreferenceData<Long>,
     secondaryPref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
@@ -538,11 +527,11 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     pref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     valueLabel: @Composable (Double) -> String = { it.toString() },
     summary: @Composable (Double) -> String = valueLabel,
@@ -595,12 +584,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     primaryPref: PreferenceData<Double>,
     secondaryPref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
@@ -651,11 +640,11 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     pref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     valueLabel: @Composable (Float) -> String = { it.toString() },
     summary: @Composable (Float) -> String = valueLabel,
@@ -708,12 +697,12 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
  */
 @ExperimentalJetPrefDatastoreUi
 @Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.DialogSliderPreference(
+fun DialogSliderPreference(
     primaryPref: PreferenceData<Float>,
     secondaryPref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     primaryLabel: String,
     secondaryLabel: String,

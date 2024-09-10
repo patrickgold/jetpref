@@ -20,13 +20,7 @@ import androidx.compose.runtime.Composable
 
 typealias PreferenceDataEvaluator = @Composable PreferenceDataEvaluatorScope.() -> Boolean
 
-class PreferenceDataEvaluatorScope {
-    companion object {
-        private val staticInstance = PreferenceDataEvaluatorScope()
-
-        fun instance() = staticInstance
-    }
-
+object PreferenceDataEvaluatorScope {
     @Composable
     infix fun <V : Any> PreferenceData<V>.isEqualTo(other: PreferenceData<V>): Boolean {
         val pref1 = this.observeAsState()

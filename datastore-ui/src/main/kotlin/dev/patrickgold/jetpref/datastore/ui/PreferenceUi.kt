@@ -24,6 +24,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +42,28 @@ annotation class PreferenceUiScopeDsl
 typealias PreferenceUiContent<T> = @Composable @PreferenceUiScopeDsl PreferenceUiScope<T>.() -> Unit
 
 /**
+ * Composition local for the global setting if all sub-preference composables should reserve an icon space.
+ * This can be overridden for each individual preference composable.
+ *
+ * @since 0.2.0
+ */
+val LocalIconSpaceReserved = staticCompositionLocalOf { false }
+
+/**
+ * Composition local of the current isEnabled state which applies.
+ *
+ * @since 0.2.0
+ */
+val LocalIsPrefEnabled = staticCompositionLocalOf { true }
+
+/**
+ * Composition local of the current isVisible state which applies.
+ *
+ * @since 0.2.0
+ */
+val LocalIsPrefVisible = staticCompositionLocalOf { true }
+
+/**
  * Preference UI scope which allows access to the current datastore model.
  *
  * @property prefs The current datastore model.
@@ -48,9 +72,6 @@ typealias PreferenceUiContent<T> = @Composable @PreferenceUiScopeDsl PreferenceU
  */
 class PreferenceUiScope<T : PreferenceModel>(
     val prefs: T,
-    internal val iconSpaceReserved: Boolean,
-    internal val enabledIf: PreferenceDataEvaluator,
-    internal val visibleIf: PreferenceDataEvaluator,
     columnScope: ColumnScope,
 ) : ColumnScope by columnScope
 
@@ -81,17 +102,19 @@ fun <T : PreferenceModel> PreferenceLayout(
     visibleIf: PreferenceDataEvaluator = { true },
     content: PreferenceUiContent<T>,
 ) {
-    Column(modifier = modifier) {
-        val prefModel by cachedPrefModel
-        val preferenceScope = PreferenceUiScope(
-            prefs = prefModel,
-            iconSpaceReserved = iconSpaceReserved,
-            enabledIf = enabledIf,
-            visibleIf = visibleIf,
-            columnScope = this,
-        )
-
-        content(preferenceScope)
+    CompositionLocalProvider(
+        LocalIconSpaceReserved provides iconSpaceReserved,
+        LocalIsPrefEnabled provides enabledIf(PreferenceDataEvaluatorScope),
+        LocalIsPrefVisible provides visibleIf(PreferenceDataEvaluatorScope),
+    ) {
+        Column(modifier = modifier) {
+            val prefModel by cachedPrefModel
+            val preferenceScope = PreferenceUiScope(
+                prefs = prefModel,
+                columnScope = this,
+            )
+            content(preferenceScope)
+        }
     }
 }
 
@@ -154,34 +177,35 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
 fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = this.iconSpaceReserved,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     content: PreferenceUiContent<T>,
 ) {
-    val evalScope = PreferenceDataEvaluatorScope.instance()
-    if (this.visibleIf(evalScope) && visibleIf(evalScope)) {
+    if (LocalIsPrefVisible.current && visibleIf(PreferenceDataEvaluatorScope)) {
         Column(modifier = modifier) {
             val preferenceScope = PreferenceUiScope(
                 prefs = this@PreferenceGroup.prefs,
-                iconSpaceReserved = iconSpaceReserved,
-                enabledIf = { this@PreferenceGroup.enabledIf(evalScope) && enabledIf(evalScope) },
-                visibleIf = { this@PreferenceGroup.visibleIf(evalScope) && visibleIf(evalScope) },
                 columnScope = this@Column,
             )
-
-            ListItem(
-                leadingContent = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-                headlineContent = { Text(
-                    text = title,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                ) },
-            )
-            content(preferenceScope)
+            CompositionLocalProvider(
+                LocalIconSpaceReserved provides iconSpaceReserved,
+                LocalIsPrefEnabled provides enabledIf(PreferenceDataEvaluatorScope),
+                LocalIsPrefVisible provides visibleIf(PreferenceDataEvaluatorScope),
+            ) {
+                ListItem(
+                    leadingContent = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                    headlineContent = { Text(
+                        text = title,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    ) },
+                )
+                content(preferenceScope)
+            }
         }
     }
 }
