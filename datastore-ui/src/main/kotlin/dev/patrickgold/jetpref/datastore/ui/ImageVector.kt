@@ -32,6 +32,7 @@ fun Context.vectorResource(@DrawableRes id: Int): ImageVector? {
  *
  * @since 0.1.0
  */
+@Suppress("NOTHING_TO_INLINE")
 @Composable
 inline fun vectorResource(@DrawableRes id: Int): ImageVector? {
     val context = LocalContext.current
