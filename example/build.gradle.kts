@@ -17,6 +17,7 @@
 plugins {
     alias(libs.plugins.agp.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.plugin.compose)
 }
 
 val projectCompileSdk: String by project
@@ -63,9 +64,6 @@ android {
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidx.compose.compiler.get()
     }
     packaging {
         resources {
