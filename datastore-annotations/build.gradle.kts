@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.vanniktech.maven.publish)
@@ -34,9 +36,12 @@ sourceSets {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "1.8"
+tasks {
+    compileKotlin {
+        compilerOptions.jvmTarget = JvmTarget.JVM_1_8
+    }
+    compileTestKotlin {
+        compilerOptions.jvmTarget = JvmTarget.JVM_1_8
     }
 }
 

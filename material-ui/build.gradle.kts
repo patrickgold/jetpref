@@ -17,6 +17,7 @@
 plugins {
     alias(libs.plugins.agp.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.plugin.compose)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
@@ -44,9 +45,6 @@ android {
 
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidx.compose.compiler.get()
     }
 
     sourceSets {
