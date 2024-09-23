@@ -16,8 +16,11 @@
 
 package dev.patrickgold.jetpref.material.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -93,6 +96,7 @@ import androidx.compose.ui.window.DialogProperties
  * @see androidx.compose.material3.AlertDialog
  * @see androidx.compose.ui.window.Dialog
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun JetPrefAlertDialog(
     title: String,
@@ -165,7 +169,10 @@ fun JetPrefAlertDialog(
                 ) {
                     content()
                 }
-                Row(Modifier.padding(buttonsPadding)) {
+                FlowRow(
+                    modifier = Modifier.padding(buttonsPadding),
+                    horizontalArrangement = Arrangement.End,
+                ) {
                     if (!neutralLabel.isNullOrBlank()) {
                         TextButton(
                             modifier = Modifier.padding(end = 8.dp),
@@ -177,23 +184,25 @@ fun JetPrefAlertDialog(
                         }
                     }
                     Spacer(modifier = Modifier.weight(1.0f))
-                    if (!dismissLabel.isNullOrBlank()) {
-                        TextButton(
-                            modifier = Modifier.padding(end = 8.dp),
-                            colors = dismissColors,
-                            enabled = dismissEnabled,
-                            onClick = onDismiss,
-                        ) {
-                            Text(dismissLabel)
+                    Row {
+                        if (!dismissLabel.isNullOrBlank()) {
+                            TextButton(
+                                modifier = Modifier.padding(end = 8.dp),
+                                colors = dismissColors,
+                                enabled = dismissEnabled,
+                                onClick = onDismiss,
+                            ) {
+                                Text(dismissLabel)
+                            }
                         }
-                    }
-                    if (!confirmLabel.isNullOrBlank()) {
-                        TextButton(
-                            colors = confirmColors,
-                            enabled = confirmEnabled,
-                            onClick = onConfirm,
-                        ) {
-                            Text(confirmLabel)
+                        if (!confirmLabel.isNullOrBlank()) {
+                            TextButton(
+                                colors = confirmColors,
+                                enabled = confirmEnabled,
+                                onClick = onConfirm,
+                            ) {
+                                Text(confirmLabel)
+                            }
                         }
                     }
                 }
