@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.observeAsState
@@ -102,25 +105,21 @@ internal fun <V> DialogSliderPreference(
         ) {
             Column {
                 Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 8.dp),
                     text = valueLabel(convertToV(sliderValue)),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
                 Slider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
                     value = sliderValue,
                     valueRange = min.toFloat()..max.toFloat(),
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).roundToInt() - 1,
                     onValueChange = { sliderValue = round(it) },
                     onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
-                        activeTickColor = Color.Transparent,
-                        inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
-                        ),
-                        inactiveTickColor = Color.Transparent,
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
+                    colors = customSliderDialogColors(),
                 )
             }
         }
@@ -196,56 +195,59 @@ internal fun <V> DialogSliderPreference(
         ) {
             Column {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(primaryLabel)
                     Text(valueLabel(primarySliderValue))
                 }
                 Slider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
                     value = primarySliderValue.toFloat(),
                     valueRange = min.toFloat()..max.toFloat(),
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
                     onValueChange = { primarySliderValue = convertToV(it) },
                     onValueChangeFinished = { onPreviewSelectedPrimaryValue(primarySliderValue) },
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
-                        activeTickColor = Color.Transparent,
-                        inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
-                        ),
-                        inactiveTickColor = Color.Transparent,
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
+                    colors = customSliderDialogColors(),
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(secondaryLabel)
                     Text(valueLabel(secondarySliderValue))
                 }
                 Slider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
                     value = secondarySliderValue.toFloat(),
                     valueRange = min.toFloat()..max.toFloat(),
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
                     onValueChange = { secondarySliderValue = convertToV(it) },
                     onValueChangeFinished = { onPreviewSelectedSecondaryValue(secondarySliderValue) },
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
-                        activeTickColor = Color.Transparent,
-                        inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = SliderDefaults.colors().inactiveTrackColor.alpha,
-                        ),
-                        inactiveTickColor = Color.Transparent,
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
+                    colors = customSliderDialogColors(),
                 )
             }
         }
     }
+}
+
+@Composable
+private fun customSliderDialogColors(): SliderColors {
+    return SliderDefaults.colors(
+        thumbColor = MaterialTheme.colorScheme.primary,
+        activeTrackColor = MaterialTheme.colorScheme.primary,
+        activeTickColor = Color.Transparent,
+        inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
+        inactiveTickColor = Color.Transparent,
+    )
 }
 
 /**
