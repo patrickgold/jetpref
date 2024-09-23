@@ -1,7 +1,7 @@
 # JetPref [![Maven Central Version](https://img.shields.io/maven-central/v/dev.patrickgold.jetpref/jetpref-datastore-model)](https://mvnrepository.com/search?q=dev.patrickgold.jetpref)
 
 A preference library (custom data handling + UI in JetPack Compose) for Android 6.0+ mainly developed for use in
-[FlorisBoard](https://github.com/florisboard/florisboard). Currently in early-beta phase.
+[FlorisBoard](https://github.com/florisboard/florisboard). Currently in beta phase.
 
 Disclaimer: This library is still in beta and therefore should only be used with caution in production code. It is
 currently tested out in FlorisBoard, so bugs or other issues in runtime use can be found and fixed. Feel free to ask if
@@ -9,7 +9,8 @@ you need help using this library or to file feature requests / bug reports in th
 
 ## Importing the library
 
-### Since 0.1.0-beta14
+<details open>
+<summary>0.1.0-beta14 or newer</summary>
 
 JetPref is hosted on Maven Central:
 
@@ -20,11 +21,13 @@ subprojects {
     }
 }
 ```
+</details>
 
-### Until 0.1.0-beta14
+<details>
+<summary>0.1.0-beta13 or older</summary>
 
 JetPref dependencies were hosted on [JitPack](https://jitpack.io/#dev.patrickgold/jetpref). Thus the JitPack
-repository needs to be added in your global repository config first:
+repository needs to be added in your global repository config:
 
 ```kts
 subprojects {
@@ -33,6 +36,7 @@ subprojects {
     }
 }
 ```
+</details>
 
 ### Adding the dependencies
 
@@ -182,6 +186,9 @@ JetPref provides a handful of pre-configured and ready Material preference widge
   is backed by a preference data with any value and allows to choose from different pre-set values ina list-style format
   within a dialog. Optionally this can also be combined with an additional boolean preference data backer, which adds a
   switch in the same dialog as the list.
+- [`TextFieldPreference`](datastore-ui/src/main/kotlin/dev/patrickgold/jetpref/datastore/ui/TextFieldPreference.kt):
+  Widget which is backed by a string preference data and shows a free-text input field. Additionally allows for on-the-fly
+  validation and automatic text transform (e.g. string trimming).
 - [`DialogSliderPreference`](datastore-ui/src/main/kotlin/dev/patrickgold/jetpref/datastore/ui/DialogSliderPreference.kt):
   Widget is is backed by one or two numeric preference data fields and which provides a dialog slider for each data
   field.
@@ -265,6 +272,20 @@ fun ExampleSettingsScreen() = ScrollablePreferenceLayout(examplePreferenceModel(
             stepIncrement = 5.0f,
         )
     }
+    TextFieldPreference(
+        prefs.example.description,
+        title = "Description",
+        summaryIfBlank = "(blank)",
+        summaryIfEmpty = "(empty)",
+    )
+    TextFieldPreference(
+        prefs.example.itemKey,
+        title = "Item key",
+        validateValue = {
+            "[a-z0-9_]+".toRegex().matches(it) || error("Invalid key")
+        },
+        transformValue = { it.trim() },
+    )
     ListPreference(
         prefs.example.title,
         title = "Some lengthy title about this entry some lengthy title about this entry.",
