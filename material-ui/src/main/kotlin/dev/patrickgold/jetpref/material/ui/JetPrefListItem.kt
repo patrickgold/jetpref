@@ -17,11 +17,14 @@
 package dev.patrickgold.jetpref.material.ui
 
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 
 /**
  * Material Design list item.
@@ -34,6 +37,9 @@ import androidx.compose.ui.text.style.TextOverflow
  * @param singleLineSecondaryText If the secondary text should be limited to a single line.
  * @param enabled If false, this list item will be grayed out.
  * @param trailing The trailing meta text, icon, switch or checkbox.
+ * @param colors The colors to be used for the list item.
+ * @param tonalElevation The elevation to be used for the tonal surface.
+ * @param shadowElevation The elevation to be used for the shadow surface.
  *
  * @since 0.1.0
  *
@@ -49,6 +55,9 @@ fun JetPrefListItem(
     singleLineSecondaryText: Boolean = false,
     enabled: Boolean = true,
     trailing: (@Composable () -> Unit)? = null,
+    colors: ListItemColors = ListItemDefaults.colors(),
+    tonalElevation: Dp = ListItemDefaults.Elevation,
+    shadowElevation: Dp = ListItemDefaults.Elevation,
 ) {
     ListItem(
         modifier = modifier.alpha(if (enabled) 1.0f else 0.38f),
@@ -75,5 +84,8 @@ fun JetPrefListItem(
             )
         },
         trailingContent = trailing,
+        colors = colors,
+        tonalElevation = tonalElevation,
+        shadowElevation = shadowElevation,
     )
 }
