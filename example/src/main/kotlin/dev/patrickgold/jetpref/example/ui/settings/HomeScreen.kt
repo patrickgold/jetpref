@@ -17,11 +17,13 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
@@ -54,6 +56,13 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         icon = Icons.Default.Palette,
         title = "Theme",
         entries = Theme.listEntries(),
+    )
+    ColorPickerPreference(
+        pref = prefs.accentColor,
+        title = "Accent Color",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        showAlphaSlider = false
     )
     DialogSliderPreference(
         primaryPref = prefs.boxSizePortrait,
