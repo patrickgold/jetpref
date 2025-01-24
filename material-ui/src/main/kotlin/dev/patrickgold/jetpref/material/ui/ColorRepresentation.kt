@@ -47,7 +47,7 @@ enum class ColorRepresentation(val regex: Regex) {
             }
             HSV -> {
                 val (h, s, v, a) = color.toHsv()
-                val hsv = listOf(h.toInt(), (s * 100).toInt(), (v * 100).toInt()).joinToString(", ")
+                val hsv = listOf(h.roundToInt(), (s * 100).roundToInt(), (v * 100).roundToInt()).joinToString(", ")
                 if (withAlpha) {
                     val alphaStr = String.format(Locale.ROOT, "%.2f", a).trimEnd('0').trimEnd('.')
                     "hsva($hsv, $alphaStr)"
