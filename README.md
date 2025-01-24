@@ -1,7 +1,7 @@
 # JetPref [![Maven Central Version](https://img.shields.io/maven-central/v/dev.patrickgold.jetpref/jetpref-datastore-model)](https://mvnrepository.com/search?q=dev.patrickgold.jetpref)
 
 A preference library (custom data handling + UI in JetPack Compose) for Android 6.0+ mainly developed for use in
-[FlorisBoard](https://github.com/florisboard/florisboard). Currently in beta phase.
+[FlorisBoard](https://github.com/florisboard/florisboard).
 
 Disclaimer: This library is still in beta and therefore should only be used with caution in production code. It is
 currently tested out in FlorisBoard, so bugs or other issues in runtime use can be found and fixed. Feel free to ask if
@@ -390,8 +390,12 @@ JetPref additionally provides ready-to-use custom Material components Jetpack Co
   Advanced and easy-to-use alert dialog, based on Jetpack Compose's `Dialog`.
 - [`JetPrefColorPicker`](material-ui/src/main/kotlin/dev/patrickgold/jetpref/material/ui/JetPrefColorPicker.kt): Simple
   but effective HSV color picker.
+- [`JetPrefDropdown`](material-ui/src/main/kotlin/dev/patrickgold/jetpref/material/ui/JetPrefDropdown.kt): Ease of use
+- of a material3 dropdown.
 - [`JetPrefListItem`](material-ui/src/main/kotlin/dev/patrickgold/jetpref/material/ui/JetPrefListItem.kt): Compatibility
   and ease-of use for a list item.
+- [`JetPrefTextField`](material-ui/src/main/kotlin/dev/patrickgold/jetpref/material/ui/JetPrefDropdown.kt): Ease of use
+- of material3 text field, which allow to toggle filled/outlined appearance via parameters.
 
 The Material UI package can be used independently from JetPref too, if you only need one of the above components!
 
@@ -406,7 +410,7 @@ A separate documentation page (with dokka) for the API and improved tutorials / 
 ## License
 
 ```
-Copyright 2021-2024 Patrick Goldinger
+Copyright 2021-2025 Patrick Goldinger
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
