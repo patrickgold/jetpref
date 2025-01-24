@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Patrick Goldinger
+ * Copyright 2022-2025 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.example.examplePreferenceModel
 import dev.patrickgold.jetpref.material.ui.ExperimentalJetPrefMaterial3Ui
@@ -40,42 +41,26 @@ import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 
 @OptIn(ExperimentalJetPrefMaterial3Ui::class)
 @Composable
-fun ColorPickerDemoScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
-    var color by remember { mutableStateOf(Color.White) }
-    Column(modifier = Modifier.padding(all = 32.dp)) {
+fun ColorPickerDemoScreen() = ScrollablePreferenceLayout(
+    cachedPrefModel = examplePreferenceModel(),
+    modifier = Modifier.fillMaxSize(),
+) {
+    var color by remember { mutableStateOf(Color.Red) }
+    Column(modifier = Modifier.padding(all = 16.dp)) {
         val colorPickerState = rememberJetPrefColorPickerState(initColor = color)
 
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp)
+                .padding(bottom = 16.dp)
                 .checkeredBackground(),
             color = color,
         ) {
-            Text(text = "Color state outside the picker.")
-        }
-
-        Row {
-            TextButton(onClick = {
-                colorPickerState.setColor(Color.Red)
-                color = Color.Red
-            }) {
-                Text(text = "Red")
-            }
-
-            TextButton(onClick = {
-                colorPickerState.setColor(Color.Green)
-                color = Color.Green
-            }) {
-                Text(text = "Green")
-            }
-
-            TextButton(onClick = {
-                colorPickerState.setColor(Color.Blue)
-                color = Color.Blue
-            }) {
-                Text(text = "Blue")
-            }
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = "Color state outside the picker.",
+                color = if (ColorUtils.calculateLuminance(color.toArgb()) > 0.179f) Color.Black else Color.White,
+            )
         }
 
         JetPrefColorPicker(
