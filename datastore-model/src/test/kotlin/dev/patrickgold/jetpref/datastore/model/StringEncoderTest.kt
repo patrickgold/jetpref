@@ -1,10 +1,10 @@
 package dev.patrickgold.jetpref.datastore.model
 
-import io.kotest.core.spec.style.FreeSpec
-import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
-class StringEncoderTest : FreeSpec({
-    val stringsToTest = listOf(
+class StringEncoderTest {
+    private val stringsToTest = listOf(
         "test" to "\"test\"",
         "\r\n" to "\"\\r\\n\"",
         "\\" to "\"\\\\\"",
@@ -14,20 +14,17 @@ class StringEncoderTest : FreeSpec({
         "\\\"one\\\" two=\"hello\"" to "\"\\\\\\\"one\\\\\\\" two=\\\"hello\\\"\"",
     )
 
-    "String encode/decode" - {
-        "Test string encode" - {
-            stringsToTest.forEach { (original, encoded) ->
-                "`$original` should be `$encoded`" {
-                    StringEncoder.encode(original) shouldBe encoded
-                }
-            }
-        }
-        "Test string decode" - {
-            stringsToTest.forEach { (original, encoded) ->
-                "`$encoded` should be `$original`" {
-                    StringEncoder.decode(encoded) shouldBe original
-                }
-            }
+    @Test
+    fun `test string encode`() {
+        stringsToTest.forEach { (original, encoded) ->
+            assertEquals(encoded, StringEncoder.encode(original))
         }
     }
-})
+
+    @Test
+    fun `test string decode`() {
+        stringsToTest.forEach { (original, encoded) ->
+            assertEquals(original, StringEncoder.decode(encoded))
+        }
+    }
+}
