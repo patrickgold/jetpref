@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Patrick Goldinger
+ * Copyright 2022-2025 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,18 +35,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -63,12 +72,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.takeOrElse
 import kotlin.math.ceil
-import kotlin.math.max
-import kotlin.math.min
 
 private val PreviewSize = 64.dp
 private val SliderPadding = PaddingValues(all = 12.dp)
@@ -76,6 +85,7 @@ private val SliderTrackHeight = 12.dp
 private val SliderThumbSize = 24.dp
 private val SliderThumbBorderSize = 4.dp
 private val SliderThumbElevation = 4.dp
+private val TextRowPadding = PaddingValues(vertical = 12.dp)
 
 private val ZeroOneRange = 0f..1f
 
@@ -87,8 +97,12 @@ private val ZeroOneRange = 0f..1f
  *  is always the end product, taking all input fields in regard.
  * @param modifier THe modifier to apply to this layout.
  * @param state The state for this color picker.
- * @param alphaSlider If true, the layout shows a slider for modifying the alpha property of a color.
+ * @param initialRepresentation The format in which the color should be displayed.
+ * @param withAlpha If true, the layout shows a slider for modifying the alpha property of a color.
  * @param strokeColor The color of the thumb color.
+ * @param saturationValueAspectRatio The aspect ratio of the saturation/value box.
+ * @param editorFieldLabel The label of the editor text field.
+ * @param editorFieldAppearance The appearance of the editor text field.
  *
  * @since 0.1.0
  */
@@ -98,21 +112,38 @@ fun JetPrefColorPicker(
     onColorChange: (Color) -> Unit,
     modifier: Modifier = Modifier,
     state: JetPrefColorPickerState = rememberJetPrefColorPickerState(initColor = Color.White),
-    alphaSlider: Boolean = true,
+    initialRepresentation: ColorRepresentation = ColorRepresentation.HEX,
+    withAlpha: Boolean = true,
     strokeColor: Color = Color.White,
+    saturationValueAspectRatio: Float = 1.5f,
+    editorFieldVisible: Boolean = true,
+    editorFieldLabel: String? = "Color",
+    editorFieldAppearance: JetPrefTextFieldAppearance = JetPrefTextFieldDefaults.filled(),
 ) {
     SideEffect {
-        if (!alphaSlider) {
+        if (!withAlpha) {
             state.alpha = 1f
+        }
+        if (!editorFieldVisible) {
+            state.isEditorMode = false
+        }
+    }
+
+    val grayedOutModifier = remember(state.isEditorMode) {
+        if (state.isEditorMode) {
+            Modifier.alpha(0.5f)
+        } else {
+            Modifier
         }
     }
 
     Column(modifier = modifier) {
-        SaturationValueBox(onColorChange, state, strokeColor)
+        SaturationValueBox(grayedOutModifier, onColorChange, state, strokeColor, saturationValueAspectRatio)
         Row(
             modifier = Modifier
+                .then(grayedOutModifier)
                 .fillMaxWidth()
-                .padding(start = 12.dp, top = 12.dp),
+                .padding(start = 2.dp, top = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
@@ -126,10 +157,59 @@ fun JetPrefColorPicker(
             )
             Column(modifier = Modifier.weight(1f)) {
                 HueBar(onColorChange, state, strokeColor)
-                if (alphaSlider) {
+                if (withAlpha) {
                     AlphaBar(onColorChange, state, strokeColor)
                 }
             }
+        }
+
+        if (editorFieldVisible) {
+            var selectedRepresentation by remember(initialRepresentation) { mutableStateOf(initialRepresentation) }
+            val color = state.rememberColor()
+            val colorField = remember(color, selectedRepresentation, withAlpha) {
+                TextFieldValue(selectedRepresentation.formatColor(color, withAlpha))
+            }
+            var isEditorError by remember(state.isEditorMode) { mutableStateOf(false) }
+            var editorColorField by remember(state.isEditorMode) {
+                mutableStateOf(TextFieldValue(colorField.text, TextRange(colorField.text.length)))
+            }
+            JetPrefTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(TextRowPadding),
+                value = if (state.isEditorMode) editorColorField else colorField,
+                onValueChange = { editorColorField = it },
+                readOnly = !state.isEditorMode,
+                trailingIcon = {
+                    if (!state.isEditorMode) {
+                        IconButton(onClick = { state.isEditorMode = true }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit color")
+                        }
+                    } else {
+                        Row {
+                            IconButton(onClick = {
+                                val result = Color.parseOrNull(editorColorField.text, withAlpha)
+                                if (result == null) {
+                                    isEditorError = true
+                                    return@IconButton
+                                }
+                                val (newColor, newRepresentation) = result
+                                state.setColor(newColor)
+                                selectedRepresentation = newRepresentation
+                                state.isEditorMode = false
+                            }) {
+                                Icon(Icons.Default.Done, contentDescription = "Apply changes")
+                            }
+                            IconButton(onClick = { state.isEditorMode = false }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Discard changes")
+                            }
+                        }
+                    }
+                },
+                isError = isEditorError,
+                labelText = editorFieldLabel,
+                appearance = editorFieldAppearance,
+            )
         }
     }
 }
@@ -194,7 +274,9 @@ private fun HueBar(
             HueBarShader(width, height)
         }
 
-        val inputModifier = Modifier.pointerInput(hueBarShader) {
+        val inputModifier = Modifier.pointerInput(hueBarShader, state.isEditorMode) {
+            if (state.isEditorMode) return@pointerInput
+
             fun updateSlider(newPosition: Offset) {
                 state.setHue(newPosition.x, width.toFloat())
                 onColorChange(state.color())
@@ -212,6 +294,7 @@ private fun HueBar(
 
         ColorSlider(
             modifier = inputModifier.padding(),
+            state = state,
             bitmap = hueBarShader.image,
             fillColor = state.rememberHueColor(),
             strokeColor = strokeColor,
@@ -239,7 +322,9 @@ private fun AlphaBar(
             AlphaBarShader(width, height, colorWithoutAlpha)
         }
 
-        val inputModifier = Modifier.pointerInput(alphaBarShader) {
+        val inputModifier = Modifier.pointerInput(alphaBarShader, state.isEditorMode) {
+            if (state.isEditorMode) return@pointerInput
+
             fun updateSlider(newPosition: Offset) {
                 state.setAlpha(newPosition.x, width.toFloat())
                 onColorChange(state.color())
@@ -257,6 +342,7 @@ private fun AlphaBar(
 
         ColorSlider(
             modifier = inputModifier,
+            state = state,
             bitmap = alphaBarShader.image,
             fillColor = state.rememberColor(),
             strokeColor = strokeColor,
@@ -268,14 +354,16 @@ private fun AlphaBar(
 
 @Composable
 private fun SaturationValueBox(
+    modifier: Modifier,
     onColorChange: (Color) -> Unit,
     state: JetPrefColorPickerState,
     strokeColor: Color,
+    aspectRatio: Float,
 ) = with(LocalDensity.current) {
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1.5f),
+            .aspectRatio(aspectRatio),
     ) {
         val width = constraints.maxWidth
         val height = constraints.maxHeight
@@ -284,7 +372,9 @@ private fun SaturationValueBox(
             SaturationValueBoxShader(width, height, hueColor)
         }
 
-        val inputModifier = Modifier.pointerInput(satValBox) {
+        val inputModifier = Modifier.pointerInput(satValBox, state.isEditorMode) {
+            if (state.isEditorMode) return@pointerInput
+
             fun updateBox(newPosition: Offset) {
                 state.setSaturation(newPosition.x, width.toFloat())
                 state.setValue(newPosition.y, height.toFloat())
@@ -301,24 +391,32 @@ private fun SaturationValueBox(
             }
         }
 
-        Image(
-            modifier = inputModifier.fillMaxSize(),
-            contentDescription = null,
-            bitmap = satValBox.image,
-        )
-
-        Thumb(
-            fillColor = state.rememberColorWithoutAlpha(),
-            strokeColor = strokeColor,
-            thumbPositionX = width.toDp() * state.saturation - (SliderThumbSize / 2),
-            thumbPositionY = height.toDp() * (1f - state.value) - (SliderThumbSize / 2),
-        )
+        Box(
+            modifier = inputModifier.matchParentSize(),
+        ) {
+            Image(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(OutlinedTextFieldDefaults.shape),
+                contentDescription = null,
+                bitmap = satValBox.image,
+            )
+            if (!state.isEditorMode) {
+                Thumb(
+                    fillColor = state.rememberColorWithoutAlpha(),
+                    strokeColor = strokeColor,
+                    thumbPositionX = width.toDp() * state.saturation - (SliderThumbSize / 2),
+                    thumbPositionY = height.toDp() * (1f - state.value) - (SliderThumbSize / 2),
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun ColorSlider(
     modifier: Modifier = Modifier,
+    state: JetPrefColorPickerState,
     bitmap: ImageBitmap,
     fillColor: Color,
     strokeColor: Color,
@@ -338,11 +436,13 @@ private fun ColorSlider(
             bitmap = bitmap,
         )
 
-        Thumb(
-            fillColor = fillColor,
-            strokeColor = strokeColor,
-            thumbPositionX = thumbPosition,
-        )
+        if (!state.isEditorMode) {
+            Thumb(
+                fillColor = fillColor,
+                strokeColor = strokeColor,
+                thumbPositionX = thumbPosition,
+            )
+        }
     }
 }
 
@@ -366,34 +466,6 @@ private fun Thumb(
         shadowElevation = SliderThumbElevation,
         content = { },
     )
-}
-
-private data class HsvColor(
-    val hue: Float,
-    val saturation: Float,
-    val value: Float,
-    val alpha: Float,
-)
-
-private fun Color.toHsv(): HsvColor {
-    val r = this.red
-    val g = this.green
-    val b = this.blue
-
-    val cMax = max(r, max(g, b))
-    val cMin = min(r, min(g, b))
-    val diff = cMax - cMin
-
-    val h = when (cMax) {
-        cMin -> 0f
-        r -> (60 * ((g - b) / diff) + 360) % 360
-        g -> (60 * ((b - r) / diff) + 120) % 360
-        b -> (60 * ((r - g) / diff) + 240) % 360
-        else -> -1f
-    }
-    val s = if (cMax == 0f) { 0f } else { diff / cMax }
-
-    return HsvColor(h, s, cMax, this.alpha)
 }
 
 /**
@@ -447,6 +519,13 @@ interface JetPrefColorPickerState {
      * @since 0.1.0
      */
     var alpha: Float
+
+    /**
+     * Whether the color picker is in editor mode.
+     *
+     * @since 0.2.0
+     */
+    var isEditorMode: Boolean
 
     /**
      * Returns the current color of this state.
@@ -514,11 +593,13 @@ private class JetPrefColorPickerStateImpl(
     initSaturation: Float = 1f,
     initValue: Float = 1f,
     initAlpha: Float = 1f,
+    initIsEditorMode: Boolean = false,
 ) : JetPrefColorPickerState {
     override var hue by mutableFloatStateOf(initHue)
     override var saturation by mutableFloatStateOf(initSaturation)
     override var value by mutableFloatStateOf(initValue)
     override var alpha by mutableFloatStateOf(initAlpha)
+    override var isEditorMode by mutableStateOf(initIsEditorMode)
 }
 
 private interface ShaderBase {

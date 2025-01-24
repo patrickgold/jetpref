@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Patrick Goldinger
+ * Copyright 2024-2025 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +29,8 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
+import dev.patrickgold.jetpref.material.ui.JetPrefTextField
+import dev.patrickgold.jetpref.material.ui.JetPrefTextFieldDefaults
 import dev.patrickgold.jetpref.material.ui.whenNotNullOrBlank
 
 /**
@@ -125,11 +126,12 @@ fun TextFieldPreference(
                         error.localizedMessage ?: error.message
                     }
                 }
-                OutlinedTextField(
+                JetPrefTextField(
                     value = localPrefValue,
                     onValueChange = { localPrefValue = it },
                     isError = validationResult.isFailure,
                     supportingText = whenNotNullOrBlank(message) { Text(it) },
+                    appearance = JetPrefTextFieldDefaults.outlined(),
                 )
             }
         }
