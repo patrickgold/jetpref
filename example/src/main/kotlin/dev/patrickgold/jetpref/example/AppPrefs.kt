@@ -7,7 +7,6 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.PreferenceSerializer
 import dev.patrickgold.jetpref.datastore.model.PreferenceType
-import dev.patrickgold.jetpref.datastore.ui.materialColors
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 // Defining a getter function for easy retrieval of the AppPrefs model.
@@ -27,7 +26,7 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
         default =  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             Color.Unspecified
         else
-            materialColors[0],
+            Color.Red,
         serializer = ColorPreferenceSerializer
     )
     val boxSizePortrait = int(

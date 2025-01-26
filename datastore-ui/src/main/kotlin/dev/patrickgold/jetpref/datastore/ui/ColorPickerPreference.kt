@@ -50,27 +50,6 @@ import dev.patrickgold.jetpref.material.ui.JetPrefColorPicker
 import dev.patrickgold.jetpref.material.ui.checkeredBackground
 import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 
-val materialColors = arrayOf(
-    Color(0xFFF44336), // RED 500
-    Color(0xFFE91E63), // PINK 500
-    Color(0xFFFF2C93), // LIGHT PINK 500
-    Color(0xFF9C27B0), // PURPLE 500
-    Color(0xFF673AB7), // DEEP PURPLE 500
-    Color(0xFF3F51B5), // INDIGO 500
-    Color(0xFF2196F3), // BLUE 500
-    Color(0xFF03A9F4), // LIGHT BLUE 500
-    Color(0xFF00BCD4), // CYAN 500
-    Color(0xFF009688), // TEAL 500
-    Color(0xFF4CAF50), // GREEN 500
-    Color(0xFF8BC34A), // LIGHT GREEN 500
-    Color(0xFFCDDC39), // LIME 500
-    Color(0xFFFFEB3B), // YELLOW 500
-    Color(0xFFFFC107), // AMBER 500
-    Color(0xFFFF9800), // ORANGE 500
-    Color(0xFF795548), // BROWN 500
-    Color(0xFF607D8B), // BLUE GREY 500
-    Color(0xFF9E9E9E), // GREY 500
-)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalJetPrefMaterial3Ui::class)
 @Composable
@@ -83,6 +62,8 @@ fun ColorPickerPreference(
     summary: String? = null,
     defaultValueLabel: String? = null,
     showAlphaSlider: Boolean = false,
+    enableAdvancedLayout: Boolean = false,
+    defaultColors: Array<Color>,
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
@@ -122,12 +103,11 @@ fun ColorPickerPreference(
 
         val color = Color(dialogValue)
         val presetColors = remember {
-            materialColors.plus(
-                if (defaultValueLabel == null)
-                    defaultColor
-                else
-                    Color.Black
-            )
+            defaultColors.apply {
+                if (defaultValueLabel == null) {
+                    plus(defaultColor)
+                }
+            }
         }
 
         var selectedPreset by remember { mutableIntStateOf(presetColors.indexOf(color)) }
@@ -222,13 +202,15 @@ fun ColorPickerPreference(
                     Row(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        TextButton(
-                            onClick = {
-                                advanced = !advanced
-                            }) {
-                            Text(
-                                if (advanced) "Presets" else "Custom"
-                            )
+                        if (enableAdvancedLayout) {
+                            TextButton(
+                                onClick = {
+                                    advanced = !advanced
+                                }) {
+                                Text(
+                                    if (advanced) "Presets" else "Custom"
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
