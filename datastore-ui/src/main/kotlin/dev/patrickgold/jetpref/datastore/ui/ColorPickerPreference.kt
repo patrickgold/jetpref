@@ -73,6 +73,8 @@ fun ColorPickerPreference(
     var dialogValue by remember { mutableIntStateOf(0) }
     val prefValue by pref.observeAsState()
     val safeValue = prefValue.safeValue()
+    val isMaterialYou = Color(dialogValue).isMaterialYou()
+
 
     Preference(
         modifier = modifier,
@@ -84,7 +86,7 @@ fun ColorPickerPreference(
                     .size(24.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface)
-                    .background(prefValue)
+                    .background(Color(safeValue))
                     .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
             )
         },
@@ -171,8 +173,8 @@ fun ColorPickerPreference(
                                         icon = icon,
                                         onSelect = {
                                             selectedPreset = -1
-                                            dialogValue = it.toArgb()
-                                            colorPickerState.setColor(it)
+                                            dialogValue = defaultColor.toArgb()
+                                            colorPickerState.setColor(defaultColor)
                                         }
                                     )
 
@@ -224,7 +226,11 @@ fun ColorPickerPreference(
                         TextButton(
                             onClick = {
                                 showPicker = false
-                                pref.set(Color(dialogValue))
+                                if (isMaterialYou) {
+                                    pref.set(Color.Unspecified)
+                                } else {
+                                    pref.set(Color(dialogValue))
+                                }
                             }) {
                             Text(dialogStrings.confirmLabel)
                         }
@@ -288,5 +294,16 @@ fun Color.safeValue(): Int {
         }
     } else {
         toArgb()
+    }
+}
+
+@Composable
+fun Color.isMaterialYou(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        with(LocalContext.current) {
+            this@isMaterialYou == Color(resources.getColor(android.R.color.system_accent1_500, theme))
+        }
+    } else {
+        false
     }
 }

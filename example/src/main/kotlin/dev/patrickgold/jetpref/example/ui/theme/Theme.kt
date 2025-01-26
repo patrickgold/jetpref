@@ -9,8 +9,11 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.platform.LocalContext
+import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
+import dev.patrickgold.jetpref.example.examplePreferenceModel
 
 private val DarkColorPalette = darkColorScheme(
     primary = Purple200,
@@ -51,7 +54,12 @@ private fun dynamicColors(darkTheme: Boolean) = if (darkTheme) {
 @Composable
 fun JetPrefTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
 
-    val colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    val prefs by examplePreferenceModel()
+    val accentColor = prefs.accentColor.observeAsState()
+
+    val dynamicColors = accentColor.value.isUnspecified
+
+    val colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && dynamicColors) {
         dynamicColors(darkTheme = darkTheme)
     } else {
         colors(darkTheme = darkTheme)
