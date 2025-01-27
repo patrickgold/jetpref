@@ -1,5 +1,6 @@
 package dev.patrickgold.jetpref.datastore.ui
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -65,6 +66,7 @@ fun ColorPickerPreference(
     enableAdvancedLayout: Boolean = false,
     defaultColors: Array<Color>,
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
+    colorOverride: (Color) -> Color = { it },
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
@@ -73,7 +75,6 @@ fun ColorPickerPreference(
     var dialogValue by remember { mutableIntStateOf(0) }
     val prefValue by pref.observeAsState()
     val safeValue = prefValue.safeValue()
-    val isMaterialYou = Color(dialogValue).isMaterialYou()
 
 
     Preference(
@@ -226,11 +227,7 @@ fun ColorPickerPreference(
                         TextButton(
                             onClick = {
                                 showPicker = false
-                                if (isMaterialYou) {
-                                    pref.set(Color.Unspecified)
-                                } else {
-                                    pref.set(Color(dialogValue))
-                                }
+                                pref.set(colorOverride(Color(dialogValue)))
                             }) {
                             Text(dialogStrings.confirmLabel)
                         }
@@ -297,10 +294,10 @@ fun Color.safeValue(): Int {
     }
 }
 
-@Composable
-fun Color.isMaterialYou(): Boolean {
+
+fun Color.isMaterialYou(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        with(LocalContext.current) {
+        with(context) {
             this@isMaterialYou == Color(resources.getColor(android.R.color.system_accent1_500, theme))
         }
     } else {

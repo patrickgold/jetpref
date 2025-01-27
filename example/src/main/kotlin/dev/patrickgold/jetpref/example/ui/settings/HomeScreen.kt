@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
@@ -34,6 +35,7 @@ import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
+import dev.patrickgold.jetpref.datastore.ui.isMaterialYou
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.datastore.ui.vectorResource
 import dev.patrickgold.jetpref.example.LocalNavController
@@ -45,6 +47,7 @@ import dev.patrickgold.jetpref.example.ui.theme.Theme
 @Composable
 fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     val navController = LocalNavController.current
+    val context = LocalContext.current
 
     val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
     Text(text = "is datastore ready = $isDatastoreReady")
@@ -87,6 +90,13 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         ),
         showAlphaSlider = false,
         enableAdvancedLayout = false,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
     )
     DialogSliderPreference(
         primaryPref = prefs.boxSizePortrait,
