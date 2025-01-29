@@ -65,6 +65,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     ColorPickerPreference(
         pref = prefs.accentColor,
         title = "Accent Color",
+        summary = "Without advanced and alpha",
         defaultValueLabel = "Default",
         icon = Icons.Default.FormatPaint,
         defaultColors = arrayOf<Color>(
@@ -90,6 +91,117 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         ),
         showAlphaSlider = false,
         enableAdvancedLayout = false,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
+    )
+    ColorPickerPreference(
+        pref = prefs.accentColor,
+        title = "Accent Color",
+        summary = "Without advanced with alpha",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        defaultColors = arrayOf<Color>(
+            Color(0xFFF44336), // RED 500
+            Color(0xFFE91E63), // PINK 500
+            Color(0xFFFF2C93), // LIGHT PINK 500
+            Color(0xFF9C27B0), // PURPLE 500
+            Color(0xFF673AB7), // DEEP PURPLE 500
+            Color(0xFF3F51B5), // INDIGO 500
+            Color(0xFF2196F3), // BLUE 500
+            Color(0xFF03A9F4), // LIGHT BLUE 500
+            Color(0xFF00BCD4), // CYAN 500
+            Color(0xFF009688), // TEAL 500
+            Color(0xFF4CAF50), // GREEN 500
+            Color(0xFF8BC34A), // LIGHT GREEN 500
+            Color(0xFFCDDC39), // LIME 500
+            Color(0xFFFFEB3B), // YELLOW 500
+            Color(0xFFFFC107), // AMBER 500
+            Color(0xFFFF9800), // ORANGE 500
+            Color(0xFF795548), // BROWN 500
+            Color(0xFF607D8B), // BLUE GREY 500
+            Color(0xFF9E9E9E), // GREY 500
+        ),
+        showAlphaSlider = true,
+        enableAdvancedLayout = false,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
+    )
+    ColorPickerPreference(
+        pref = prefs.accentColor,
+        title = "Accent Color",
+        summary = "With advanced without alpha",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        defaultColors = arrayOf<Color>(
+            Color(0xFFF44336), // RED 500
+            Color(0xFFE91E63), // PINK 500
+            Color(0xFFFF2C93), // LIGHT PINK 500
+            Color(0xFF9C27B0), // PURPLE 500
+            Color(0xFF673AB7), // DEEP PURPLE 500
+            Color(0xFF3F51B5), // INDIGO 500
+            Color(0xFF2196F3), // BLUE 500
+            Color(0xFF03A9F4), // LIGHT BLUE 500
+            Color(0xFF00BCD4), // CYAN 500
+            Color(0xFF009688), // TEAL 500
+            Color(0xFF4CAF50), // GREEN 500
+            Color(0xFF8BC34A), // LIGHT GREEN 500
+            Color(0xFFCDDC39), // LIME 500
+            Color(0xFFFFEB3B), // YELLOW 500
+            Color(0xFFFFC107), // AMBER 500
+            Color(0xFFFF9800), // ORANGE 500
+            Color(0xFF795548), // BROWN 500
+            Color(0xFF607D8B), // BLUE GREY 500
+            Color(0xFF9E9E9E), // GREY 500
+        ),
+        showAlphaSlider = false,
+        enableAdvancedLayout = true,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
+    )
+    ColorPickerPreference(
+        pref = prefs.accentColor,
+        title = "Accent Color",
+        summary = "With advanced and alpha",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        defaultColors = arrayOf<Color>(
+            Color(0xFFF44336), // RED 500
+            Color(0xFFE91E63), // PINK 500
+            Color(0xFFFF2C93), // LIGHT PINK 500
+            Color(0xFF9C27B0), // PURPLE 500
+            Color(0xFF673AB7), // DEEP PURPLE 500
+            Color(0xFF3F51B5), // INDIGO 500
+            Color(0xFF2196F3), // BLUE 500
+            Color(0xFF03A9F4), // LIGHT BLUE 500
+            Color(0xFF00BCD4), // CYAN 500
+            Color(0xFF009688), // TEAL 500
+            Color(0xFF4CAF50), // GREEN 500
+            Color(0xFF8BC34A), // LIGHT GREEN 500
+            Color(0xFFCDDC39), // LIME 500
+            Color(0xFFFFEB3B), // YELLOW 500
+            Color(0xFFFFC107), // AMBER 500
+            Color(0xFFFF9800), // ORANGE 500
+            Color(0xFF795548), // BROWN 500
+            Color(0xFF607D8B), // BLUE GREY 500
+            Color(0xFF9E9E9E), // GREY 500
+        ),
+        showAlphaSlider = true,
+        enableAdvancedLayout = true,
         colorOverride = {
             if (it.isMaterialYou(context)) {
                 Color.Unspecified
