@@ -132,8 +132,20 @@ fun ColorPickerPreference(
             }
         }
 
-        var selectedPreset by remember { mutableIntStateOf(presetColors.indexOf(color)) }
-        var advanced by remember { mutableStateOf(false) }
+        var selectedPreset by remember {
+            mutableIntStateOf(
+                presetColors.indexOf(
+                    color.copy(alpha = 1f)
+                )
+            )
+        }
+        var advanced by remember {
+            mutableStateOf(
+                !presetColors.contains(color.copy(alpha = 1f))
+                    && color.copy(1f)
+                    != defaultColor && enableAdvancedLayout
+            )
+        }
 
         val neutralLabel by remember(advanced, enableAdvancedLayout) {
             mutableStateOf(
@@ -200,7 +212,7 @@ fun ColorPickerPreference(
                                 ) {
                                     ColorBox(
                                         color = defaultColor,
-                                        selected = color == defaultColor,
+                                        selected = color.copy(1f) == defaultColor,
                                         icon = icon,
                                         onSelect = {
                                             selectedPreset = -1
