@@ -48,7 +48,29 @@ import dev.patrickgold.jetpref.material.ui.checkeredBackground
 import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalJetPrefMaterial3Ui::class)
+/**
+ * Material Color picker preference with a preset and a custom layout
+ *
+ * @param pref The color preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param icon The [ImageVector] of the list entry.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
+ * @param defaultValueLabel The label for the default color box.
+ * @param showAlphaSlider If the alpha slider should be shown.
+ * @param enableAdvancedLayout If the advancedLayout should be shown.
+ * @param defaultColors [Array] of [Color] which will be shown as default colors.
+ * @param colorOverride Optional callback for overriding colors with other colors.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ * @since 0.2.0
+ */
+@OptIn(ExperimentalJetPrefMaterial3Ui::class)
 @Composable
 fun ColorPickerPreference(
     pref: PreferenceData<Color>,
@@ -61,8 +83,8 @@ fun ColorPickerPreference(
     showAlphaSlider: Boolean = false,
     enableAdvancedLayout: Boolean = false,
     defaultColors: Array<Color>,
-    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     colorOverride: (Color) -> Color = { it },
+    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
@@ -224,6 +246,15 @@ fun ColorPickerPreference(
     }
 }
 
+/**
+ * ColorBox used in the [ColorPickerPreference] for displaying the default colors.
+ *
+ * @param color The [Color] of the ColorBox
+ * @param selected If the colorbox is currently selected.
+ * @param icon the [ImageVector] that should be used as selected indicator.
+ * @param onSelect callback for selecting the color of the color box.
+ * @since 0.2.0
+ */
 @Composable
 fun ColorBox(
     color: Color,
@@ -269,6 +300,12 @@ fun ColorBox(
     }
 }
 
+/**
+ * Safe value
+ *
+ * @return the save color value. Either itself or the material you system accent
+ * @since 0.2.0
+ */
 @Composable
 fun Color.safeValue(): Int {
     return if (isUnspecified && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -281,6 +318,13 @@ fun Color.safeValue(): Int {
 }
 
 
+/**
+ * Check if a color is the system accent color
+ *
+ * @param context
+ * @return a boolean indicating if it is the material you color
+ * @since 0.2.0
+ */
 fun Color.isMaterialYou(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         with(context) {
