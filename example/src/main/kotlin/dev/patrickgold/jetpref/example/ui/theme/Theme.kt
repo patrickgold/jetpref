@@ -55,7 +55,7 @@ private fun dynamicColors(darkTheme: Boolean) = if (darkTheme) {
 fun JetPrefTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
 
     val prefs by examplePreferenceModel()
-    val accentColor = prefs.accentColor.observeAsState()
+    val accentColor = prefs.color1.observeAsState()
 
     val dynamicColors = accentColor.value.isUnspecified
 

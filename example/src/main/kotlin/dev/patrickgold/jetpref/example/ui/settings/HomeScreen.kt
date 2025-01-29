@@ -63,7 +63,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         entries = Theme.listEntries(),
     )
     ColorPickerPreference(
-        pref = prefs.accentColor,
+        pref = prefs.color1,
         title = "Accent Color",
         summary = "Without advanced and alpha",
         defaultValueLabel = "Default",
@@ -100,7 +100,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         }
     )
     ColorPickerPreference(
-        pref = prefs.accentColor,
+        pref = prefs.color2,
         title = "Accent Color",
         summary = "Without advanced with alpha",
         defaultValueLabel = "Default",
@@ -137,7 +137,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         }
     )
     ColorPickerPreference(
-        pref = prefs.accentColor,
+        pref = prefs.color3,
         title = "Accent Color",
         summary = "With advanced without alpha",
         defaultValueLabel = "Default",
@@ -174,7 +174,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         }
     )
     ColorPickerPreference(
-        pref = prefs.accentColor,
+        pref = prefs.color4,
         title = "Accent Color",
         summary = "With advanced and alpha",
         defaultValueLabel = "Default",

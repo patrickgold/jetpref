@@ -21,8 +21,32 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
         key = "theme",
         default = Theme.AUTO,
     )
-    val accentColor = custom(
-        key = "accent_color",
+    val color1 = custom(
+        key = "accent_color1",
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
+    )
+    val color2 = custom(
+        key = "accent_color2",
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
+    )
+    val color3 = custom(
+        key = "accent_color3",
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
+    )
+    val color4 = custom(
+        key = "accent_color4",
         default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             true -> Color.Unspecified
             false -> Color.Red
