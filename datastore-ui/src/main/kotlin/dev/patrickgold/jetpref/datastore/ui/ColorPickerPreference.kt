@@ -105,6 +105,7 @@ fun ColorPickerPreference(
                     .size(24.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface)
+                    .checkeredBackground(gridSize = 2.dp)
                     .background(Color(safeValue))
                     .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
             )
