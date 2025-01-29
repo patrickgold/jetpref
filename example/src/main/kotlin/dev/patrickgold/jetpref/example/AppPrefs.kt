@@ -21,13 +21,13 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
         key = "theme",
         default = Theme.AUTO,
     )
-    val accentColor = custom<Color>(
+    val accentColor = custom(
         key = "accent_color",
-        default =  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            Color.Unspecified
-        else
-            Color.Red,
-        serializer = ColorPreferenceSerializer
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
     )
     val boxSizePortrait = int(
         key = "box_size_portrait",
