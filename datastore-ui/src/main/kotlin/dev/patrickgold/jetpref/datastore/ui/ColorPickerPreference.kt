@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.graphics.ColorUtils
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -88,12 +89,10 @@ fun ColorPickerPreference(
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
-
     var showPicker by remember { mutableStateOf(false) }
     var dialogValue by remember { mutableIntStateOf(0) }
     val prefValue by pref.observeAsState()
     val safeValue = prefValue.safeValue()
-
 
     Preference(
         modifier = modifier,
@@ -122,7 +121,6 @@ fun ColorPickerPreference(
 
     if (showPicker) {
         val defaultColor = Color(pref.default.safeValue())
-
         val color = Color(dialogValue)
         val presetColors = remember {
             defaultColors.apply {
@@ -131,7 +129,6 @@ fun ColorPickerPreference(
                 }
             }
         }
-
         var selectedPreset by remember {
             mutableIntStateOf(
                 presetColors.indexOf(
@@ -146,7 +143,6 @@ fun ColorPickerPreference(
                     != defaultColor && enableAdvancedLayout
             )
         }
-
         val neutralLabel by remember(advanced, enableAdvancedLayout) {
             mutableStateOf(
                 if (!enableAdvancedLayout) {
@@ -156,8 +152,6 @@ fun ColorPickerPreference(
                 }
             )
         }
-
-
         val colorPickerState = rememberJetPrefColorPickerState(color)
 
         key(advanced) {
@@ -277,7 +271,7 @@ fun ColorBox(
 ) {
     Box(
         modifier = Modifier
-            .requiredSize(56.dp)
+            .requiredSize(50.dp)
             .padding(4.dp)
             .clip(CircleShape)
             //.background(MaterialTheme.colorScheme.surface)
