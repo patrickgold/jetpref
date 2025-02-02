@@ -18,6 +18,7 @@ package dev.patrickgold.jetpref.material.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
@@ -151,7 +152,13 @@ fun JetPrefColorPicker(
                     .padding(end = 16.dp)
                     .size(PreviewSize)
                     .clip(CircleShape)
-                    .checkeredBackground(),
+                    .checkeredBackground()
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline,
+                        shape = CircleShape
+                    )
+                    .padding(1.dp),
                 color = state.rememberColor(),
                 content = { },
             )
@@ -304,7 +311,7 @@ private fun HueBar(
 }
 
 @Composable
-private fun AlphaBar(
+fun AlphaBar(
     onColorChange: (Color) -> Unit,
     state: JetPrefColorPickerState,
     strokeColor: Color,

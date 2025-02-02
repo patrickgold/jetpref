@@ -1,8 +1,11 @@
 package dev.patrickgold.jetpref.example
 
+import android.os.Build
+import androidx.compose.ui.graphics.Color
 import dev.patrickgold.jetpref.datastore.JetPref
 import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
+import dev.patrickgold.jetpref.datastore.model.PreferenceSerializer
 import dev.patrickgold.jetpref.datastore.model.PreferenceType
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 
@@ -17,6 +20,38 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
     val theme = enum(
         key = "theme",
         default = Theme.AUTO,
+    )
+    val color1 = custom(
+        key = "accent_color1",
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
+    )
+    val color2 = custom(
+        key = "accent_color2",
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
+    )
+    val color3 = custom(
+        key = "accent_color3",
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
+    )
+    val color4 = custom(
+        key = "accent_color4",
+        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            true -> Color.Unspecified
+            false -> Color.Red
+        },
+        serializer = ColorPreferenceSerializer,
     )
     val boxSizePortrait = int(
         key = "box_size_portrait",
@@ -114,4 +149,14 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
             else -> entry.keepAsIs()
         }
     }
+}
+
+object ColorPreferenceSerializer : PreferenceSerializer<Color> {
+    @OptIn(ExperimentalStdlibApi::class)
+    override fun deserialize(value: String): Color {
+        return Color(value.hexToULong())
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    override fun serialize(value: Color): String = value.value.toHexString()
 }

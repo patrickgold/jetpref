@@ -16,12 +16,17 @@
 
 package dev.patrickgold.jetpref.example.ui.settings
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
@@ -30,17 +35,20 @@ import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
+import dev.patrickgold.jetpref.datastore.ui.isMaterialYou
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.datastore.ui.vectorResource
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.examplePreferenceModel
 import dev.patrickgold.jetpref.example.ui.theme.Theme
+import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 
 @OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
 fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
     val navController = LocalNavController.current
+    val context = LocalContext.current
 
     val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
     Text(text = "is datastore ready = $isDatastoreReady")
@@ -55,6 +63,74 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         title = "Theme",
         entries = Theme.listEntries(),
     )
+    ColorPickerPreference(
+        pref = prefs.color1,
+        title = "Accent Color",
+        summary = "Without advanced and alpha",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        defaultColors = defaultColors,
+        showAlphaSlider = false,
+        enableAdvancedLayout = false,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
+    )
+    ColorPickerPreference(
+        pref = prefs.color2,
+        title = "Accent Color",
+        summary = "Without advanced with alpha",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        defaultColors = defaultColors,
+        showAlphaSlider = true,
+        enableAdvancedLayout = false,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
+    )
+    ColorPickerPreference(
+        pref = prefs.color3,
+        title = "Accent Color",
+        summary = "With advanced without alpha",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        defaultColors = defaultColors,
+        showAlphaSlider = false,
+        enableAdvancedLayout = true,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
+    )
+    ColorPickerPreference(
+        pref = prefs.color4,
+        title = "Accent Color",
+        summary = "With advanced and alpha",
+        defaultValueLabel = "Default",
+        icon = Icons.Default.FormatPaint,
+        defaultColors = defaultColors,
+        showAlphaSlider = true,
+        enableAdvancedLayout = true,
+        colorOverride = {
+            if (it.isMaterialYou(context)) {
+                Color.Unspecified
+            } else {
+                it
+            }
+        }
+    )
     DialogSliderPreference(
         primaryPref = prefs.boxSizePortrait,
         secondaryPref = prefs.boxSizeLandscape,
@@ -67,8 +143,8 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
         stepIncrement = 1,
         // Tapping causes an incorrect state to be print, see https://issuetracker.google.com/issues/181415195
         // Dragging works fine though
-        onPreviewSelectedPrimaryValue = { android.util.Log.d("preview primary", it.toString()) },
-        onPreviewSelectedSecondaryValue = { android.util.Log.d("preview secondary", it.toString()) },
+        onPreviewSelectedPrimaryValue = { Log.d("preview primary", it.toString()) },
+        onPreviewSelectedSecondaryValue = { Log.d("preview secondary", it.toString()) },
     )
     SwitchPreference(
         prefs.showExampleGroup,
