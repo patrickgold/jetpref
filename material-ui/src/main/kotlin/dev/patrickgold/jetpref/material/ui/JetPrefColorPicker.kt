@@ -202,6 +202,7 @@ fun JetPrefColorPicker(
                                 }
                                 val (newColor, newRepresentation) = result
                                 state.setColor(newColor)
+                                onColorChange(newColor)
                                 selectedRepresentation = newRepresentation
                                 state.isEditorMode = false
                             }) {
@@ -275,8 +276,8 @@ private fun HueBar(
             .fillMaxWidth()
             .height(SliderTrackHeight),
     ) {
-        val width = constraints.maxWidth
-        val height = constraints.maxHeight
+        val width = this.constraints.maxWidth
+        val height = this.constraints.maxHeight
         val hueBarShader = remember(width, height) {
             HueBarShader(width, height)
         }
@@ -322,8 +323,8 @@ fun AlphaBar(
             .fillMaxWidth()
             .height(SliderTrackHeight),
     ) {
-        val width = constraints.maxWidth
-        val height = constraints.maxHeight
+        val width = this.constraints.maxWidth
+        val height = this.constraints.maxHeight
         val colorWithoutAlpha = state.rememberColorWithoutAlpha()
         val alphaBarShader = remember(width, height, colorWithoutAlpha) {
             AlphaBarShader(width, height, colorWithoutAlpha)
@@ -372,8 +373,8 @@ private fun SaturationValueBox(
             .fillMaxWidth()
             .aspectRatio(aspectRatio),
     ) {
-        val width = constraints.maxWidth
-        val height = constraints.maxHeight
+        val width = this.constraints.maxWidth
+        val height = this.constraints.maxHeight
         val hueColor = state.rememberHueColor()
         val satValBox = remember(width, height, hueColor) {
             SaturationValueBoxShader(width, height, hueColor)
