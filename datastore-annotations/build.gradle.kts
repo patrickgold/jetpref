@@ -26,8 +26,8 @@ val artifactId = "jetpref-datastore-annotations"
 val projectVersion: String by project
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 sourceSets {
@@ -38,10 +38,10 @@ sourceSets {
 
 tasks {
     compileKotlin {
-        compilerOptions.jvmTarget = JvmTarget.JVM_1_8
+        compilerOptions.jvmTarget = JvmTarget.JVM_11
     }
     compileTestKotlin {
-        compilerOptions.jvmTarget = JvmTarget.JVM_1_8
+        compilerOptions.jvmTarget = JvmTarget.JVM_11
     }
 }
 
