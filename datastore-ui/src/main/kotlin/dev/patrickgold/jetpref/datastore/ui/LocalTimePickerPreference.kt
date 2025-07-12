@@ -17,12 +17,19 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import android.text.format.DateFormat.is24HourFormat
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+//TODO: Decide if the icons should be included here or in another module
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
@@ -59,21 +66,6 @@ fun LocalTimePickerPreference(
     var isDialogOpen by remember { mutableStateOf(false) }
     var displayMode by remember { mutableStateOf(DisplayMode.Picker) }
 
-    fun toggleDisplayMode() {
-        displayMode = when (displayMode) {
-            DisplayMode.Picker -> {
-                DisplayMode.Input
-            }
-            DisplayMode.Input -> {
-                DisplayMode.Picker
-            }
-            else -> {
-                //FFS why is this a value class and not an enum???
-                displayMode
-            }
-        }
-    }
-
     Preference(
         modifier = modifier,
         icon = icon,
@@ -100,28 +92,60 @@ fun LocalTimePickerPreference(
             modifier = Modifier
                 .width(IntrinsicSize.Min)
                 .height(IntrinsicSize.Min),
-            onDismiss = {
-                isDialogOpen = false
-            },
-            onNeutral = ::toggleDisplayMode,
-            neutralLabel = if (displayMode == DisplayMode.Picker) {
-                "Switch to Input"
-            } else {
-                "Switch to Picker"
-            },
+            confirmLabel = dialogStrings.confirmLabel,
             onConfirm = {
                 pref.set(timePickerState.toLocalTime())
                 isDialogOpen = false
             },
-            confirmLabel = dialogStrings.confirmLabel,
             dismissLabel = dialogStrings.dismissLabel,
+            onDismiss = {
+                isDialogOpen = false
+            },
+            neutralLabel = dialogStrings.neutralLabel,
+            onNeutral = {
+                pref.reset()
+                isDialogOpen = false
+            },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            val contentModifier = Modifier.padding(horizontal = 24.dp)
-            when (displayMode) {
-                DisplayMode.Picker -> TimePicker(modifier = contentModifier, state = timePickerState)
-                DisplayMode.Input -> TimeInput(modifier = contentModifier, state = timePickerState)
+            Column {
+                val contentModifier = Modifier.padding(horizontal = 24.dp)
+                when (displayMode) {
+                    DisplayMode.Picker -> TimePicker(modifier = contentModifier, state = timePickerState)
+                    DisplayMode.Input -> TimeInput(modifier = contentModifier, state = timePickerState)
+                }
+                DisplayModeToggleButton(displayMode, onDisplayModeChange = { displayMode = it })
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DisplayModeToggleButton(
+    displayMode: DisplayMode,
+    onDisplayModeChange: (DisplayMode) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (displayMode) {
+        DisplayMode.Picker -> IconButton(
+            modifier = modifier,
+            onClick = { onDisplayModeChange(DisplayMode.Input) },
+        ) {
+            Icon(
+                imageVector = Icons.Default.Keyboard,
+                contentDescription = "Switch time input to keyboard input",
+            )
+        }
+
+        DisplayMode.Input -> IconButton(
+            modifier = modifier,
+            onClick = { onDisplayModeChange(DisplayMode.Picker) },
+        ) {
+            Icon(
+                imageVector = Icons.Default.Schedule,
+                contentDescription = "Switch time input to time picker",
+            )
         }
     }
 }
@@ -130,5 +154,3 @@ fun LocalTimePickerPreference(
 fun TimePickerState.toLocalTime(): LocalTime {
     return LocalTime(hour = hour, minute = minute)
 }
-// TODO: re-implement a time picker preference which does not depend on the
-//       time picker Android view and core lib desugaring
