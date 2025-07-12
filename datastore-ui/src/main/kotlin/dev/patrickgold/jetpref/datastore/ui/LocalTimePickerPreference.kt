@@ -16,29 +16,119 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-@ExperimentalJetPrefDatastoreUi
-data class ClockFormat(
-    val is24Hour: Boolean,
-    val showHours: Boolean,
-    val showMinutes: Boolean,
-    val showSeconds: Boolean,
-    val showMilliseconds: Boolean,
-)
+import android.text.format.DateFormat.is24HourFormat
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import dev.patrickgold.jetpref.datastore.model.LocalTime
+import dev.patrickgold.jetpref.datastore.model.PreferenceData
+import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 
-object TimePickerDefaults {
-    /**
-     * Creates a clock format config, which can be used to determine
-     * what UI controls a time picker should show.
-     */
-    @ExperimentalJetPrefDatastoreUi
-    fun clockFormat(
-        is24Hour: Boolean = true,
-        showHours: Boolean = true,
-        showMinutes: Boolean = true,
-        showSeconds: Boolean = false,
-        showMilliseconds: Boolean = false,
-    ) = ClockFormat(is24Hour, showHours, showMinutes, showSeconds, showMilliseconds)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LocalTimePickerPreference(
+    pref: PreferenceData<LocalTime>,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    title: String,
+    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+) {
+    val prefValue by pref.observeAsState()
+    var isDialogOpen by remember { mutableStateOf(false) }
+    var displayMode by remember { mutableStateOf(DisplayMode.Picker) }
+
+    fun toggleDisplayMode() {
+        displayMode = when (displayMode) {
+            DisplayMode.Picker -> {
+                DisplayMode.Input
+            }
+            DisplayMode.Input -> {
+                DisplayMode.Picker
+            }
+            else -> {
+                //FFS why is this a value class and not an enum???
+                displayMode
+            }
+        }
+    }
+
+    Preference(
+        modifier = modifier,
+        icon = icon,
+        iconSpaceReserved = iconSpaceReserved,
+        title = title,
+        summary = prefValue.stringRepresentation,
+        enabledIf = enabledIf,
+        visibleIf = visibleIf,
+        onClick = {
+            isDialogOpen = true
+        }
+    )
+
+    if (isDialogOpen) {
+        val is24Hour = is24HourFormat(LocalContext.current)
+        val timePickerState = rememberTimePickerState(
+            initialHour = prefValue.hour,
+            initialMinute = prefValue.minute,
+            is24Hour = is24Hour
+        )
+
+        JetPrefAlertDialog(
+            title = title,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min),
+            onDismiss = {
+                isDialogOpen = false
+            },
+            onNeutral = ::toggleDisplayMode,
+            neutralLabel = if (displayMode == DisplayMode.Picker) {
+                "Switch to Input"
+            } else {
+                "Switch to Picker"
+            },
+            onConfirm = {
+                pref.set(timePickerState.toLocalTime())
+                isDialogOpen = false
+            },
+            confirmLabel = dialogStrings.confirmLabel,
+            dismissLabel = dialogStrings.dismissLabel,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            val contentModifier = Modifier.padding(horizontal = 24.dp)
+            when (displayMode) {
+                DisplayMode.Picker -> TimePicker(modifier = contentModifier, state = timePickerState)
+                DisplayMode.Input -> TimeInput(modifier = contentModifier, state = timePickerState)
+            }
+        }
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+fun TimePickerState.toLocalTime(): LocalTime {
+    return LocalTime(hour = hour, minute = minute)
+}
 // TODO: re-implement a time picker preference which does not depend on the
 //       time picker Android view and core lib desugaring

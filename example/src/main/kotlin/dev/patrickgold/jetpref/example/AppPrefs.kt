@@ -3,6 +3,7 @@ package dev.patrickgold.jetpref.example
 import android.os.Build
 import androidx.compose.ui.graphics.Color
 import dev.patrickgold.jetpref.datastore.JetPref
+import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.PreferenceSerializer
@@ -115,6 +116,11 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
         val longListPref = string(
             key = "test__long_list",
             default = "str1"
+        )
+
+        val time = time(
+            key = "test__time",
+            default = LocalTime(18, 0)
         )
     }
 
