@@ -125,6 +125,15 @@ abstract class PreferenceModel(val name: String) {
         return prefData
     }
 
+    protected fun time(
+        @PreferenceKey key: String,
+        default: LocalTime,
+    ): PreferenceData<LocalTime> {
+        val prefData = CustomPreferenceData(this, key, default, TimePreferenceSerializer)
+        registryAdd(prefData)
+        return prefData
+    }
+
     protected inline fun <reified V : Enum<V>> enum(
         @PreferenceKey key: String,
         default: V,

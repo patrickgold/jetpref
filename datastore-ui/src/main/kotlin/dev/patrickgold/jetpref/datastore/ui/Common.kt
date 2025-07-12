@@ -16,13 +16,16 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
+import android.text.format.DateFormat.is24HourFormat
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import dev.patrickgold.jetpref.datastore.model.LocalTime
 
 
 @Composable
@@ -44,3 +47,32 @@ internal fun maybeJetIcon(
         else -> null
     }
 }
+
+
+val LocalTime.isAfternoon
+    get() = hour >= 12
+
+@get:Composable
+val LocalTime.hourForDisplay: Int
+    get() {
+        return when {
+            is24HourFormat(LocalContext.current) -> hour % 24
+            hour % 12 == 0 -> 12
+            isAfternoon -> hour - 12
+            else -> hour
+        }
+    }
+
+@get:Composable
+val LocalTime.stringRepresentation: String
+    get() {
+        return if (is24HourFormat(LocalContext.current)) {
+            "$hourForDisplay:${String.format("%02d", minute)}"
+        } else {
+            if (isAfternoon) {
+                "$hourForDisplay:${String.format("%02d", minute)} PM"
+            } else {
+                "$hourForDisplay:${String.format("%02d", minute)} AM"
+            }
+        }
+    }

@@ -30,6 +30,7 @@ import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
+import dev.patrickgold.jetpref.datastore.ui.LocalTimePickerPreference
 import dev.patrickgold.jetpref.datastore.ui.Preference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
@@ -311,5 +312,9 @@ fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
                 "String 10"
             )
         }
+    )
+    LocalTimePickerPreference(
+        pref = prefs.example.time,
+        title = "Test time"
     )
 }
