@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -62,30 +63,43 @@ fun LocalTimePickerPreference(
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
+    val context = LocalContext.current
     val prefValue by pref.observeAsState()
     var isDialogOpen by remember { mutableStateOf(false) }
     var displayMode by remember { mutableStateOf(DisplayMode.Picker) }
+    var is24hour by remember {
+        mutableStateOf(is24HourFormat(context))
+    }
+
+    LifecycleResumeEffect(Unit) {
+        is24hour = is24HourFormat(context)
+        onPauseOrDispose { }
+    }
 
     Preference(
         modifier = modifier,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         title = title,
-        summary = prefValue.stringRepresentation,
+        summary = prefValue.stringRepresentation(is24hour),
         enabledIf = enabledIf,
         visibleIf = visibleIf,
         onClick = {
             isDialogOpen = true
-        }
+        },
     )
 
     if (isDialogOpen) {
-        val is24Hour = is24HourFormat(LocalContext.current)
         val timePickerState = rememberTimePickerState(
             initialHour = prefValue.hour,
             initialMinute = prefValue.minute,
-            is24Hour = is24Hour
+            is24Hour = is24hour,
         )
+
+        LifecycleResumeEffect(Unit) {
+            timePickerState.is24hour = is24HourFormat(context)
+            onPauseOrDispose { }
+        }
 
         JetPrefAlertDialog(
             title = title,
@@ -106,7 +120,7 @@ fun LocalTimePickerPreference(
                 pref.reset()
                 isDialogOpen = false
             },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+            properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
             Column {
                 val contentModifier = Modifier.padding(horizontal = 24.dp)
