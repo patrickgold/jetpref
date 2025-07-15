@@ -17,6 +17,7 @@
 plugins {
     alias(libs.plugins.agp.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
