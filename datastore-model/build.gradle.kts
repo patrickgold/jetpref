@@ -17,6 +17,7 @@
 plugins {
     alias(libs.plugins.agp.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
@@ -53,6 +54,7 @@ android {
 dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.serialization.json)
     implementation(project(":datastore-annotations"))
 
     testImplementation(libs.junit.jupiter.api)
