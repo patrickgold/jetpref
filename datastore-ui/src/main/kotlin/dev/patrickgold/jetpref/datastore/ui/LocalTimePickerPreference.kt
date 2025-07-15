@@ -51,6 +51,24 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 
+
+/**
+ * Material preference which provides a dialog with a time picker for choosing a time.
+ *
+ * @param pref The localTime preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param icon The [ImageVector] of the list entry.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.2.0-rc04
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalTimePickerPreference(
