@@ -16,6 +16,7 @@
 
 package dev.patrickgold.jetpref.material.ui
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -80,7 +81,9 @@ fun <T : Any> JetPrefDropdown(
         },
     ) {
         JetPrefTextField(
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
             value = asString(options[selectedOptionIndex]),
             onValueChange = {},
             enabled = enabled,
