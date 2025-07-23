@@ -1,7 +1,7 @@
 package dev.patrickgold.jetpref.material.ui
 
 import androidx.compose.ui.graphics.Color
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull

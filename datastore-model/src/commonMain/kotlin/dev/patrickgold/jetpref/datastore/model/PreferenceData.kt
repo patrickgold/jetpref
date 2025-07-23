@@ -17,9 +17,6 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch

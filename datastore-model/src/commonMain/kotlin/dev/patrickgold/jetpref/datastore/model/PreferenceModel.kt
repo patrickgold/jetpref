@@ -16,7 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
-import android.content.Context
 import dev.patrickgold.jetpref.datastore.JetPref
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
 import dev.patrickgold.jetpref.datastore.jetprefDatastoreDir
