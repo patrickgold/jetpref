@@ -38,10 +38,11 @@ fun <V : Any> PreferenceData<V>.observeAsState(): State<V> = observeAsState(get(
 fun <V : Any> PreferenceData<V>.observeAsState(initial: V): State<V> {
     val lifecycleOwner = LocalLifecycleOwner.current
     val state = remember(key) { mutableStateOf(initial) }
-    DisposableEffect(this, lifecycleOwner) {
-        val observer = PreferenceObserver<V> { newValue -> state.value = newValue }
-        observe(lifecycleOwner, observer)
-        onDispose { removeObserver(observer) }
-    }
+    // TODO fix state again!!!!!!!!!!!!!!!!
+//    DisposableEffect(this, lifecycleOwner) {
+//        val observer = PreferenceObserver<V> { newValue -> state.value = newValue }
+//        observe(lifecycleOwner, observer)
+//        onDispose { removeObserver(observer) }
+//    }
     return state
 }

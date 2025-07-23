@@ -29,7 +29,7 @@ import dev.patrickgold.jetpref.example.ui.theme.Theme
 val LocalNavController = staticCompositionLocalOf<NavHostController> { error("not init") }
 
 class MainActivity : ComponentActivity() {
-    private val prefs by examplePreferenceModel()
+    private val prefs by AppPrefs
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

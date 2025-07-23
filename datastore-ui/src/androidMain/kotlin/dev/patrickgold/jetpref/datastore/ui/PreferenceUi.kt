@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import dev.patrickgold.jetpref.datastore.CachedPreferenceModel
+import dev.patrickgold.jetpref.datastore.JetPrefDataStore
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
@@ -95,7 +95,7 @@ class PreferenceUiScope<T : PreferenceModel>(
  */
 @Composable
 fun <T : PreferenceModel> PreferenceLayout(
-    cachedPrefModel: CachedPreferenceModel<T>,
+    dataStore: JetPrefDataStore<T>,
     modifier: Modifier = Modifier,
     iconSpaceReserved: Boolean = true,
     enabledIf: PreferenceDataEvaluator = { true },
@@ -108,7 +108,7 @@ fun <T : PreferenceModel> PreferenceLayout(
         LocalIsPrefVisible provides visibleIf(PreferenceDataEvaluatorScope),
     ) {
         Column(modifier = modifier) {
-            val prefModel by cachedPrefModel
+            val prefModel by dataStore
             val preferenceScope = PreferenceUiScope(
                 prefs = prefModel,
                 columnScope = this,
@@ -138,7 +138,7 @@ fun <T : PreferenceModel> PreferenceLayout(
  */
 @Composable
 fun <T : PreferenceModel> ScrollablePreferenceLayout(
-    cachedPrefModel: CachedPreferenceModel<T>,
+    dataStore: JetPrefDataStore<T>,
     modifier: Modifier = Modifier,
     iconSpaceReserved: Boolean = true,
     enabledIf: PreferenceDataEvaluator = { true },
@@ -146,7 +146,7 @@ fun <T : PreferenceModel> ScrollablePreferenceLayout(
     content: PreferenceUiContent<T>,
 ) {
     PreferenceLayout(
-        cachedPrefModel = cachedPrefModel,
+        dataStore = dataStore,
         modifier = modifier.verticalScroll(rememberScrollState()),
         iconSpaceReserved = iconSpaceReserved,
         enabledIf = enabledIf,

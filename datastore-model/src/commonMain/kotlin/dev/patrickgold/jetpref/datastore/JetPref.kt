@@ -16,14 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore
 
-import android.content.Context
-import android.util.Log
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import java.io.File
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
-
 /**
  * Global JetPref object bundling the global config, default values and model caching.
  *
@@ -34,16 +26,11 @@ object JetPref {
         const val SaveIntervalMs: Long = 1_000
         const val EncodeDefaultValues: Boolean = false
         val ErrorLogProcessor: (Throwable) -> Unit = {
-            Log.e("JetPref", it.message ?: "(no message provided)")
+            //Log.e("JetPref", it.message ?: "(no message provided)")
         }
     }
 
     internal const val DELIMITER = ";"
-
-    const val JETPREF_DIR_NAME = "jetpref_datastore"
-    const val JETPREF_FILE_EXT = "jetpref"
-
-    private val preferenceModelCache: HashMap<KClass<*>, CachedPreferenceModel<*>> = hashMapOf()
 
     internal var saveIntervalMs: Long = Defaults.SaveIntervalMs
     internal var encodeDefaultValues: Boolean = Defaults.EncodeDefaultValues
@@ -74,74 +61,6 @@ object JetPref {
         this.encodeDefaultValues = encodeDefaultValues
         this.errorLogProcessor = errorLogProcessor
     }
-
-    /**
-     * Gets or creates a preference model and returns a [CachedPreferenceModel] wrapper.
-     * This method runs synchronized on the model cache and may block your thread for a
-     * short period of time.
-     *
-     * @param kClass The class of the preference model to get, is is used as a key for the
-     *  underlying cache.
-     * @param factory A factory function to create a new instance of the model in case it
-     *  does not exist yet.
-     *
-     * @since 0.1.0
-     */
-    @Suppress("unchecked_cast")
-    fun <T : PreferenceModel> getOrCreatePreferenceModel(
-        kClass: KClass<T>,
-        factory: () -> T,
-    ): CachedPreferenceModel<T> = synchronized(preferenceModelCache) {
-        return preferenceModelCache.getOrPut(kClass) {
-            CachedPreferenceModel(factory())
-        } as CachedPreferenceModel<T>
-    }
-}
-
-/**
- * Cached preference model wrapper. Allows to act as a delegate.
- *
- * @since 0.1.0
- */
-class CachedPreferenceModel<T : PreferenceModel>(
-    private val preferenceModel: T,
-) : ReadOnlyProperty<Any?, T> {
-
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return preferenceModel
-    }
-}
-
-/**
- * Returns the absolute path to the directory on the filesystem where preference datastore
- * files are created and used by JetPref are stored. Note that this path may change over time,
- * so only relative paths should be stored.
- *
- * @return The path of the directory holding JetPref datastore files.
- *
- * @since 0.1.0
- */
-val Context.jetprefDatastoreDir: File
-    get() = File(this.filesDir.parent, JetPref.JETPREF_DIR_NAME)
-
-/**
- * Returns the absolute path to the directory on the filesystem where temporary preference
- * datastore files of JetPref are stored. Note that files in this path can be incomplete and
- * should at no point be preserved in automatic backups.
- *
- * @return The path of the directory holding temporary JetPref datastore files.
- *
- * @since 0.1.0
- */
-val Context.jetprefTempDir: File
-    get() = File(this.cacheDir, JetPref.JETPREF_DIR_NAME)
-
-internal fun File.jetprefDatastoreFile(name: String): File {
-    return File(this, "$name.${JetPref.JETPREF_FILE_EXT}")
-}
-
-internal fun File.jetprefTempFile(name: String): File {
-    return File(this, "$name.${JetPref.JETPREF_FILE_EXT}.tmp")
 }
 
 internal inline fun runSafely(block: () -> Unit) {

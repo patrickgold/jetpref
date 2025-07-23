@@ -18,10 +18,6 @@ package dev.patrickgold.jetpref.datastore.model
 
 import dev.patrickgold.jetpref.datastore.JetPref
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
-import dev.patrickgold.jetpref.datastore.jetprefDatastoreDir
-import dev.patrickgold.jetpref.datastore.jetprefDatastoreFile
-import dev.patrickgold.jetpref.datastore.jetprefTempDir
-import dev.patrickgold.jetpref.datastore.jetprefTempFile
 import dev.patrickgold.jetpref.datastore.runSafely
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,15 +26,13 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("SameParameterValue", "MemberVisibilityCanBePrivate")
-abstract class PreferenceModel(val name: String) {
+abstract class PreferenceModel {
     companion object {
         private const val INTERNAL_PREFIX = "__internal"
     }
@@ -58,7 +52,6 @@ abstract class PreferenceModel(val name: String) {
         private set
 
     init {
-        Validator.validateFileName(name)
         datastoreReadyStatus.set(false, requestSync = false)
     }
 
@@ -163,14 +156,10 @@ abstract class PreferenceModel(val name: String) {
         return prefData
     }
 
-    suspend fun initialize(context: Context, readOnly: Boolean = false) = registryGuard.withLock {
+    suspend fun initialize(persistenceHandler: dev.patrickgold.jetpref.datastore.PersistenceHandler, readOnly: Boolean = false) = registryGuard.withLock {
         runSafely { datastorePersistenceHandler?.cancelJobsAndJoin() }
         persistReq.set(false)
-        runSafely { datastorePersistenceHandler = PersistenceHandler(context, readOnly) }
-    }
-
-    fun initializeBlocking(context: Context, readOnly: Boolean = false) = runBlocking {
-        initialize(context, readOnly)
+        runSafely { datastorePersistenceHandler = PersistenceHandler(persistenceHandler, readOnly) }
     }
 
     /**
@@ -226,14 +215,10 @@ abstract class PreferenceModel(val name: String) {
         }
     }
 
-    inner class PersistenceHandler(context: Context, readOnly: Boolean) {
-        private val datastoreDir: File = context.jetprefDatastoreDir
-        private val datastoreFile = datastoreDir.jetprefDatastoreFile(name)
-        private val tempDir: File = context.jetprefTempDir
-        private val tempFile = tempDir.jetprefTempFile(name)
+    inner class PersistenceHandler(val persistenceHandler: dev.patrickgold.jetpref.datastore.PersistenceHandler, readOnly: Boolean) {
 
         private val ioJob = ioScope.launch(Dispatchers.IO) {
-            runSafely { loadPrefs(datastoreFile, reset = true) }
+            runSafely { loadPrefs(reset = true) }
             while (isActive) {
                 if (datastoreReadyStatus.get() && persistReq.getAndSet(false) && !readOnly) {
                     runSafely { persistPrefs() }
@@ -246,14 +231,8 @@ abstract class PreferenceModel(val name: String) {
             ioJob.cancelAndJoin()
         }
 
-        private fun mkdirs() {
-            datastoreDir.mkdirs()
-            tempDir.mkdirs()
-        }
-
-        suspend fun loadPrefs(file: File, reset: Boolean) = withContext(Dispatchers.IO) {
+        suspend fun loadPrefs(reset: Boolean) = withContext(Dispatchers.IO) {
             registryGuard.withLock {
-                mkdirs()
                 datastoreReadyStatus.set(false, requestSync = false)
                 if (reset) {
                     for (prefData in registry) {
@@ -261,52 +240,50 @@ abstract class PreferenceModel(val name: String) {
                     }
                 }
                 var requiresSyncAfterRead = false
-                if (file.exists()) {
-                    file.bufferedReader().useLines { lines ->
-                        for (line in lines) ioScope.launch line@{
-                            if (line.isBlank()) return@line
-                            val del1 = line.indexOf(JetPref.DELIMITER)
-                            if (del1 < 0) return@line
-                            var type = PreferenceType.from(line.substring(0, del1))
-                            val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
-                            if (del2 < 0) return@line
-                            var key = line.substring(del1 + 1, del2)
-                            var rawValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
+                persistenceHandler.load().onSuccess { rawDatastoreContent ->
+                    for (line in rawDatastoreContent.lines()) ioScope.launch line@{
+                        if (line.isBlank()) return@line
+                        val del1 = line.indexOf(JetPref.DELIMITER)
+                        if (del1 < 0) return@line
+                        var type = PreferenceType.from(line.substring(0, del1))
+                        val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
+                        if (del2 < 0) return@line
+                        var key = line.substring(del1 + 1, del2)
+                        var rawValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
 
-                            // Handle preference data migration
-                            val migrationResult = migrate(PreferenceMigrationEntry(
-                                action = PreferenceMigrationEntry.Action.KEEP_AS_IS,
-                                type = type,
-                                key = key,
-                                rawValue = if (type.isString()) StringEncoder.decode(rawValue) else rawValue,
-                            ))
-                            when (migrationResult.action) {
-                                PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
-                                    /* Do nothing and continue as no migration is needed */
-                                }
-                                PreferenceMigrationEntry.Action.RESET -> {
-                                    requiresSyncAfterRead = true
-                                    return@line
-                                }
-                                PreferenceMigrationEntry.Action.TRANSFORM -> {
-                                    requiresSyncAfterRead = true
-                                    type = migrationResult.type
-                                    key = migrationResult.key
-                                    rawValue = if (type.isString()) {
-                                        StringEncoder.encode(migrationResult.rawValue)
-                                    } else {
-                                        migrationResult.rawValue
-                                    }
+                        // Handle preference data migration
+                        val migrationResult = migrate(PreferenceMigrationEntry(
+                            action = PreferenceMigrationEntry.Action.KEEP_AS_IS,
+                            type = type,
+                            key = key,
+                            rawValue = if (type.isString()) StringEncoder.decode(rawValue) else rawValue,
+                        ))
+                        when (migrationResult.action) {
+                            PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
+                                /* Do nothing and continue as no migration is needed */
+                            }
+                            PreferenceMigrationEntry.Action.RESET -> {
+                                requiresSyncAfterRead = true
+                                return@line
+                            }
+                            PreferenceMigrationEntry.Action.TRANSFORM -> {
+                                requiresSyncAfterRead = true
+                                type = migrationResult.type
+                                key = migrationResult.key
+                                rawValue = if (type.isString()) {
+                                    StringEncoder.encode(migrationResult.rawValue)
+                                } else {
+                                    migrationResult.rawValue
                                 }
                             }
+                        }
 
-                            val prefData = registry.find { it.key == key }
-                            if (prefData != null) {
-                                if (prefData.type.id != type.id) {
-                                    return@line
-                                }
-                                prefData.deserialize(rawValue)
+                        val prefData = registry.find { it.key == key }
+                        if (prefData != null) {
+                            if (prefData.type.id != type.id) {
+                                return@line
                             }
+                            prefData.deserialize(rawValue)
                         }
                     }
                 }
@@ -316,14 +293,13 @@ abstract class PreferenceModel(val name: String) {
 
         suspend fun persistPrefs() = withContext(Dispatchers.IO) {
             registryGuard.withLock {
-                mkdirs()
-                tempFile.bufferedWriter().use { writer ->
+                val rawDatastoreContent = buildString {
                     for (prefData in registry) {
                         val serializedData = prefData.serialize() ?: continue
-                        writer.appendLine(serializedData)
+                        appendLine(serializedData)
                     }
                 }
-                tempFile.renameTo(datastoreFile)
+                persistenceHandler.persist(rawDatastoreContent)
             }
         }
     }

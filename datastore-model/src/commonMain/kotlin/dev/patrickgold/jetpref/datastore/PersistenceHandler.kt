@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2025 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.datastore.model
+package dev.patrickgold.jetpref.datastore
 
-/**
- * Interface for observers to implement when observing a preference.
- */
-fun interface PreferenceObserver<V : Any> {
-    /**
-     * Called either directly after a new value is set or on lifecycle
-     * re-entry, if a value has been set in the meantime.
-     *
-     * @param newValue The new value for this preference.
-     */
-    fun onChanged(newValue: V)
+// TODO document
+interface PersistenceHandler {
+    val datastoreName: String
+
+    fun load(): Result<String>
+
+    fun persist(rawDatastoreContent: String): Result<Unit>
 }

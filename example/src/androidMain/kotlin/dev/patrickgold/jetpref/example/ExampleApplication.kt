@@ -2,11 +2,11 @@ package dev.patrickgold.jetpref.example
 
 import android.app.Application
 import dev.patrickgold.jetpref.datastore.JetPref
+import dev.patrickgold.jetpref.datastore.init
+import kotlinx.coroutines.runBlocking
 
 @Suppress("unused")
 class ExampleApplication : Application() {
-    private val prefs by examplePreferenceModel()
-
     override fun onCreate() {
         super.onCreate()
 
@@ -18,6 +18,11 @@ class ExampleApplication : Application() {
         )
 
         // Initialize your datastore here (required)
-        prefs.initializeBlocking(this)
+        runBlocking {
+            AppPrefs.init(
+                context = this@ExampleApplication,
+                datastoreName = "example-app-preferences",
+            )
+        }
     }
 }

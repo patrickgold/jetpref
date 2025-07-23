@@ -16,6 +16,7 @@ kotlin {
                 implementation(compose.materialIconsExtended)
                 implementation(compose.runtime)
                 implementation(compose.ui)
+                implementation(libs.androidx.core.ktx)
                 implementation(project(":datastore-model"))
                 implementation(project(":material-ui"))
             }

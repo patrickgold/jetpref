@@ -39,15 +39,15 @@ import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import dev.patrickgold.jetpref.datastore.ui.isMaterialYou
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.datastore.ui.vectorResource
+import dev.patrickgold.jetpref.example.AppPrefs
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
-import dev.patrickgold.jetpref.example.examplePreferenceModel
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 
 @OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
-fun HomeScreen() = ScrollablePreferenceLayout(examplePreferenceModel()) {
+fun HomeScreen() = ScrollablePreferenceLayout(AppPrefs) {
     val navController = LocalNavController.current
     val context = LocalContext.current
 

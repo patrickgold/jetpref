@@ -2,7 +2,7 @@ package dev.patrickgold.jetpref.example
 
 import android.os.Build
 import androidx.compose.ui.graphics.Color
-import dev.patrickgold.jetpref.datastore.JetPref
+import dev.patrickgold.jetpref.datastore.JetPrefDataStore
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
@@ -10,14 +10,11 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceSerializer
 import dev.patrickgold.jetpref.datastore.model.PreferenceType
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 
-// Defining a getter function for easy retrieval of the AppPrefs model.
-// You can name this however you want, the convention is <projectName>PreferenceModel
-fun examplePreferenceModel() = JetPref.getOrCreatePreferenceModel(AppPrefs::class, ::AppPrefs)
+// Defining the instance of the application preferences
+val AppPrefs = JetPrefDataStore.newInstanceOf(AppPrefsModel::class)
 
-// Defining a preference model for our app prefs
-// The name we give here is the file name of the preferences and is saved
-// within the app's `jetpref_datastore` directory.
-class AppPrefs : PreferenceModel("example-app-preferences") {
+// Defining the model of the application preferences
+class AppPrefsModel : PreferenceModel() {
     val theme = enum(
         key = "theme",
         default = Theme.AUTO,
@@ -151,7 +148,7 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
             // If we have a pref that does not exist nor is needed anymore we need to do nothing, the delete happens
             // automatically!
 
-            // By default we keep each entry as is (you could also return entry directly but this is more readable)
+            // By default, we keep each entry as is (you could also return entry directly but this is more readable)
             else -> entry.keepAsIs()
         }
     }
