@@ -32,7 +32,6 @@ dependencyResolutionManagement {
     }
 }
 
-include(":datastore-annotations")
 include(":datastore-model")
 include(":datastore-ui")
 include(":example")
