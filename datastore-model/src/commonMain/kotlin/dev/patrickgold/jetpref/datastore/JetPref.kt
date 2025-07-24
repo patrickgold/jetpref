@@ -62,11 +62,3 @@ object JetPref {
         this.errorLogProcessor = errorLogProcessor
     }
 }
-
-internal inline fun runSafely(block: () -> Unit) {
-    try {
-        block()
-    } catch (e: Throwable) {
-        JetPref.errorLogProcessor(e)
-    }
-}

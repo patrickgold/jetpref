@@ -26,6 +26,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +48,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefColorPicker
 import dev.patrickgold.jetpref.material.ui.checkeredBackground
 import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
+import kotlinx.coroutines.launch
 
 
 /**
@@ -89,6 +91,7 @@ fun ColorPickerPreference(
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
+    val scope = rememberCoroutineScope()
     var showPicker by remember { mutableStateOf(false) }
     var dialogValue by remember { mutableIntStateOf(0) }
     val prefValue by pref.observeAsState()
@@ -243,8 +246,10 @@ fun ColorPickerPreference(
                 neutralEnabled = enableAdvancedLayout,
                 confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
+                    scope.launch {
+                        pref.set(colorOverride(Color(dialogValue)))
+                    }
                     showPicker = false
-                    pref.set(colorOverride(Color(dialogValue)))
                 },
                 dismissLabel = dialogStrings.dismissLabel,
                 onDismiss = { showPicker = false },

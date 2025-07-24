@@ -20,11 +20,12 @@ import android.content.Context
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.Validator
 import java.io.File
+import java.io.FileNotFoundException
 
-private class AndroidPersistenceHandler(
+private class AndroidStorageProvider(
     context: Context,
     override val datastoreName: String,
-) : PersistenceHandler {
+) : JetPrefStorageProvider {
     private val datastoreDir: File = context.jetprefDatastoreDir
     private val datastoreFile = datastoreDir.jetprefDatastoreFile(datastoreName)
     private val tempDir: File = context.jetprefTempDir
@@ -36,13 +37,18 @@ private class AndroidPersistenceHandler(
         tempDir.mkdirs()
     }
 
-    override fun load(): Result<String> = runCatching {
-        datastoreFile.readText()
+    override fun load() = runCatchingCancellationAware {
+        try {
+            datastoreFile.readText()
+        } catch (_: FileNotFoundException) {
+            ""
+        }
     }
 
-    override fun persist(rawDatastoreContent: String): Result<Unit> = runCatching {
+    override fun persist(rawDatastoreContent: String) = runCatchingCancellationAware {
         tempFile.writeText(rawDatastoreContent)
         tempFile.renameTo(datastoreFile)
+        Unit
     }
 
     companion object {
@@ -54,9 +60,9 @@ private class AndroidPersistenceHandler(
 suspend fun <T : PreferenceModel> JetPrefDataStore<T>.init(
     context: Context,
     datastoreName: String,
-) {
-    val persistenceHandler = AndroidPersistenceHandler(context, datastoreName)
-    this.init(persistenceHandler)
+): Result<Unit> {
+    val storageProvider = AndroidStorageProvider(context, datastoreName)
+    return this.init(storageProvider)
 }
 
 /**
@@ -69,15 +75,15 @@ suspend fun <T : PreferenceModel> JetPrefDataStore<T>.init(
  * @since 0.1.0
  */
 val Context.jetprefDatastoreDir: File
-    get() = File(this.filesDir.parent, AndroidPersistenceHandler.JETPREF_DIR_NAME)
+    get() = File(this.filesDir.parent, AndroidStorageProvider.JETPREF_DIR_NAME)
 
 private fun File.jetprefDatastoreFile(name: String): File {
-    return File(this, "$name.${AndroidPersistenceHandler.JETPREF_FILE_EXT}")
+    return File(this, "$name.${AndroidStorageProvider.JETPREF_FILE_EXT}")
 }
 
 private val Context.jetprefTempDir: File
     get() = File(this.jetprefDatastoreDir, "temp")
 
 private fun File.jetprefTempFile(name: String): File {
-    return File(this, "$name.${AndroidPersistenceHandler.JETPREF_FILE_EXT}.tmp")
+    return File(this, "$name.${AndroidStorageProvider.JETPREF_FILE_EXT}.tmp")
 }

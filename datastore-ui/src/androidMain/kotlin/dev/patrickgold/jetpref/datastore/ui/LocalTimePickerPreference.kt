@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,6 +50,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
+import kotlinx.coroutines.launch
 
 
 /**
@@ -81,6 +83,7 @@ fun LocalTimePickerPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val prefValue by pref.observeAsState()
     var isDialogOpen by remember { mutableStateOf(false) }
     var displayMode by remember { mutableStateOf(DisplayMode.Picker) }
@@ -125,7 +128,9 @@ fun LocalTimePickerPreference(
                 .height(IntrinsicSize.Min),
             confirmLabel = dialogStrings.confirmLabel,
             onConfirm = {
-                pref.set(timePickerState.toLocalTime())
+                scope.launch {
+                    pref.set(timePickerState.toLocalTime())
+                }
                 isDialogOpen = false
             },
             dismissLabel = dialogStrings.dismissLabel,
@@ -134,7 +139,9 @@ fun LocalTimePickerPreference(
             },
             neutralLabel = dialogStrings.neutralLabel,
             onNeutral = {
-                pref.reset()
+                scope.launch {
+                    pref.reset()
+                }
                 isDialogOpen = false
             },
             properties = DialogProperties(usePlatformDefaultWidth = false),

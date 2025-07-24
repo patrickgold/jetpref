@@ -21,6 +21,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -28,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.observeAsState
+import kotlinx.coroutines.launch
 
 /**
  * Material switch preference which provides a list item with a trailing switch.
@@ -62,6 +64,7 @@ fun SwitchPreference(
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
+    val scope = rememberCoroutineScope()
     val prefValue by pref.observeAsState()
 
     Preference(
@@ -71,7 +74,11 @@ fun SwitchPreference(
                 value = prefValue,
                 enabled = LocalIsPrefEnabled.current,
                 role = Role.Switch,
-                onValueChange = { pref.set(it) },
+                onValueChange = {
+                    scope.launch {
+                        pref.set(it)
+                    }
+                },
             )
         },
         icon = icon,

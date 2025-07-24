@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2025 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,53 +16,17 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
-import dev.patrickgold.jetpref.datastore.JetPref
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
-import dev.patrickgold.jetpref.datastore.runSafely
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import java.util.concurrent.atomic.AtomicBoolean
 
-@Suppress("SameParameterValue", "MemberVisibilityCanBePrivate")
+@Suppress("SameParameterValue")
 abstract class PreferenceModel {
-    companion object {
-        private const val INTERNAL_PREFIX = "__internal"
-    }
-
-    internal val mainScope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
-    internal val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    private val registryGuard = Mutex()
-    protected abstract val registry: List<PreferenceData<*>>
-    private var persistReq: AtomicBoolean = AtomicBoolean(false)
-
-    val datastoreReadyStatus = boolean(
-        key = "${INTERNAL_PREFIX}_datastore_ready_status",
-        default = false,
-    )
-    var datastorePersistenceHandler: PersistenceHandler? = null
-        private set
-
-    init {
-        datastoreReadyStatus.set(false, requestSync = false)
-    }
-
-    internal fun notifyValueChanged() = persistReq.set(true)
+    abstract val declaredPreferenceEntries: Map<String, PreferenceData<*>>
 
     protected fun boolean(
         @PreferenceKey key: String,
         default: Boolean,
     ): PreferenceData<Boolean> {
-        return PreferenceDataImpl(
-            model = this,
+        return preferenceDataOf(
             key = key,
             default = default,
             type = PreferenceType.boolean(),
@@ -74,8 +38,7 @@ abstract class PreferenceModel {
         @PreferenceKey key: String,
         default: Double,
     ): PreferenceData<Double> {
-        return PreferenceDataImpl(
-            model = this,
+        return preferenceDataOf(
             key = key,
             default = default,
             type = PreferenceType.double(),
@@ -87,8 +50,7 @@ abstract class PreferenceModel {
         @PreferenceKey key: String,
         default: Float,
     ): PreferenceData<Float> {
-        return PreferenceDataImpl(
-            model = this,
+        return preferenceDataOf(
             key = key,
             default = default,
             type = PreferenceType.float(),
@@ -100,8 +62,7 @@ abstract class PreferenceModel {
         @PreferenceKey key: String,
         default: Int,
     ): PreferenceData<Int> {
-        return PreferenceDataImpl(
-            model = this,
+        return preferenceDataOf(
             key = key,
             default = default,
             type = PreferenceType.integer(),
@@ -113,8 +74,7 @@ abstract class PreferenceModel {
         @PreferenceKey key: String,
         default: Long,
     ): PreferenceData<Long> {
-        return PreferenceDataImpl(
-            model = this,
+        return preferenceDataOf(
             key = key,
             default = default,
             type = PreferenceType.long(),
@@ -126,8 +86,7 @@ abstract class PreferenceModel {
         @PreferenceKey key: String,
         default: String,
     ): PreferenceData<String> {
-        return PreferenceDataImpl(
-            model = this,
+        return preferenceDataOf(
             key = key,
             default = default,
             type = PreferenceType.string(),
@@ -140,8 +99,7 @@ abstract class PreferenceModel {
         default: V,
         serializer: PreferenceSerializer<V>,
     ): PreferenceData<V> {
-        return PreferenceDataImpl(
-            model = this,
+        return preferenceDataOf(
             key = key,
             default = default,
             type = PreferenceType.string(),
@@ -176,12 +134,6 @@ abstract class PreferenceModel {
         return custom(key, default, TimePreferenceSerializer)
     }
 
-    suspend fun initialize(persistenceHandler: dev.patrickgold.jetpref.datastore.PersistenceHandler, readOnly: Boolean = false) = registryGuard.withLock {
-        runSafely { datastorePersistenceHandler?.cancelJobsAndJoin() }
-        persistReq.set(false)
-        runSafely { datastorePersistenceHandler = PersistenceHandler(persistenceHandler, readOnly) }
-    }
-
     /**
      * Called for each entry during the loading process to allow for potential migration of preference entries. In
      * general, one of the following three results can be returned for each entry:
@@ -200,127 +152,8 @@ abstract class PreferenceModel {
      *
      * @return A result migration entry as described above.
      */
-    protected open fun migrate(entry: PreferenceMigrationEntry): PreferenceMigrationEntry {
+    open fun migrate(entry: PreferenceMigrationEntry): PreferenceMigrationEntry {
         // By default keep as is
         return entry.keepAsIs()
-    }
-
-    private fun <V : Any> PreferenceData<V>.serialize(): String? {
-        if (type.isInvalid() || !type.isPrimitive()) return null
-        val rawValue = (if (JetPref.encodeDefaultValues) get() else getOrNull())?.let {
-            serializer.serialize(it)
-        } ?: return null
-        return buildString {
-            append(type.id)
-            append(JetPref.DELIMITER)
-            append(key)
-            append(JetPref.DELIMITER)
-            if (type.isString()) {
-                append(StringEncoder.encode(rawValue))
-            } else {
-                append(rawValue)
-            }
-        }
-    }
-
-    private fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {
-        if (type.isInvalid() || !type.isPrimitive()) return
-        val value = if (type.isString()) {
-            serializer.deserialize(StringEncoder.decode(rawValue))
-        } else {
-            serializer.deserialize(rawValue)
-        }
-        if (value != null) {
-            set(value, requestSync = false)
-        }
-    }
-
-    inner class PersistenceHandler(val persistenceHandler: dev.patrickgold.jetpref.datastore.PersistenceHandler, readOnly: Boolean) {
-
-        private val ioJob = ioScope.launch(Dispatchers.IO) {
-            runSafely { loadPrefs(reset = true) }
-            while (isActive) {
-                if (datastoreReadyStatus.get() && persistReq.getAndSet(false) && !readOnly) {
-                    runSafely { persistPrefs() }
-                }
-                delay(JetPref.saveIntervalMs)
-            }
-        }
-
-        internal suspend fun cancelJobsAndJoin() {
-            ioJob.cancelAndJoin()
-        }
-
-        suspend fun loadPrefs(reset: Boolean) = withContext(Dispatchers.IO) {
-            registryGuard.withLock {
-                datastoreReadyStatus.set(false, requestSync = false)
-                if (reset) {
-                    for (prefData in registry) {
-                        prefData.reset(requestSync = false)
-                    }
-                }
-                var requiresSyncAfterRead = false
-                persistenceHandler.load().onSuccess { rawDatastoreContent ->
-                    for (line in rawDatastoreContent.lines()) ioScope.launch line@{
-                        if (line.isBlank()) return@line
-                        val del1 = line.indexOf(JetPref.DELIMITER)
-                        if (del1 < 0) return@line
-                        var type = PreferenceType.from(line.substring(0, del1))
-                        val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
-                        if (del2 < 0) return@line
-                        var key = line.substring(del1 + 1, del2)
-                        var rawValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
-
-                        // Handle preference data migration
-                        val migrationResult = migrate(PreferenceMigrationEntry(
-                            action = PreferenceMigrationEntry.Action.KEEP_AS_IS,
-                            type = type,
-                            key = key,
-                            rawValue = if (type.isString()) StringEncoder.decode(rawValue) else rawValue,
-                        ))
-                        when (migrationResult.action) {
-                            PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
-                                /* Do nothing and continue as no migration is needed */
-                            }
-                            PreferenceMigrationEntry.Action.RESET -> {
-                                requiresSyncAfterRead = true
-                                return@line
-                            }
-                            PreferenceMigrationEntry.Action.TRANSFORM -> {
-                                requiresSyncAfterRead = true
-                                type = migrationResult.type
-                                key = migrationResult.key
-                                rawValue = if (type.isString()) {
-                                    StringEncoder.encode(migrationResult.rawValue)
-                                } else {
-                                    migrationResult.rawValue
-                                }
-                            }
-                        }
-
-                        val prefData = registry.find { it.key == key }
-                        if (prefData != null) {
-                            if (prefData.type.id != type.id) {
-                                return@line
-                            }
-                            prefData.deserialize(rawValue)
-                        }
-                    }
-                }
-                datastoreReadyStatus.set(true, requestSync = requiresSyncAfterRead)
-            }
-        }
-
-        suspend fun persistPrefs() = withContext(Dispatchers.IO) {
-            registryGuard.withLock {
-                val rawDatastoreContent = buildString {
-                    for (prefData in registry) {
-                        val serializedData = prefData.serialize() ?: continue
-                        appendLine(serializedData)
-                    }
-                }
-                persistenceHandler.persist(rawDatastoreContent)
-            }
-        }
     }
 }

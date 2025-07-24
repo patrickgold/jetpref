@@ -23,6 +23,8 @@ class ExampleApplication : Application() {
                 context = this@ExampleApplication,
                 datastoreName = "example-app-preferences",
             )
+                .onSuccess { println("loaded model successfully") }
+                .onFailure { println("error occurred: $it") }
         }
     }
 }

@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.datastore.model
+package dev.patrickgold.jetpref.datastore
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
+// TODO document
+interface JetPrefStorageProvider {
+    val datastoreName: String
 
-@Composable
-fun <V : Any> PreferenceData<V>.observeAsState(): State<V> {
-    return getAsFlow().collectAsState()
-}
+    fun load(): Result<String>
 
-@Composable
-fun <V : Any> PreferenceData<V>.observeAsState(initial: V): State<V> {
-    return getAsFlow().collectAsState(initial)
+    fun persist(rawDatastoreContent: String): Result<Unit>
 }

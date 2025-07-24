@@ -15,6 +15,7 @@ kotlin {
         }
     }
 
+    applyDefaultHierarchyTemplate()
     sourceSets {
         commonMain {
             dependencies {
@@ -27,7 +28,15 @@ kotlin {
                 implementation(libs.kotlin.test)
             }
         }
-        androidMain {}
+        val jvmCommonMain by creating {
+            dependsOn(commonMain.get())
+        }
+        jvmMain {
+            dependsOn(jvmCommonMain)
+        }
+        androidMain {
+            dependsOn(jvmCommonMain)
+        }
     }
 }
 

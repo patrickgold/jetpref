@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,6 +33,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefTextField
 import dev.patrickgold.jetpref.material.ui.JetPrefTextFieldDefaults
 import dev.patrickgold.jetpref.material.ui.whenNotNullOrBlank
+import kotlinx.coroutines.launch
 
 /**
  * Material text field preference which provides a dialog with a text field.
@@ -78,6 +80,7 @@ fun TextFieldPreference(
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
+    val scope = rememberCoroutineScope()
     val prefValue by pref.observeAsState()
     var localPrefValue by remember { mutableStateOf("") }
     var isDialogOpen by remember { mutableStateOf(false) }
@@ -107,7 +110,9 @@ fun TextFieldPreference(
             confirmLabel = dialogStrings.confirmLabel,
             confirmEnabled = validationResult.isSuccess,
             onConfirm = {
-                pref.set(transformValue(localPrefValue))
+                scope.launch {
+                    pref.set(transformValue(localPrefValue))
+                }
                 isDialogOpen = false
             },
             dismissLabel = dialogStrings.dismissLabel,
@@ -116,7 +121,9 @@ fun TextFieldPreference(
             },
             neutralLabel = dialogStrings.neutralLabel,
             onNeutral = {
-                pref.reset()
+                scope.launch {
+                    pref.reset()
+                }
                 isDialogOpen = false
             },
         ) {

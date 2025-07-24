@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2025 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package dev.patrickgold.jetpref.datastore.model
 
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Interface for an implementation of a preference data accessor for
@@ -87,74 +85,34 @@ interface PreferenceData<V : Any> {
      */
     fun getOrNull(): V?
 
+    fun getAsFlow(): StateFlow<V>
+
     /**
      * Sets the value of this preference data.
      *
      * @param value The new value to set for this preference data.
-     * @param requestSync If true the [PreferenceModel] is requested to
-     *  persist the cached values to storage.
      *
      * @since 0.1.0
      */
-    fun set(value: V, requestSync: Boolean = true)
+    suspend fun set(value: V)
 
     /**
      * Resets this preference data to [default].
      *
-     * @param requestSync If true the [PreferenceModel] is requested to
-     *  persist the cached values to storage.
-     *
      * @since 0.1.0
      */
-    fun reset(requestSync: Boolean = true)
-}
+    suspend fun reset()
 
-internal class PreferenceDataImpl<V : Any>(
-    private val model: PreferenceModel,
-    override val key: String,
-    override val default: V,
-    override val type: PreferenceType,
-    override val serializer: PreferenceSerializer<V>,
-) : PreferenceData<V> {
-    private val cacheGuard = Mutex()
-    private var cachedValue: V? = null
-    private var cachedValueVersion: Int = 0
+    suspend fun init(value: V?, handler: ValuePersistHandler<V>)
 
-    init {
-        Validator.validateKey(key)
-    }
-
-    override fun get(): V = cachedValue ?: default
-
-    override fun getOrNull(): V? = cachedValue
-
-    override fun set(value: V, requestSync: Boolean) {
-        model.mainScope.launch {
-            cacheGuard.withLock {
-                if (cachedValue != value) {
-                    cachedValue = value
-                    cachedValueVersion++
-                    if (requestSync) {
-                        model.notifyValueChanged()
-                    }
-                    //dispatchValue(null)
-                }
-            }
-        }
-    }
-
-    override fun reset(requestSync: Boolean) {
-        model.mainScope.launch {
-            cacheGuard.withLock {
-                if (cachedValue != null) {
-                    cachedValue = null
-                    cachedValueVersion++
-                    if (requestSync) {
-                        model.notifyValueChanged()
-                    }
-                    //dispatchValue(null)
-                }
-            }
-        }
+    fun interface ValuePersistHandler<V> {
+        suspend fun onValueChanged(newValue: V?): Result<Unit>
     }
 }
+
+internal expect fun <V : Any> preferenceDataOf(
+    key: String,
+    default: V,
+    type: PreferenceType,
+    serializer: PreferenceSerializer<V>,
+): PreferenceData<V>

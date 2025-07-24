@@ -51,8 +51,9 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefs) {
     val navController = LocalNavController.current
     val context = LocalContext.current
 
-    val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
-    Text(text = "is datastore ready = $isDatastoreReady")
+    // TODO: fix again or remove?
+//    val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
+//    Text(text = "is datastore ready = $isDatastoreReady")
 
     Preference(
         onClick = { navController.navigate("color-picker-demo") },

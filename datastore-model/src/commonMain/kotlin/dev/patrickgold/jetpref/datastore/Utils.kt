@@ -16,11 +16,21 @@
 
 package dev.patrickgold.jetpref.datastore
 
-// TODO document
-interface PersistenceHandler {
-    val datastoreName: String
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consume
 
-    fun load(): Result<String>
+@Throws(CancellationException::class)
+internal inline fun <T, R> T.runCatchingCancellationAware(block: T.() -> R): Result<R> {
+    return try {
+        Result.success(block())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Throwable) {
+        Result.failure(e)
+    }
+}
 
-    fun persist(rawDatastoreContent: String): Result<Unit>
+internal suspend fun <E> Channel<E>.consumeFirst(): E {
+    return consume { return@consume receive() }
 }

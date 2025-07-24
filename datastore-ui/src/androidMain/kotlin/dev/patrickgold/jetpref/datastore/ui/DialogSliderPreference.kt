@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
+import kotlinx.coroutines.launch
 import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -67,6 +69,7 @@ internal fun <V> DialogSliderPreference(
     require(stepIncrement > convertToV(0f)) { "Step increment must be greater than 0!" }
     require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
 
+    val scope = rememberCoroutineScope()
     val prefValue by pref.observeAsState()
     var sliderValue by remember { mutableFloatStateOf(0.0f) }
     var isDialogOpen by remember { mutableStateOf(false) }
@@ -90,7 +93,9 @@ internal fun <V> DialogSliderPreference(
             title = title,
             confirmLabel = dialogStrings.confirmLabel,
             onConfirm = {
-                pref.set(convertToV(sliderValue))
+                scope.launch {
+                    pref.set(convertToV(sliderValue))
+                }
                 isDialogOpen = false
             },
             dismissLabel = dialogStrings.dismissLabel,
@@ -99,7 +104,9 @@ internal fun <V> DialogSliderPreference(
             },
             neutralLabel = dialogStrings.neutralLabel,
             onNeutral = {
-                pref.reset()
+                scope.launch {
+                    pref.reset()
+                }
                 isDialogOpen = false
             },
         ) {
@@ -152,6 +159,7 @@ internal fun <V> DialogSliderPreference(
     require(stepIncrement > convertToV(0f)) { "Step increment must be greater than 0!" }
     require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
 
+    val scope = rememberCoroutineScope()
     val primaryPrefValue by primaryPref.observeAsState()
     val secondaryPrefValue by secondaryPref.observeAsState()
     var primarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
@@ -178,8 +186,10 @@ internal fun <V> DialogSliderPreference(
             title = title,
             confirmLabel = dialogStrings.confirmLabel,
             onConfirm = {
-                primaryPref.set(primarySliderValue)
-                secondaryPref.set(secondarySliderValue)
+                scope.launch {
+                    primaryPref.set(primarySliderValue)
+                    secondaryPref.set(secondarySliderValue)
+                }
                 isDialogOpen = false
             },
             dismissLabel = dialogStrings.dismissLabel,
@@ -188,8 +198,10 @@ internal fun <V> DialogSliderPreference(
             },
             neutralLabel = dialogStrings.neutralLabel,
             onNeutral = {
-                primaryPref.reset()
-                secondaryPref.reset()
+                scope.launch {
+                    primaryPref.reset()
+                    secondaryPref.reset()
+                }
                 isDialogOpen = false
             },
         ) {
@@ -301,7 +313,7 @@ fun DialogSliderPreference(
     ) {
         try {
             it.roundToInt()
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             it.toInt()
         }
     }
@@ -369,7 +381,7 @@ fun DialogSliderPreference(
     ) {
         try {
             it.roundToInt()
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             it.toInt()
         }
     }
@@ -426,7 +438,7 @@ fun DialogSliderPreference(
     ) {
         try {
             it.roundToLong()
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             it.toLong()
         }
     }
@@ -494,7 +506,7 @@ fun DialogSliderPreference(
     ) {
         try {
             it.roundToLong()
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             it.toLong()
         }
     }

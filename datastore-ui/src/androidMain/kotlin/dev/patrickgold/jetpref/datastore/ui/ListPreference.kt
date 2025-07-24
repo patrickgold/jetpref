@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,7 @@ import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialogDefaults
 import dev.patrickgold.jetpref.material.ui.copy
+import kotlinx.coroutines.launch
 
 /**
  * Data class specifying a single list preference entry.
@@ -242,6 +244,7 @@ fun <V : Any> ListPreference(
     visibleIf: PreferenceDataEvaluator = { true },
     entries: List<ListPreferenceEntry<V>>,
 ) {
+    val scope = rememberCoroutineScope()
     val listPrefValue by listPref.observeAsState()
     val switchPrefValue = switchPref?.observeAsState() // can't use delegate because nullable
     val (tmpListPrefValue, setTmpListPrefValue) = remember { mutableStateOf(listPref.get()) }
@@ -268,7 +271,11 @@ fun <V : Any> ListPreference(
                             value = switchPrefValue.value,
                             enabled = LocalIsPrefEnabled.current,
                             role = Role.Switch,
-                            onValueChange = { switchPref.set(it) },
+                            onValueChange = {
+                                scope.launch {
+                                    switchPref.set(it)
+                                }
+                            },
                         )
                         .drawBehind {
                             drawLine(
@@ -305,8 +312,10 @@ fun <V : Any> ListPreference(
             title = title,
             confirmLabel = dialogStrings.confirmLabel,
             onConfirm = {
-                listPref.set(tmpListPrefValue)
-                switchPref?.set(tmpSwitchPrefValue)
+                scope.launch {
+                    listPref.set(tmpListPrefValue)
+                    switchPref?.set(tmpSwitchPrefValue)
+                }
                 isDialogOpen = false
             },
             dismissLabel = dialogStrings.dismissLabel,
@@ -315,8 +324,10 @@ fun <V : Any> ListPreference(
             },
             neutralLabel = dialogStrings.neutralLabel,
             onNeutral = {
-                listPref.reset()
-                switchPref?.reset()
+                scope.launch {
+                    listPref.reset()
+                    switchPref?.reset()
+                }
                 isDialogOpen = false
             },
             trailingIconTitle = {
