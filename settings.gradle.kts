@@ -17,6 +17,7 @@ dependencyResolutionManagement {
 }
 
 include(":datastore-model")
+include(":datastore-model-processor")
 include(":datastore-ui")
 include(":example")
 include(":material-ui")
