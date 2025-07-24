@@ -117,7 +117,7 @@ abstract class AppPrefsModel : PreferenceModel() {
             default = "str1"
         )
 
-        val time = time(
+        val time = localTime(
             key = "test__time",
             default = LocalTime(18, 0)
         )

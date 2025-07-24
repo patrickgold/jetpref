@@ -41,7 +41,7 @@ abstract class PreferenceModel {
     internal val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val registryGuard = Mutex()
-    private val registry: MutableList<PreferenceData<*>> = mutableListOf()
+    protected abstract val registry: List<PreferenceData<*>>
     private var persistReq: AtomicBoolean = AtomicBoolean(false)
 
     val datastoreReadyStatus = boolean(
@@ -57,73 +57,96 @@ abstract class PreferenceModel {
 
     internal fun notifyValueChanged() = persistReq.set(true)
 
-    private fun registryAdd(prefData: PreferenceData<*>) = ioScope.launch {
-        if (!prefData.key.startsWith(INTERNAL_PREFIX)) {
-            registryGuard.withLock { registry.add(prefData) }
-        }
-    }
-
     protected fun boolean(
         @PreferenceKey key: String,
         default: Boolean,
     ): PreferenceData<Boolean> {
-        val prefData = BooleanPreferenceData(this, key, default)
-        registryAdd(prefData)
-        return prefData
+        return PreferenceDataImpl(
+            model = this,
+            key = key,
+            default = default,
+            type = PreferenceType.boolean(),
+            serializer = BooleanPreferenceSerializer,
+        )
     }
 
     protected fun double(
         @PreferenceKey key: String,
         default: Double,
     ): PreferenceData<Double> {
-        val prefData = DoublePreferenceData(this, key, default)
-        registryAdd(prefData)
-        return prefData
+        return PreferenceDataImpl(
+            model = this,
+            key = key,
+            default = default,
+            type = PreferenceType.double(),
+            serializer = DoublePreferenceSerializer,
+        )
     }
 
     protected fun float(
         @PreferenceKey key: String,
         default: Float,
     ): PreferenceData<Float> {
-        val prefData = FloatPreferenceData(this, key, default)
-        registryAdd(prefData)
-        return prefData
+        return PreferenceDataImpl(
+            model = this,
+            key = key,
+            default = default,
+            type = PreferenceType.float(),
+            serializer = FloatPreferenceSerializer,
+        )
     }
 
     protected fun int(
         @PreferenceKey key: String,
         default: Int,
     ): PreferenceData<Int> {
-        val prefData = IntPreferenceData(this, key, default)
-        registryAdd(prefData)
-        return prefData
+        return PreferenceDataImpl(
+            model = this,
+            key = key,
+            default = default,
+            type = PreferenceType.integer(),
+            serializer = IntPreferenceSerializer,
+        )
     }
 
     protected fun long(
         @PreferenceKey key: String,
         default: Long,
     ): PreferenceData<Long> {
-        val prefData = LongPreferenceData(this, key, default)
-        registryAdd(prefData)
-        return prefData
+        return PreferenceDataImpl(
+            model = this,
+            key = key,
+            default = default,
+            type = PreferenceType.long(),
+            serializer = LongPreferenceSerializer,
+        )
     }
 
     protected fun string(
         @PreferenceKey key: String,
         default: String,
     ): PreferenceData<String> {
-        val prefData = StringPreferenceData(this, key, default)
-        registryAdd(prefData)
-        return prefData
+        return PreferenceDataImpl(
+            model = this,
+            key = key,
+            default = default,
+            type = PreferenceType.string(),
+            serializer = StringPreferenceSerializer,
+        )
     }
 
-    protected fun time(
+    protected fun <V : Any> custom(
         @PreferenceKey key: String,
-        default: LocalTime,
-    ): PreferenceData<LocalTime> {
-        val prefData = CustomPreferenceData(this, key, default, TimePreferenceSerializer)
-        registryAdd(prefData)
-        return prefData
+        default: V,
+        serializer: PreferenceSerializer<V>,
+    ): PreferenceData<V> {
+        return PreferenceDataImpl(
+            model = this,
+            key = key,
+            default = default,
+            type = PreferenceType.string(),
+            serializer = serializer,
+        )
     }
 
     protected inline fun <reified V : Enum<V>> enum(
@@ -138,7 +161,7 @@ abstract class PreferenceModel {
             override fun deserialize(value: String): V? {
                 return try {
                     enumValueOf<V>(value)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 }
             }
@@ -146,14 +169,11 @@ abstract class PreferenceModel {
         return custom(key, default, serializer)
     }
 
-    protected fun <V : Any> custom(
+    protected fun localTime(
         @PreferenceKey key: String,
-        default: V,
-        serializer: PreferenceSerializer<V>,
-    ): PreferenceData<V> {
-        val prefData = CustomPreferenceData(this, key, default, serializer)
-        registryAdd(prefData)
-        return prefData
+        default: LocalTime,
+    ): PreferenceData<LocalTime> {
+        return custom(key, default, TimePreferenceSerializer)
     }
 
     suspend fun initialize(persistenceHandler: dev.patrickgold.jetpref.datastore.PersistenceHandler, readOnly: Boolean = false) = registryGuard.withLock {

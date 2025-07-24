@@ -109,16 +109,26 @@ interface PreferenceData<V : Any> {
     fun reset(requestSync: Boolean = true)
 }
 
-internal abstract class AbstractPreferenceData<V : Any>(private val model: PreferenceModel) : PreferenceData<V> {
+internal class PreferenceDataImpl<V : Any>(
+    private val model: PreferenceModel,
+    override val key: String,
+    override val default: V,
+    override val type: PreferenceType,
+    override val serializer: PreferenceSerializer<V>,
+) : PreferenceData<V> {
     private val cacheGuard = Mutex()
     private var cachedValue: V? = null
     private var cachedValueVersion: Int = 0
 
-    final override fun get(): V = cachedValue ?: default
+    init {
+        Validator.validateKey(key)
+    }
 
-    final override fun getOrNull(): V? = cachedValue
+    override fun get(): V = cachedValue ?: default
 
-    final override fun set(value: V, requestSync: Boolean) {
+    override fun getOrNull(): V? = cachedValue
+
+    override fun set(value: V, requestSync: Boolean) {
         model.mainScope.launch {
             cacheGuard.withLock {
                 if (cachedValue != value) {
@@ -133,7 +143,7 @@ internal abstract class AbstractPreferenceData<V : Any>(private val model: Prefe
         }
     }
 
-    final override fun reset(requestSync: Boolean) {
+    override fun reset(requestSync: Boolean) {
         model.mainScope.launch {
             cacheGuard.withLock {
                 if (cachedValue != null) {
@@ -147,108 +157,4 @@ internal abstract class AbstractPreferenceData<V : Any>(private val model: Prefe
             }
         }
     }
-}
-
-internal class BooleanPreferenceData(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: Boolean,
-) : AbstractPreferenceData<Boolean>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.boolean()
-
-    override val serializer: PreferenceSerializer<Boolean> = BooleanPreferenceSerializer
-}
-
-internal class DoublePreferenceData(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: Double,
-) : AbstractPreferenceData<Double>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.double()
-
-    override val serializer: PreferenceSerializer<Double> = DoublePreferenceSerializer
-}
-
-internal class FloatPreferenceData(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: Float,
-) : AbstractPreferenceData<Float>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.float()
-
-    override val serializer: PreferenceSerializer<Float> = FloatPreferenceSerializer
-}
-
-internal class IntPreferenceData(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: Int,
-) : AbstractPreferenceData<Int>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.integer()
-
-    override val serializer: PreferenceSerializer<Int> = IntPreferenceSerializer
-}
-
-internal class LongPreferenceData(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: Long,
-) : AbstractPreferenceData<Long>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.long()
-
-    override val serializer: PreferenceSerializer<Long> = LongPreferenceSerializer
-}
-
-internal class StringPreferenceData(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: String,
-) : AbstractPreferenceData<String>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.string()
-
-    override val serializer: PreferenceSerializer<String> = StringPreferenceSerializer
-}
-
-internal class CustomPreferenceData<V : Any>(
-    model: PreferenceModel,
-    override val key: String,
-    override val default: V,
-    override val serializer: PreferenceSerializer<V>,
-) : AbstractPreferenceData<V>(model) {
-
-    init {
-        Validator.validateKey(key)
-    }
-
-    override val type: PreferenceType = PreferenceType.string()
 }

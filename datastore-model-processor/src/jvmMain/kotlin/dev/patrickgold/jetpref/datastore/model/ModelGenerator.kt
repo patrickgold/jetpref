@@ -82,7 +82,7 @@ class ModelGenerator(private val env: SymbolProcessorEnvironment) : SymbolProces
             it.appendLine()
             it.appendLine("class $finalModelName : $abstractModelName() {")
             // TODO: registry should be passed to DataStore
-            it.appendLine("  val registry: List<PreferenceData<*>>")
+            it.appendLine("  override val registry: List<PreferenceData<*>>")
             it.appendLine("  init {")
             it.appendLine("    registry = listOf(")
             it.appendLine("      ${preferenceNames.joinToString(",\n      ")},")
