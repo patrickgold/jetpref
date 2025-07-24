@@ -1,36 +1,14 @@
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.plugin.compose)
-    alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.agp.application)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.plugin.compose)
 }
 
 val projectCompileSdk: String by project
 val projectMinSdk: String by project
 val projectTargetSdk: String by project
 val projectVersion: String by project
-
-kotlin {
-    androidTarget()
-
-    sourceSets {
-        androidMain {
-            dependencies {
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
-                implementation(compose.runtime)
-                implementation(compose.ui)
-                implementation(libs.androidx.activity.compose)
-                implementation(libs.androidx.core.ktx)
-                implementation(libs.androidx.lifecycle.runtime.ktx)
-                implementation(libs.androidx.navigation.compose)
-                implementation(project(":datastore-model"))
-                implementation(project(":datastore-ui"))
-                implementation(project(":material-ui"))
-            }
-        }
-    }
-}
 
 android {
     namespace = "dev.patrickgold.jetpref.example"
@@ -47,6 +25,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        sourceSets {
+            maybeCreate("main").apply {
+                java {
+                    srcDirs("src/main/kotlin")
+                }
+            }
+        }
     }
 
     buildTypes {
@@ -54,9 +40,34 @@ android {
             proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildFeatures {
+        compose = true
+    }
+}
+
+dependencies {
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation(project(":datastore-model"))
+    ksp(project(":datastore-model-processor"))
+    implementation(project(":datastore-ui"))
+    implementation(project(":material-ui"))
+
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }

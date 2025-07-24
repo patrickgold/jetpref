@@ -3,6 +3,7 @@ package dev.patrickgold.jetpref.example
 import android.os.Build
 import androidx.compose.ui.graphics.Color
 import dev.patrickgold.jetpref.datastore.JetPrefDataStore
+import dev.patrickgold.jetpref.datastore.annotations.Preferences
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
@@ -14,7 +15,8 @@ import dev.patrickgold.jetpref.example.ui.theme.Theme
 val AppPrefs = JetPrefDataStore.newInstanceOf(AppPrefsModel::class)
 
 // Defining the model of the application preferences
-class AppPrefsModel : PreferenceModel() {
+@Preferences
+abstract class AppPrefsModel : PreferenceModel() {
     val theme = enum(
         key = "theme",
         default = Theme.AUTO,
