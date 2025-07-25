@@ -20,7 +20,7 @@ package dev.patrickgold.jetpref.datastore
 interface JetPrefStorageProvider {
     val datastoreName: String
 
-    fun load(): Result<String>
+    suspend fun load(): Result<String>
 
-    fun persist(rawDatastoreContent: String): Result<Unit>
+    suspend fun persist(rawDatastoreContent: String): Result<Unit>
 }

@@ -19,7 +19,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(libs.kotlinx.coroutines)
+                implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
             }
         }
@@ -28,14 +28,11 @@ kotlin {
                 implementation(libs.kotlin.test)
             }
         }
-        val jvmCommonMain by creating {
+        jvmMain {
             dependsOn(commonMain.get())
         }
-        jvmMain {
-            dependsOn(jvmCommonMain)
-        }
         androidMain {
-            dependsOn(jvmCommonMain)
+            dependsOn(jvmMain.get())
         }
     }
 }

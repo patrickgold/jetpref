@@ -2,8 +2,8 @@ package dev.patrickgold.jetpref.example
 
 import android.os.Build
 import androidx.compose.ui.graphics.Color
-import dev.patrickgold.jetpref.datastore.JetPrefDataStore
 import dev.patrickgold.jetpref.datastore.annotations.Preferences
+import dev.patrickgold.jetpref.datastore.jetprefDataStoreOf
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
@@ -12,7 +12,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceType
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 // Defining the instance of the application preferences
-val AppPrefs = JetPrefDataStore.newInstanceOf(AppPrefsModel::class)
+val AppPrefs = jetprefDataStoreOf(AppPrefsModel::class)
 
 // Defining the model of the application preferences
 @Preferences

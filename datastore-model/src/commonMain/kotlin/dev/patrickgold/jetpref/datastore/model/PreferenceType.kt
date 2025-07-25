@@ -18,8 +18,8 @@ package dev.patrickgold.jetpref.datastore.model
 
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceTypeId
 
-@JvmInline
-value class PreferenceType private constructor(@PreferenceTypeId val id: String) {
+@ConsistentCopyVisibility
+data class PreferenceType private constructor(@PreferenceTypeId val id: String) {
     companion object {
         @PreferenceTypeId private const val BOOLEAN: String =       "b"
         @PreferenceTypeId private const val DOUBLE: String =        "d"

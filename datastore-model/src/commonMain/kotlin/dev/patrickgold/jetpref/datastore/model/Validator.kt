@@ -20,7 +20,6 @@ internal object Validator {
     private val FILE_NAME_REGEX = """^(([a-zA-Z_])|([a-zA-Z_][a-zA-Z0-9_-]*[a-zA-Z0-9_]))${'$'}""".toRegex()
     private val KEY_REGEX = """^(([a-zA-Z_])|([a-zA-Z_][a-zA-Z0-9_-]*[a-zA-Z0-9_]))${'$'}""".toRegex()
 
-    @JvmStatic
     fun validateFileName(fileName: String): String {
         if (!FILE_NAME_REGEX.matches(fileName)) {
             throw IllegalArgumentException(
@@ -30,7 +29,6 @@ internal object Validator {
         return fileName
     }
 
-    @JvmStatic
     fun validateKey(key: String): String {
         if (!KEY_REGEX.matches(key)) {
             throw IllegalArgumentException(

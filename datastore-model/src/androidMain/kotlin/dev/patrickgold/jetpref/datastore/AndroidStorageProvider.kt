@@ -19,6 +19,8 @@ package dev.patrickgold.jetpref.datastore
 import android.content.Context
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.Validator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -37,16 +39,20 @@ private class AndroidStorageProvider(
         tempDir.mkdirs()
     }
 
-    override fun load() = runCatchingCancellationAware {
+    override suspend fun load() = runCatchingCancellationAware {
         try {
-            datastoreFile.readText()
+            withContext(Dispatchers.IO) {
+                datastoreFile.readText()
+            }
         } catch (_: FileNotFoundException) {
             ""
         }
     }
 
-    override fun persist(rawDatastoreContent: String) = runCatchingCancellationAware {
-        tempFile.writeText(rawDatastoreContent)
+    override suspend fun persist(rawDatastoreContent: String) = runCatchingCancellationAware {
+        withContext(Dispatchers.IO) {
+            tempFile.writeText(rawDatastoreContent)
+        }
         check(tempFile.renameTo(datastoreFile)) {
             "Failed to rename temp file to actual file name"
         }

@@ -27,8 +27,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -39,7 +37,7 @@ class JetPrefDataStore<T : PreferenceModel>(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private val eventQueue = Channel<Event>(Channel.UNLIMITED)
-    private var currentStoreRef = AtomicReference<Store?>(null)
+    private var currentStoreRef: Store? = null
 
     init {
         scope.launch {
@@ -57,7 +55,7 @@ class JetPrefDataStore<T : PreferenceModel>(
 
     suspend fun init(storageProvider: JetPrefStorageProvider, shouldPersist: Boolean = true): Result<Unit> {
         val store = Store(
-            id = System.currentTimeMillis(),
+            id = generateDataStoreId(),
             shouldPersist = shouldPersist,
             storageProvider = storageProvider,
             values = model.declaredPreferenceEntries.mapValues { (_, data) ->
@@ -75,12 +73,10 @@ class JetPrefDataStore<T : PreferenceModel>(
     }
 
     private suspend fun handleLoadFromStorage(event: Event.LoadFromStorage) {
-        val currentStore = currentStoreRef.get()
+        val currentStore = currentStoreRef
         val newStore = event.store
         require(currentStore == null || currentStore.id != newStore.id)
-        val rawDataStoreContent = withContext(Dispatchers.IO) {
-            newStore.storageProvider.load().getOrThrow()
-        }
+        val rawDataStoreContent = newStore.storageProvider.load().getOrThrow()
         for (line in rawDataStoreContent.lines()) {
             if (line.isBlank()) continue
             val del1 = line.indexOf(JetPref.DELIMITER)
@@ -131,7 +127,7 @@ class JetPrefDataStore<T : PreferenceModel>(
             }
             entry.init(value)
         }
-        currentStoreRef.set(newStore)
+        currentStoreRef = newStore
     }
 
     private suspend fun <V : Any> PreferenceData<V>.init(typedRawEncodedValue: TypedRawEncodedValue) {
@@ -161,7 +157,7 @@ class JetPrefDataStore<T : PreferenceModel>(
     }
 
     private suspend fun handleSetValueAndPersistToStorage(event: Event.SetValueAndPersistToStorage) {
-        val currentStore = currentStoreRef.get()
+        val currentStore = currentStoreRef
         if (currentStore == null || !currentStore.shouldPersist) {
             return
         }
@@ -180,9 +176,7 @@ class JetPrefDataStore<T : PreferenceModel>(
                 appendLine()
             }
         }
-        withContext(Dispatchers.IO) {
-            currentStore.storageProvider.persist(rawDatastoreContent)
-        }
+        currentStore.storageProvider.persist(rawDatastoreContent)
     }
 
     private data class Store(
@@ -209,23 +203,17 @@ class JetPrefDataStore<T : PreferenceModel>(
             val rawEncodedValue: String?,
         ) : Event()
     }
-
-    companion object {
-        /**
-         * Creates a preference model store and returns it.
-         *
-         * @param kClass The class of the preference model to create.
-         *
-         * @since 0.3.0
-         */
-        @Suppress("unchecked_cast")
-        fun <T : PreferenceModel> newInstanceOf(
-            kClass: KClass<T>,
-        ): JetPrefDataStore<T> {
-            val modelImplName = kClass.qualifiedName!! + "Impl"
-            val modelImplClass = Class.forName(modelImplName)
-            val modelImplInstance = modelImplClass.getDeclaredConstructor().newInstance() as T
-            return JetPrefDataStore(modelImplInstance) // TODO
-        }
-    }
 }
+
+/**
+ * Creates a preference model store and returns it.
+ *
+ * @param kClass The class of the preference model to create.
+ *
+ * @since 0.3.0
+ */
+expect fun <T : PreferenceModel> jetprefDataStoreOf(
+    kClass: KClass<T>,
+): JetPrefDataStore<T>
+
+internal expect fun generateDataStoreId(): Long
