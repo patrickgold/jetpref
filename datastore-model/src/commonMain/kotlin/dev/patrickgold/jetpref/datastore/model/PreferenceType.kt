@@ -63,4 +63,8 @@ value class PreferenceType private constructor(@PreferenceTypeId val id: String)
     fun isLong() = id == LONG
 
     fun isString() = id == STRING
+
+    override fun toString(): String {
+        return id
+    }
 }

@@ -25,7 +25,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,7 +39,7 @@ class JetPrefDataStore<T : PreferenceModel>(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private val eventQueue = Channel<Event>(Channel.UNLIMITED)
-    private val currentStoreRef = AtomicReference<Store?>(null)
+    private var currentStoreRef = AtomicReference<Store?>(null)
 
     init {
         scope.launch {
@@ -56,10 +55,10 @@ class JetPrefDataStore<T : PreferenceModel>(
         }
     }
 
-    suspend fun init(storageProvider: JetPrefStorageProvider, readOnly: Boolean = false): Result<Unit> {
+    suspend fun init(storageProvider: JetPrefStorageProvider, shouldPersist: Boolean = true): Result<Unit> {
         val store = Store(
             id = System.currentTimeMillis(),
-            readOnly = readOnly,
+            shouldPersist = shouldPersist,
             storageProvider = storageProvider,
             values = model.declaredPreferenceEntries.mapValues { (_, data) ->
                 TypedRawEncodedValue(data.type, null)
@@ -116,7 +115,11 @@ class JetPrefDataStore<T : PreferenceModel>(
                     }
                 }
             }
-            newStore.values.put(key, TypedRawEncodedValue(type, rawEncodedValue))
+            val cachedEntry = newStore.values[key]
+            if (cachedEntry == null || cachedEntry.type != type) {
+                continue
+            }
+            newStore.values.put(key, cachedEntry.copy(rawEncodedValue = rawEncodedValue))
         }
         model.declaredPreferenceEntries.forEach { (key, entry) ->
             val value = requireNotNull(newStore.values[key]) {
@@ -126,12 +129,13 @@ class JetPrefDataStore<T : PreferenceModel>(
                     append(" not found, should never happen!")
                 }
             }
-            entry.init(value, newStore)
+            entry.init(value)
         }
+        currentStoreRef.set(newStore)
     }
 
-    private suspend fun <V : Any> PreferenceData<V>.init(typedRawEncodedValue: TypedRawEncodedValue, store: Store) {
-        if (type != typedRawEncodedValue.type) return
+    private suspend fun <V : Any> PreferenceData<V>.init(typedRawEncodedValue: TypedRawEncodedValue) {
+        require(type == typedRawEncodedValue.type)
         val value = typedRawEncodedValue.rawEncodedValue?.let { rawEncodedValue ->
             if (type.isString()) {
                 serializer.deserialize(StringEncoder.decode(rawEncodedValue))
@@ -149,8 +153,7 @@ class JetPrefDataStore<T : PreferenceModel>(
             }
             val event = Event.SetValueAndPersistToStorage(
                 key = key,
-                value = TypedRawEncodedValue(type, rawEncodedValue),
-                storeId = store.id,
+                rawEncodedValue = rawEncodedValue,
             )
             eventQueue.send(event)
             event.done.consumeFirst()
@@ -159,14 +162,32 @@ class JetPrefDataStore<T : PreferenceModel>(
 
     private suspend fun handleSetValueAndPersistToStorage(event: Event.SetValueAndPersistToStorage) {
         val currentStore = currentStoreRef.get()
-        if (currentStore == null || event.storeId != currentStore.id) {
-            throw Exception("Outdated update request, ignoring")
+        if (currentStore == null || !currentStore.shouldPersist) {
+            return
+        }
+        val cachedEntry = requireNotNull(currentStore.values[event.key])
+        currentStore.values.put(event.key, cachedEntry.copy(rawEncodedValue = event.rawEncodedValue))
+        val rawDatastoreContent = buildString {
+            for ((key, typedRawEncodedValue) in currentStore.values) {
+                if (typedRawEncodedValue.rawEncodedValue == null) {
+                    continue
+                }
+                append(typedRawEncodedValue.type)
+                append(JetPref.DELIMITER)
+                append(key)
+                append(JetPref.DELIMITER)
+                append(typedRawEncodedValue.rawEncodedValue)
+                appendLine()
+            }
+        }
+        withContext(Dispatchers.IO) {
+            currentStore.storageProvider.persist(rawDatastoreContent)
         }
     }
 
     private data class Store(
         val id: Long,
-        val readOnly: Boolean = false,
+        val shouldPersist: Boolean,
         val storageProvider: JetPrefStorageProvider,
         val values: MutableMap<String, TypedRawEncodedValue>,
     )
@@ -185,8 +206,7 @@ class JetPrefDataStore<T : PreferenceModel>(
 
         data class SetValueAndPersistToStorage(
             val key: String,
-            val value: TypedRawEncodedValue,
-            val storeId: Long,
+            val rawEncodedValue: String?,
         ) : Event()
     }
 
@@ -209,127 +229,3 @@ class JetPrefDataStore<T : PreferenceModel>(
         }
     }
 }
-
-/*
-
-
-
-    private fun <V : Any> PreferenceData<V>.serialize(): String? {
-        if (type.isInvalid() || !type.isPrimitive()) return null
-        val rawValue = (if (JetPref.encodeDefaultValues) get() else getOrNull())?.let {
-            serializer.serialize(it)
-        } ?: return null
-        return buildString {
-            append(type.id)
-            append(JetPref.DELIMITER)
-            append(key)
-            append(JetPref.DELIMITER)
-            if (type.isString()) {
-                append(StringEncoder.encode(rawValue))
-            } else {
-                append(rawValue)
-            }
-        }
-    }
-
-    private fun <V : Any> PreferenceData<V>.deserialize(rawValue: String) {
-        if (type.isInvalid() || !type.isPrimitive()) return
-        val value = if (type.isString()) {
-            serializer.deserialize(StringEncoder.decode(rawValue))
-        } else {
-            serializer.deserialize(rawValue)
-        }
-        if (value != null) {
-            set(value, requestSync = false)
-        }
-    }
-
-    inner class PersistenceHandler(val persistenceHandler: dev.patrickgold.jetpref.datastore.PersistenceHandler, readOnly: Boolean) {
-
-        private val ioJob = ioScope.launch(Dispatchers.IO) {
-            runSafely { loadPrefs(reset = true) }
-            while (isActive) {
-                if (datastoreReadyStatus.get() && persistReq.getAndSet(false) && !readOnly) {
-                    runSafely { persistPrefs() }
-                }
-                delay(JetPref.saveIntervalMs)
-            }
-        }
-
-        internal suspend fun cancelJobsAndJoin() {
-            ioJob.cancelAndJoin()
-        }
-
-        suspend fun loadPrefs(reset: Boolean) = withContext(Dispatchers.IO) {
-            registryGuard.withLock {
-                datastoreReadyStatus.set(false, requestSync = false)
-                if (reset) {
-                    for (prefData in declaredPreferenceEntries) {
-                        prefData.reset(requestSync = false)
-                    }
-                }
-                var requiresSyncAfterRead = false
-                persistenceHandler.load().onSuccess { rawDatastoreContent ->
-                    for (line in rawDatastoreContent.lines()) ioScope.launch line@{
-                        if (line.isBlank()) return@line
-                        val del1 = line.indexOf(JetPref.DELIMITER)
-                        if (del1 < 0) return@line
-                        var type = PreferenceType.from(line.substring(0, del1))
-                        val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
-                        if (del2 < 0) return@line
-                        var key = line.substring(del1 + 1, del2)
-                        var rawValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
-
-                        // Handle preference data migration
-                        val migrationResult = migrate(PreferenceMigrationEntry(
-                            action = PreferenceMigrationEntry.Action.KEEP_AS_IS,
-                            type = type,
-                            key = key,
-                            rawValue = if (type.isString()) StringEncoder.decode(rawValue) else rawValue,
-                        ))
-                        when (migrationResult.action) {
-                            PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
-                                /* Do nothing and continue as no migration is needed */
-                            }
-                            PreferenceMigrationEntry.Action.RESET -> {
-                                requiresSyncAfterRead = true
-                                return@line
-                            }
-                            PreferenceMigrationEntry.Action.TRANSFORM -> {
-                                requiresSyncAfterRead = true
-                                type = migrationResult.type
-                                key = migrationResult.key
-                                rawValue = if (type.isString()) {
-                                    StringEncoder.encode(migrationResult.rawValue)
-                                } else {
-                                    migrationResult.rawValue
-                                }
-                            }
-                        }
-
-                        val prefData = declaredPreferenceEntries.find { it.key == key }
-                        if (prefData != null) {
-                            if (prefData.type.id != type.id) {
-                                return@line
-                            }
-                            prefData.deserialize(rawValue)
-                        }
-                    }
-                }
-                datastoreReadyStatus.set(true, requestSync = requiresSyncAfterRead)
-            }
-        }
-
-        suspend fun persistPrefs() = withContext(Dispatchers.IO) {
-            registryGuard.withLock {
-                val rawDatastoreContent = buildString {
-                    for (prefData in declaredPreferenceEntries) {
-                        val serializedData = prefData.serialize() ?: continue
-                        appendLine(serializedData)
-                    }
-                }
-                persistenceHandler.persist(rawDatastoreContent)
-            }
-        }
-    }
- */

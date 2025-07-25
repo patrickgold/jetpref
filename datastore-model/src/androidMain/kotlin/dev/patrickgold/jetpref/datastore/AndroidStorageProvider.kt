@@ -47,8 +47,9 @@ private class AndroidStorageProvider(
 
     override fun persist(rawDatastoreContent: String) = runCatchingCancellationAware {
         tempFile.writeText(rawDatastoreContent)
-        tempFile.renameTo(datastoreFile)
-        Unit
+        check(tempFile.renameTo(datastoreFile)) {
+            "Failed to rename temp file to actual file name"
+        }
     }
 
     companion object {
@@ -60,9 +61,10 @@ private class AndroidStorageProvider(
 suspend fun <T : PreferenceModel> JetPrefDataStore<T>.init(
     context: Context,
     datastoreName: String,
+    shouldPersist: Boolean = true,
 ): Result<Unit> {
     val storageProvider = AndroidStorageProvider(context, datastoreName)
-    return this.init(storageProvider)
+    return this.init(storageProvider, shouldPersist)
 }
 
 /**
