@@ -28,6 +28,7 @@ private class PreferenceDataImpl<V : Any>(
     override val type: PreferenceType,
     override val serializer: PreferenceSerializer<V>,
 ) : PreferenceData<V> {
+    override val typedKey = PreferenceModel.TypedKey(type, key)
     private val cachedValue = AtomicReference<V?>(null)
     private var cachedValueFlow = MutableStateFlow(default)
     private val cachedValueWriteGuard = Mutex()

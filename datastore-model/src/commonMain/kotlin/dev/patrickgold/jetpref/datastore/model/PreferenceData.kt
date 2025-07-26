@@ -60,6 +60,13 @@ interface PreferenceData<V : Any> {
     @PreferenceKey val key: String
 
     /**
+     * The typed key of this preference data. Is a composite of [type] and [key].
+     *
+     * @since 0.3.0
+     */
+    val typedKey: PreferenceModel.TypedKey
+
+    /**
      * The default value for this preference data. Is used if no valid persisted
      * value is existent or when resetting this preference data.
      *

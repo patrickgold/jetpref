@@ -20,8 +20,6 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
         const val PREFERENCE_DATA_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.model.PreferenceData"
     }
 
-    //val alreadyProcessedSymbols = mutableListOf<KSClassDeclaration>()
-
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (symbols, symbolsToProcessNextRound) = resolver
             .getSymbolsWithAnnotation("dev.patrickgold.jetpref.datastore.annotations.Preferences")
@@ -81,14 +79,14 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
             it.appendLine("import $PREFERENCE_DATA_QUALIFIED_NAME")
             it.appendLine()
             it.appendLine("class `$finalModelName` : `$abstractModelName`() {")
-            it.appendLine("  override val declaredPreferenceEntries: Map<String, PreferenceData<*>>")
+            it.appendLine("  override val declaredPreferenceEntries: Map<TypedKey, PreferenceData<*>>")
             it.appendLine("  init {")
             if (preferenceNames.isEmpty()) {
                 it.appendLine("  declaredPreferenceEntries = emptyMap()")
             } else {
                 it.appendLine("  declaredPreferenceEntries = listOf(")
                 it.appendLine("    ${preferenceNames.joinToString(",\n      ")},")
-                it.appendLine("  ).associateBy { it.key }")
+                it.appendLine("  ).associateBy { TypedKey(it.type, it.key) }")
             }
             it.appendLine("  }")
             it.appendLine("}")

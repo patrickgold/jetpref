@@ -27,6 +27,7 @@ import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
  * @property key The key of the preference entry. Must conform to [PreferenceData.key]'s rules.
  * @property rawValue The raw value of the preference entry. If the preference is a string, the string is guaranteed to
  *  be properly decoded.
+ * @since 0.1.0
  */
 class PreferenceMigrationEntry internal constructor(
     internal val action: Action,
@@ -36,16 +37,22 @@ class PreferenceMigrationEntry internal constructor(
 ) {
     /**
      * Keep this entry as is in the migration process.
+     *
+     * @since 0.1.0
      */
     fun keepAsIs() = if (action == Action.KEEP_AS_IS) this else copy(action = Action.KEEP_AS_IS)
 
     /**
      * Reset this entry back to the default value in the migration process.
+     *
+     * @since 0.1.0
      */
     fun reset() = if (action == Action.RESET) this else copy(action = Action.RESET)
 
     /**
      * Transform this entry's type, key, and/or raw value in the migration process.
+     *
+     * @since 0.1.0
      */
     fun transform(
         type: PreferenceType = this.type,

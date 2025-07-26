@@ -16,10 +16,12 @@
 
 package com.example.tests
 
-import dev.patrickgold.jetpref.datastore.JetPrefStorageProvider
 import dev.patrickgold.jetpref.datastore.jetprefDataStoreOf
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceType
+import dev.patrickgold.jetpref.datastore.runtime.DataStoreReader
+import dev.patrickgold.jetpref.datastore.runtime.LoadStrategy
+import dev.patrickgold.jetpref.datastore.runtime.PersistStrategy
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,7 +32,7 @@ class ModelLoadTest {
     @Test
     fun `model schema v1 is loaded correctly`() = runTest {
         val datastore = jetprefDataStoreOf(GenericFlatModel::class)
-        val provider = createLoadableStorageProvider(
+        val reader = createLoadableReader(
             """
             ${PreferenceType.boolean()};${GenericFlatModel.KEY_BOOLEAN};false
             ${PreferenceType.double()};${GenericFlatModel.KEY_DOUBLE};99.123
@@ -42,7 +44,10 @@ class ModelLoadTest {
             ${PreferenceType.string()};${GenericFlatModel.KEY_LOCAL_TIME};"15:45:00.000"
         """.trimIndent()
         )
-        val loadResult = datastore.init(provider, shouldPersist = false)
+        val loadResult = datastore.init(
+            loadStrategy = LoadStrategy.UseReader(reader),
+            persistStrategy = PersistStrategy.Disabled,
+        )
         assertNull(loadResult.exceptionOrNull())
 
         val prefs by datastore
@@ -60,8 +65,11 @@ class ModelLoadTest {
     fun `model failed load sets all values default`() = runTest {
         val datastore = jetprefDataStoreOf(GenericFlatModel::class)
         val exception = Exception("File not found")
-        val provider = createFailingStorageProvider(exception)
-        val loadResult = datastore.init(provider, shouldPersist = false)
+        val reader = createFailingReader(exception)
+        val loadResult = datastore.init(
+            loadStrategy = LoadStrategy.UseReader(reader),
+            persistStrategy = PersistStrategy.Disabled,
+        )
         assertEquals(exception, loadResult.exceptionOrNull())
 
         val prefs by datastore
@@ -78,7 +86,7 @@ class ModelLoadTest {
     @Test
     fun `model failed re-load resets all entries`() = runTest {
         val datastore = jetprefDataStoreOf(GenericFlatModel::class)
-        val provider = createLoadableStorageProvider(
+        val reader = createLoadableReader(
             """
             ${PreferenceType.boolean()};${GenericFlatModel.KEY_BOOLEAN};false
             ${PreferenceType.double()};${GenericFlatModel.KEY_DOUBLE};99.123
@@ -90,7 +98,10 @@ class ModelLoadTest {
             ${PreferenceType.string()};${GenericFlatModel.KEY_LOCAL_TIME};"15:45:00.000"
         """.trimIndent()
         )
-        val loadResult = datastore.init(provider, shouldPersist = false)
+        val loadResult = datastore.init(
+            loadStrategy = LoadStrategy.UseReader(reader),
+            persistStrategy = PersistStrategy.Disabled,
+        )
         assertNull(loadResult.exceptionOrNull())
 
         val prefs by datastore
@@ -104,8 +115,11 @@ class ModelLoadTest {
         assertEquals(LocalTime(15, 45), prefs.prefLocalTime.getOrNull())
 
         val exception2 = Exception("File not found")
-        val provider2 = createFailingStorageProvider(exception2)
-        val loadResult2 = datastore.init(provider2, shouldPersist = false)
+        val reader2 = createFailingReader(exception2)
+        val loadResult2 = datastore.init(
+            loadStrategy = LoadStrategy.UseReader(reader2),
+            persistStrategy = PersistStrategy.Disabled,
+        )
         assertEquals(exception2, loadResult2.exceptionOrNull())
 
         assertEquals(null, prefs.prefBoolean.getOrNull())
@@ -119,29 +133,18 @@ class ModelLoadTest {
     }
 }
 
-private fun createLoadableStorageProvider(content: String): JetPrefStorageProvider {
-    return object : JetPrefStorageProvider {
-        override val datastoreName: String = "datastore"
-        override suspend fun load(): Result<String> {
-            return Result.success(content)
-        }
-        override suspend fun persist(rawDatastoreContent: String): Result<Unit> {
-            throw UnsupportedOperationException()
+private fun createLoadableReader(content: String): DataStoreReader {
+    return object : DataStoreReader {
+        override suspend fun read(): String {
+            return content
         }
     }
 }
 
-private fun createFailingStorageProvider(exception: Throwable): JetPrefStorageProvider {
-    return object : LoadOnlyStorageProvider() {
-        override suspend fun load(): Result<String> {
-            return Result.failure(exception)
+private fun createFailingReader(exception: Throwable): DataStoreReader {
+    return object : DataStoreReader {
+        override suspend fun read(): String {
+            throw exception
         }
-    }
-}
-
-private abstract class LoadOnlyStorageProvider : JetPrefStorageProvider {
-    override val datastoreName: String = "datastore"
-    override suspend fun persist(rawDatastoreContent: String): Result<Unit> {
-        throw UnsupportedOperationException()
     }
 }

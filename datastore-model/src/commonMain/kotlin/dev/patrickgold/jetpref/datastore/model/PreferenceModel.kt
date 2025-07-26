@@ -20,7 +20,7 @@ import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
 
 @Suppress("SameParameterValue")
 abstract class PreferenceModel {
-    abstract val declaredPreferenceEntries: Map<String, PreferenceData<*>>
+    abstract val declaredPreferenceEntries: Map<TypedKey, PreferenceData<*>>
 
     protected fun boolean(
         @PreferenceKey key: String,
@@ -153,7 +153,16 @@ abstract class PreferenceModel {
      * @return A result migration entry as described above.
      */
     open fun migrate(entry: PreferenceMigrationEntry): PreferenceMigrationEntry {
-        // By default keep as is
+        // By default, keep as is
         return entry.keepAsIs()
+    }
+
+    data class TypedKey(
+        val type: PreferenceType,
+        val key: String,
+    ) {
+        override fun toString(): String {
+            return "$type/$key"
+        }
     }
 }

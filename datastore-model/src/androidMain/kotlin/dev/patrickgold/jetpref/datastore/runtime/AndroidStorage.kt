@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.datastore
+package dev.patrickgold.jetpref.datastore.runtime
 
 import android.content.Context
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
@@ -22,12 +22,11 @@ import dev.patrickgold.jetpref.datastore.model.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileNotFoundException
 
 private class AndroidStorageProvider(
     context: Context,
-    override val datastoreName: String,
-) : JetPrefStorageProvider {
+    datastoreName: String,
+) : DataStoreReader, DataStoreWriter {
     private val datastoreDir: File = context.jetprefDatastoreDir
     private val datastoreFile = datastoreDir.jetprefDatastoreFile(datastoreName)
     private val tempDir: File = context.jetprefTempDir
@@ -39,19 +38,15 @@ private class AndroidStorageProvider(
         tempDir.mkdirs()
     }
 
-    override suspend fun load() = runCatchingCancellationAware {
-        try {
-            withContext(Dispatchers.IO) {
-                datastoreFile.readText()
-            }
-        } catch (_: FileNotFoundException) {
-            ""
+    override suspend fun read(): String {
+        return withContext(Dispatchers.IO) {
+            datastoreFile.readText()
         }
     }
 
-    override suspend fun persist(rawDatastoreContent: String) = runCatchingCancellationAware {
+    override suspend fun write(content: String) {
         withContext(Dispatchers.IO) {
-            tempFile.writeText(rawDatastoreContent)
+            tempFile.writeText(content)
         }
         check(tempFile.renameTo(datastoreFile)) {
             "Failed to rename temp file to actual file name"
@@ -64,13 +59,20 @@ private class AndroidStorageProvider(
     }
 }
 
-suspend fun <T : PreferenceModel> JetPrefDataStore<T>.init(
+suspend fun <T : PreferenceModel> DataStore<T>.init(
     context: Context,
     datastoreName: String,
     shouldPersist: Boolean = true,
 ): Result<Unit> {
     val storageProvider = AndroidStorageProvider(context, datastoreName)
-    return this.init(storageProvider, shouldPersist)
+    return this.init(
+        loadStrategy = LoadStrategy.UseReader(storageProvider),
+        persistStrategy = if (shouldPersist) {
+            PersistStrategy.UseWriter(storageProvider)
+        } else {
+            PersistStrategy.Disabled
+        },
+    )
 }
 
 /**

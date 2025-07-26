@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.datastore
+package dev.patrickgold.jetpref.datastore.runtime
 
+import dev.patrickgold.jetpref.datastore.consumeFirst
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceMigrationEntry
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.PreferenceType
 import dev.patrickgold.jetpref.datastore.model.StringEncoder
+import dev.patrickgold.jetpref.datastore.runCatchingCancellationAware
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import kotlin.collections.iterator
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-class JetPrefDataStore<T : PreferenceModel>(
+private typealias RawEncodedValues = MutableMap<PreferenceModel.TypedKey, String?>
+
+private const val DELIMITER = ";"
+
+class DataStore<T : PreferenceModel>(
     private val model: T,
 ): ReadOnlyProperty<Any?, T> {
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
     private val eventQueue = Channel<Event>(Channel.UNLIMITED)
     private var currentStoreRef: Store? = null
 
@@ -43,26 +48,65 @@ class JetPrefDataStore<T : PreferenceModel>(
         scope.launch {
             eventQueue.consumeEach { event ->
                 val result = runCatchingCancellationAware {
-                    when (event) {
-                        is Event.LoadFromStorage -> handleLoadFromStorage(event)
-                        is Event.SetValueAndPersistToStorage -> handleSetValueAndPersistToStorage(event)
-                    }
+                    handleEvent(event)
                 }
                 event.done.send(result)
             }
         }
     }
 
-    suspend fun init(storageProvider: JetPrefStorageProvider, shouldPersist: Boolean = true): Result<Unit> {
-        val store = Store(
-            id = generateDataStoreId(),
-            shouldPersist = shouldPersist,
-            storageProvider = storageProvider,
-            values = model.declaredPreferenceEntries.mapValues { (_, data) ->
-                TypedRawEncodedValue(data.type, null)
-            }.toMutableMap(),
+    private suspend fun handleEvent(event: Event) {
+        val currentStore = currentStoreRef
+        when (event) {
+            is Event.Init -> {
+                val reader = when (event.loadStrategy) {
+                    is LoadStrategy.Disabled -> null
+                    is LoadStrategy.UseReader -> event.loadStrategy.reader
+                }
+                val rawEncodedValues = loadAndUpdate(reader)
+                currentStoreRef = Store(
+                    loadStrategy = event.loadStrategy,
+                    persistStrategy = event.persistStrategy,
+                    rawEncodedValues = rawEncodedValues,
+                )
+            }
+            is Event.SetValueAndTryPersist -> {
+                requireNotNull(currentStore)
+                require(currentStore.rawEncodedValues.contains(event.typedKey))
+                currentStore.rawEncodedValues.put(event.typedKey, event.rawEncodedValue)
+                when (currentStore.persistStrategy) {
+                    is PersistStrategy.Disabled -> {}
+                    is PersistStrategy.UseWriter -> {
+                        persist(currentStore.persistStrategy.writer, currentStore.rawEncodedValues)
+                    }
+                }
+            }
+            is Event.Import -> {
+                requireNotNull(currentStore)
+                val rawEncodedValues = loadAndUpdate(event.importReader)
+                currentStoreRef = currentStore.copy(rawEncodedValues = rawEncodedValues)
+                when (currentStore.persistStrategy) {
+                    is PersistStrategy.Disabled -> {}
+                    is PersistStrategy.UseWriter -> {
+                        persist(currentStore.persistStrategy.writer, rawEncodedValues)
+                    }
+                }
+            }
+            is Event.Export -> {
+                requireNotNull(currentStore)
+                persist(event.exportWriter, currentStore.rawEncodedValues)
+            }
+        }
+    }
+
+    suspend fun init(
+        loadStrategy: LoadStrategy,
+        persistStrategy: PersistStrategy,
+    ): Result<Unit> {
+        val event = Event.Init(
+            loadStrategy = loadStrategy,
+            persistStrategy = persistStrategy,
         )
-        val event = Event.LoadFromStorage(store)
         eventQueue.send(event)
         return event.done.consumeFirst()
     }
@@ -72,18 +116,16 @@ class JetPrefDataStore<T : PreferenceModel>(
         return model
     }
 
-    private suspend fun handleLoadFromStorage(event: Event.LoadFromStorage) {
-        val currentStore = currentStoreRef
-        val newStore = event.store
+    private suspend fun loadAndUpdate(reader: DataStoreReader?): RawEncodedValues {
+        val rawEncodedValues: RawEncodedValues = model.declaredPreferenceEntries.mapValues { null }.toMutableMap()
         try {
-            require(currentStore == null || currentStore.id != newStore.id)
-            val rawDataStoreContent = newStore.storageProvider.load().getOrThrow()
+            val rawDataStoreContent = reader?.read() ?: ""
             for (line in rawDataStoreContent.lines()) {
                 if (line.isBlank()) continue
-                val del1 = line.indexOf(JetPref.DELIMITER)
+                val del1 = line.indexOf(DELIMITER)
                 if (del1 < 0) continue
                 var type = PreferenceType.from(line.substring(0, del1))
-                val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
+                val del2 = line.indexOf(DELIMITER, del1 + 1)
                 if (del2 < 0) continue
                 var key = line.substring(del1 + 1, del2)
                 var rawEncodedValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
@@ -101,11 +143,9 @@ class JetPrefDataStore<T : PreferenceModel>(
                     PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
                         /* Do nothing and continue as no migration is needed */
                     }
-
                     PreferenceMigrationEntry.Action.RESET -> {
                         continue
                     }
-
                     PreferenceMigrationEntry.Action.TRANSFORM -> {
                         type = migrationResult.type
                         key = migrationResult.key
@@ -116,30 +156,22 @@ class JetPrefDataStore<T : PreferenceModel>(
                         }
                     }
                 }
-                val cachedEntry = newStore.values[key]
-                if (cachedEntry == null || cachedEntry.type != type) {
-                    continue
+                val typedKey = PreferenceModel.TypedKey(type, key)
+                if (rawEncodedValues.contains(typedKey)) {
+                    rawEncodedValues.put(typedKey, rawEncodedValue)
                 }
-                newStore.values.put(key, cachedEntry.copy(rawEncodedValue = rawEncodedValue))
             }
         } finally {
-            model.declaredPreferenceEntries.forEach { (key, entry) ->
-                val value = requireNotNull(newStore.values[key]) {
-                    buildString {
-                        append("Key '$key'")
-                        append(" for datastore '${newStore.storageProvider.datastoreName}")
-                        append(" not found, should never happen!")
-                    }
-                }
+            model.declaredPreferenceEntries.forEach { (typedKey, entry) ->
+                val value = rawEncodedValues[typedKey]
                 entry.init(value)
             }
-            currentStoreRef = newStore
         }
+        return rawEncodedValues
     }
 
-    private suspend fun <V : Any> PreferenceData<V>.init(typedRawEncodedValue: TypedRawEncodedValue) {
-        require(type == typedRawEncodedValue.type)
-        val value = typedRawEncodedValue.rawEncodedValue?.let { rawEncodedValue ->
+    private suspend fun <V : Any> PreferenceData<V>.init(rawEncodedValue: String?) {
+        val value = rawEncodedValue?.let { rawEncodedValue ->
             if (type.isString()) {
                 serializer.deserialize(StringEncoder.decode(rawEncodedValue))
             } else {
@@ -154,8 +186,8 @@ class JetPrefDataStore<T : PreferenceModel>(
                     serializer.serialize(newValue)
                 }
             }
-            val event = Event.SetValueAndPersistToStorage(
-                key = key,
+            val event = Event.SetValueAndTryPersist(
+                typedKey = PreferenceModel.TypedKey(type, key),
                 rawEncodedValue = rawEncodedValue,
             )
             eventQueue.send(event)
@@ -163,73 +195,48 @@ class JetPrefDataStore<T : PreferenceModel>(
         }
     }
 
-    private suspend fun handleSetValueAndPersistToStorage(event: Event.SetValueAndPersistToStorage) {
-        val currentStore = currentStoreRef
-        if (currentStore == null || !currentStore.shouldPersist) {
-            return
-        }
-        val cachedEntry = requireNotNull(currentStore.values[event.key])
-        currentStore.values.put(event.key, cachedEntry.copy(rawEncodedValue = event.rawEncodedValue))
+    private suspend fun persist(writer: DataStoreWriter, rawEncodedValues: RawEncodedValues) {
         val rawDatastoreContent = buildString {
-            for ((key, typedRawEncodedValue) in currentStore.values) {
-                if (typedRawEncodedValue.rawEncodedValue == null) {
+            for ((typedKey, rawEncodedValue) in rawEncodedValues) {
+                if (rawEncodedValue == null) {
                     continue
                 }
-                append(typedRawEncodedValue.type)
-                append(JetPref.DELIMITER)
-                append(key)
-                append(JetPref.DELIMITER)
-                append(typedRawEncodedValue.rawEncodedValue)
+                append(typedKey.type)
+                append(DELIMITER)
+                append(typedKey.key)
+                append(DELIMITER)
+                append(rawEncodedValue)
                 appendLine()
             }
         }
-        currentStore.storageProvider.persist(rawDatastoreContent)
+        writer.write(rawDatastoreContent)
     }
 
     private data class Store(
-        val id: Long,
-        val shouldPersist: Boolean,
-        val storageProvider: JetPrefStorageProvider,
-        val values: MutableMap<String, TypedRawEncodedValue>,
-    )
-
-    private data class TypedRawEncodedValue(
-        val type: PreferenceType,
-        val rawEncodedValue: String?,
+        val loadStrategy: LoadStrategy,
+        val persistStrategy: PersistStrategy,
+        val rawEncodedValues: RawEncodedValues,
     )
 
     private sealed class Event {
         val done: Channel<Result<Unit>> = Channel(Channel.CONFLATED)
 
-        data class LoadFromStorage(
-            val store: Store,
+        data class Init(
+            val loadStrategy: LoadStrategy,
+            val persistStrategy: PersistStrategy,
         ) : Event()
 
-        data class SetValueAndPersistToStorage(
-            val key: String,
+        data class SetValueAndTryPersist(
+            val typedKey: PreferenceModel.TypedKey,
             val rawEncodedValue: String?,
+        ) : Event()
+
+        data class Import(
+            val importReader: DataStoreReader,
+        ) : Event()
+
+        data class Export(
+            val exportWriter: DataStoreWriter,
         ) : Event()
     }
 }
-
-class JetPrefModelNotFoundException(
-    modelQualifiedName: String,
-    causedBy: Throwable,
-) : Exception(
-    "No model with qualified name '$modelQualifiedName' could be found",
-    causedBy,
-)
-
-/**
- * Creates a preference model store and returns it.
- *
- * @param kClass The class of the preference model to create.
- *
- * @since 0.3.0
- */
-@Throws(JetPrefModelNotFoundException::class)
-expect fun <T : PreferenceModel> jetprefDataStoreOf(
-    kClass: KClass<T>,
-): JetPrefDataStore<T>
-
-internal expect fun generateDataStoreId(): Long

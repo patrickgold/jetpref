@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.datastore
+package dev.patrickgold.jetpref.datastore.runtime
 
-// TODO document
-interface JetPrefStorageProvider {
-    val datastoreName: String
-
-    suspend fun load(): Result<String>
-
-    suspend fun persist(rawDatastoreContent: String): Result<Unit>
-}
+/**
+ * Exception indicating that the requested preference model could not be found.
+ *
+ * Hint: most likely, this either means you forgot to annotate the model with
+ * [dev.patrickgold.jetpref.datastore.annotations.Preferences], or you did not configure
+ * KSP correctly in your `build.gradle.kts`.
+ *
+ * @since 0.3.0
+ */
+class PreferenceModelNotFoundException(
+    modelQualifiedName: String,
+    cause: Throwable,
+) : Exception(
+    "No preference model with qualified name '$modelQualifiedName' could be found",
+    cause,
+)

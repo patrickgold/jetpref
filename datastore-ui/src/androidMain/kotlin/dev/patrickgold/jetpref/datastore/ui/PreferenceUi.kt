@@ -30,10 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import dev.patrickgold.jetpref.datastore.JetPrefDataStore
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
+import dev.patrickgold.jetpref.datastore.runtime.DataStore
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -80,7 +80,7 @@ class PreferenceUiScope<T : PreferenceModel>(
  * All preference composables within this layout will make use of the provided datastore
  * automatically.
  *
- * @param cachedPrefModel The cached preference datastore model of your app.
+ * @param dataStore The cached preference datastore model of your app.
  * @param modifier Modifier to be applied to this layout.
  * @param iconSpaceReserved Global setting if all sub-preference composables should reserve
  *  an additional space if no icon is specified. Can be overridden for each individual preference
@@ -95,7 +95,7 @@ class PreferenceUiScope<T : PreferenceModel>(
  */
 @Composable
 fun <T : PreferenceModel> PreferenceLayout(
-    dataStore: JetPrefDataStore<T>,
+    dataStore: DataStore<T>,
     modifier: Modifier = Modifier,
     iconSpaceReserved: Boolean = true,
     enabledIf: PreferenceDataEvaluator = { true },
@@ -121,9 +121,9 @@ fun <T : PreferenceModel> PreferenceLayout(
 /**
  * Material preference layout which allows for easy access to the preference datastore.
  * All preference composables within this layout will make use of the provided datastore
- * automatically. Additionally this layout also provides a default scroll modifier.
+ * automatically. Additionally, this layout also provides a default scroll modifier.
  *
- * @param cachedPrefModel The cached preference datastore model of your app.
+ * @param dataStore The cached preference datastore model of your app.
  * @param modifier Modifier to be applied to this layout.
  * @param iconSpaceReserved Global setting if all sub-preference composables should reserve
  *  an additional space if no icon is specified. Can be overridden for each individual preference
@@ -138,7 +138,7 @@ fun <T : PreferenceModel> PreferenceLayout(
  */
 @Composable
 fun <T : PreferenceModel> ScrollablePreferenceLayout(
-    dataStore: JetPrefDataStore<T>,
+    dataStore: DataStore<T>,
     modifier: Modifier = Modifier,
     iconSpaceReserved: Boolean = true,
     enabledIf: PreferenceDataEvaluator = { true },

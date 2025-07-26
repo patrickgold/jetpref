@@ -16,7 +16,7 @@
 
 package com.example.tests
 
-import dev.patrickgold.jetpref.datastore.JetPrefModelNotFoundException
+import dev.patrickgold.jetpref.datastore.runtime.PreferenceModelNotFoundException
 import dev.patrickgold.jetpref.datastore.annotations.Preferences
 import dev.patrickgold.jetpref.datastore.jetprefDataStoreOf
 import dev.patrickgold.jetpref.datastore.model.LocalTime
@@ -35,7 +35,7 @@ class ModelProcessorTest {
     fun `flat model correctly generated`() {
         val prefs by jetprefDataStoreOf(FlatModel::class)
         assertEquals(
-            expected = mapOf(prefs.numericPref.key to prefs.numericPref),
+            expected = mapOf(prefs.numericPref.typedKey to prefs.numericPref),
             actual = prefs.declaredPreferenceEntries,
         )
     }
@@ -45,8 +45,8 @@ class ModelProcessorTest {
         val prefs by jetprefDataStoreOf(NestedShallowModel::class)
         assertEquals(
             expected = mapOf(
-                prefs.numericPref.key to prefs.numericPref,
-                prefs.theme.stringPref.key to prefs.theme.stringPref,
+                prefs.numericPref.typedKey to prefs.numericPref,
+                prefs.theme.stringPref.typedKey to prefs.theme.stringPref,
             ),
             actual = prefs.declaredPreferenceEntries,
         )
@@ -57,10 +57,10 @@ class ModelProcessorTest {
         val prefs by jetprefDataStoreOf(NestedDeepModel::class)
         assertEquals(
             expected = mapOf(
-                prefs.numericPref.key to prefs.numericPref,
-                prefs.theme.stringPref.key to prefs.theme.stringPref,
-                prefs.system.time.key to prefs.system.time,
-                prefs.system.audio.floatPref.key to prefs.system.audio.floatPref,
+                prefs.numericPref.typedKey to prefs.numericPref,
+                prefs.theme.stringPref.typedKey to prefs.theme.stringPref,
+                prefs.system.time.typedKey to prefs.system.time,
+                prefs.system.audio.floatPref.typedKey to prefs.system.audio.floatPref,
             ),
             actual = prefs.declaredPreferenceEntries,
         )
@@ -71,8 +71,8 @@ class ModelProcessorTest {
         val prefs by jetprefDataStoreOf(`Model with symbols requiring backtick escaping`::class)
         assertEquals(
             expected = mapOf(
-                prefs.`property with spaces`.key to prefs.`property with spaces`,
-                prefs.`pref-group`.`package+name`.key to prefs.`pref-group`.`package+name`,
+                prefs.`property with spaces`.typedKey to prefs.`property with spaces`,
+                prefs.`pref-group`.`package+name`.typedKey to prefs.`pref-group`.`package+name`,
             ),
             actual = prefs.declaredPreferenceEntries,
         )
@@ -86,7 +86,7 @@ class ModelProcessorTest {
             NestedShallowModelWithoutAnnotation::class,
             NestedDeepModelWithoutAnnotation::class,
         ).forEach { modelClass ->
-            assertThrows<JetPrefModelNotFoundException> {
+            assertThrows<PreferenceModelNotFoundException> {
                 jetprefDataStoreOf(modelClass)
             }
         }

@@ -18,6 +18,8 @@ package dev.patrickgold.jetpref.datastore.model
 
 /**
  * Interface allowing to implement a custom serializer for [V].
+ *
+ * @since 0.1.0
  */
 interface PreferenceSerializer<V : Any> {
     /**
@@ -25,8 +27,8 @@ interface PreferenceSerializer<V : Any> {
      * is possible, null is returned.
      *
      * @param value The value to serialize.
-     *
      * @return The serialized value or null.
+     * @since 0.1.0
      */
     fun serialize(value: V): String?
 
@@ -35,8 +37,8 @@ interface PreferenceSerializer<V : Any> {
      * no de-serialization is possible, null is returned.
      *
      * @param value The value to de-serialize.
-     *
      * @return The de-serialized value or null.
+     * @since 0.1.0
      */
     fun deserialize(value: String): V?
 }

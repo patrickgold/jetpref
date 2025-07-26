@@ -17,21 +17,19 @@
 package dev.patrickgold.jetpref.datastore
 
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
+import dev.patrickgold.jetpref.datastore.runtime.DataStore
+import dev.patrickgold.jetpref.datastore.runtime.PreferenceModelNotFoundException
 import kotlin.reflect.KClass
 
 @Suppress("unchecked_cast")
-@Throws(JetPrefModelNotFoundException::class)
-actual fun <T : PreferenceModel> jetprefDataStoreOf(kClass: KClass<T>): JetPrefDataStore<T> {
+@Throws(PreferenceModelNotFoundException::class)
+actual fun <T : PreferenceModel> jetprefDataStoreOf(modelClass: KClass<T>): DataStore<T> {
     val modelImplInstance = try {
-        val modelImplName = kClass.qualifiedName!! + "Impl"
+        val modelImplName = modelClass.qualifiedName!! + "Impl"
         val modelImplClass = Class.forName(modelImplName)
         modelImplClass.getDeclaredConstructor().newInstance() as T
     } catch (e: Throwable) {
-        throw JetPrefModelNotFoundException(kClass.qualifiedName.toString(), e)
+        throw PreferenceModelNotFoundException(modelClass.qualifiedName.toString(), e)
     }
-    return JetPrefDataStore(modelImplInstance)
-}
-
-actual fun generateDataStoreId(): Long {
-    return System.currentTimeMillis()
+    return DataStore(modelImplInstance)
 }
