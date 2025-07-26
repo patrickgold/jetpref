@@ -75,59 +75,66 @@ class JetPrefDataStore<T : PreferenceModel>(
     private suspend fun handleLoadFromStorage(event: Event.LoadFromStorage) {
         val currentStore = currentStoreRef
         val newStore = event.store
-        require(currentStore == null || currentStore.id != newStore.id)
-        val rawDataStoreContent = newStore.storageProvider.load().getOrThrow()
-        for (line in rawDataStoreContent.lines()) {
-            if (line.isBlank()) continue
-            val del1 = line.indexOf(JetPref.DELIMITER)
-            if (del1 < 0) continue
-            var type = PreferenceType.from(line.substring(0, del1))
-            val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
-            if (del2 < 0) continue
-            var key = line.substring(del1 + 1, del2)
-            var rawEncodedValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
+        try {
+            require(currentStore == null || currentStore.id != newStore.id)
+            val rawDataStoreContent = newStore.storageProvider.load().getOrThrow()
+            for (line in rawDataStoreContent.lines()) {
+                if (line.isBlank()) continue
+                val del1 = line.indexOf(JetPref.DELIMITER)
+                if (del1 < 0) continue
+                var type = PreferenceType.from(line.substring(0, del1))
+                val del2 = line.indexOf(JetPref.DELIMITER, del1 + 1)
+                if (del2 < 0) continue
+                var key = line.substring(del1 + 1, del2)
+                var rawEncodedValue = if (del2 + 1 == line.length) "" else line.substring(del2 + 1)
 
-            // Handle preference data migration
-            val migrationResult = model.migrate(PreferenceMigrationEntry(
-                action = PreferenceMigrationEntry.Action.KEEP_AS_IS,
-                type = type,
-                key = key,
-                rawValue = if (type.isString()) StringEncoder.decode(rawEncodedValue) else rawEncodedValue,
-            ))
-            when (migrationResult.action) {
-                PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
-                    /* Do nothing and continue as no migration is needed */
-                }
-                PreferenceMigrationEntry.Action.RESET -> {
-                    continue
-                }
-                PreferenceMigrationEntry.Action.TRANSFORM -> {
-                    type = migrationResult.type
-                    key = migrationResult.key
-                    rawEncodedValue = if (type.isString()) {
-                        StringEncoder.encode(migrationResult.rawValue)
-                    } else {
-                        migrationResult.rawValue
+                // Handle preference data migration
+                val migrationResult = model.migrate(
+                    PreferenceMigrationEntry(
+                        action = PreferenceMigrationEntry.Action.KEEP_AS_IS,
+                        type = type,
+                        key = key,
+                        rawValue = if (type.isString()) StringEncoder.decode(rawEncodedValue) else rawEncodedValue,
+                    )
+                )
+                when (migrationResult.action) {
+                    PreferenceMigrationEntry.Action.KEEP_AS_IS -> {
+                        /* Do nothing and continue as no migration is needed */
+                    }
+
+                    PreferenceMigrationEntry.Action.RESET -> {
+                        continue
+                    }
+
+                    PreferenceMigrationEntry.Action.TRANSFORM -> {
+                        type = migrationResult.type
+                        key = migrationResult.key
+                        rawEncodedValue = if (type.isString()) {
+                            StringEncoder.encode(migrationResult.rawValue)
+                        } else {
+                            migrationResult.rawValue
+                        }
                     }
                 }
-            }
-            val cachedEntry = newStore.values[key]
-            if (cachedEntry == null || cachedEntry.type != type) {
-                continue
-            }
-            newStore.values.put(key, cachedEntry.copy(rawEncodedValue = rawEncodedValue))
-        }
-        model.declaredPreferenceEntries.forEach { (key, entry) ->
-            val value = requireNotNull(newStore.values[key]) {
-                buildString {
-                    append("Key '$key'")
-                    append(" for datastore '${newStore.storageProvider.datastoreName}")
-                    append(" not found, should never happen!")
+                val cachedEntry = newStore.values[key]
+                if (cachedEntry == null || cachedEntry.type != type) {
+                    continue
                 }
+                newStore.values.put(key, cachedEntry.copy(rawEncodedValue = rawEncodedValue))
             }
-            entry.init(value)
+        } finally {
+            model.declaredPreferenceEntries.forEach { (key, entry) ->
+                val value = requireNotNull(newStore.values[key]) {
+                    buildString {
+                        append("Key '$key'")
+                        append(" for datastore '${newStore.storageProvider.datastoreName}")
+                        append(" not found, should never happen!")
+                    }
+                }
+                entry.init(value)
+            }
+            currentStoreRef = newStore
         }
-        currentStoreRef = newStore
     }
 
     private suspend fun <V : Any> PreferenceData<V>.init(typedRawEncodedValue: TypedRawEncodedValue) {
