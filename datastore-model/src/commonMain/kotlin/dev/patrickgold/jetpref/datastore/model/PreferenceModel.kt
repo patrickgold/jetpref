@@ -131,7 +131,7 @@ abstract class PreferenceModel {
         @PreferenceKey key: String,
         default: LocalTime,
     ): PreferenceData<LocalTime> {
-        return custom(key, default, TimePreferenceSerializer)
+        return custom(key, default, LocalTimePreferenceSerializer)
     }
 
     /**

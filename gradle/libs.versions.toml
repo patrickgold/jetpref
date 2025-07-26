@@ -9,7 +9,6 @@ compose-multiplatform = "1.8.2"
 ksp = "2.1.21-2.0.2"
 kotlin = "2.1.21"
 kotlinx-coroutines = "1.10.2"
-kotlinx-serialization = "1.9.0"
 vanniktech-maven-publish = "0.32.0"
 
 [libraries]
@@ -27,7 +26,6 @@ ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.re
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 [plugins]
 agp-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
@@ -37,5 +35,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }

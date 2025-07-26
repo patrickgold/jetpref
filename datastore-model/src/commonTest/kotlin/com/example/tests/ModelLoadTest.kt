@@ -39,7 +39,7 @@ class ModelLoadTest {
             ${PreferenceType.long()};${GenericFlatModel.KEY_LONG};123456789
             ${PreferenceType.string()};${GenericFlatModel.KEY_STRING};"random_text_456"
             ${PreferenceType.string()};${GenericFlatModel.KEY_ENUM};"PITCH_BLACK"
-            ${PreferenceType.string()};${GenericFlatModel.KEY_LOCAL_TIME};"{\"hour\":15,\"minute\":45}"
+            ${PreferenceType.string()};${GenericFlatModel.KEY_LOCAL_TIME};"15:45:00.000"
         """.trimIndent()
         )
         val loadResult = datastore.init(provider, shouldPersist = false)
@@ -87,7 +87,7 @@ class ModelLoadTest {
             ${PreferenceType.long()};${GenericFlatModel.KEY_LONG};123456789
             ${PreferenceType.string()};${GenericFlatModel.KEY_STRING};"random_text_456"
             ${PreferenceType.string()};${GenericFlatModel.KEY_ENUM};"PITCH_BLACK"
-            ${PreferenceType.string()};${GenericFlatModel.KEY_LOCAL_TIME};"{\"hour\":15,\"minute\":45}"
+            ${PreferenceType.string()};${GenericFlatModel.KEY_LOCAL_TIME};"15:45:00.000"
         """.trimIndent()
         )
         val loadResult = datastore.init(provider, shouldPersist = false)

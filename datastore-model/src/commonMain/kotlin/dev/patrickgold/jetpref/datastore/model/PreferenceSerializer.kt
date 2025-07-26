@@ -16,8 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
-import kotlinx.serialization.json.Json
-
 /**
  * Interface allowing to implement a custom serializer for [V].
  */
@@ -77,10 +75,4 @@ internal object StringPreferenceSerializer : PreferenceSerializer<String> {
     override fun serialize(value: String): String = value
 
     override fun deserialize(value: String): String = value
-}
-
-internal object TimePreferenceSerializer : PreferenceSerializer<LocalTime> {
-    override fun serialize(value: LocalTime): String = Json.encodeToString(value)
-
-    override fun deserialize(value: String): LocalTime = Json.decodeFromString(value)
 }
