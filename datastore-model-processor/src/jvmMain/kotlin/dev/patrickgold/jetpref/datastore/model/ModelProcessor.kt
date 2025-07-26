@@ -15,7 +15,7 @@ import com.google.devtools.ksp.validate
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-class ModelGenerator(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
+class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
     companion object {
         const val PREFERENCE_DATA_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.model.PreferenceData"
     }
@@ -52,7 +52,7 @@ class ModelGenerator(private val env: SymbolProcessorEnvironment) : SymbolProces
                 val mediumRareName = buildList {
                     addAll(groupPrefix)
                     add(property.simpleName.asString())
-                }.joinToString(".")
+                }.joinToString(".") { "`$it`" }
                 preferenceNames.add(mediumRareName)
             } else if (isInnerClassOf(modelClassDecl, propertyTypeDecl)) {
                 val groupPrefix = buildList {
@@ -80,10 +80,17 @@ class ModelGenerator(private val env: SymbolProcessorEnvironment) : SymbolProces
             it.appendLine()
             it.appendLine("import $PREFERENCE_DATA_QUALIFIED_NAME")
             it.appendLine()
-            it.appendLine("class $finalModelName : $abstractModelName() {")
-            it.appendLine("  override val declaredPreferenceEntries = listOf(")
-            it.appendLine("    ${preferenceNames.joinToString(",\n      ")},")
-            it.appendLine("  ).associate { it.key to it }")
+            it.appendLine("class `$finalModelName` : `$abstractModelName`() {")
+            it.appendLine("  override val declaredPreferenceEntries: Map<String, PreferenceData<*>>")
+            it.appendLine("  init {")
+            if (preferenceNames.isEmpty()) {
+                it.appendLine("  declaredPreferenceEntries = emptyMap()")
+            } else {
+                it.appendLine("  declaredPreferenceEntries = listOf(")
+                it.appendLine("    ${preferenceNames.joinToString(",\n      ")},")
+                it.appendLine("  ).associateBy { it.key }")
+            }
+            it.appendLine("  }")
             it.appendLine("}")
         }
     }
@@ -108,8 +115,8 @@ class ModelGenerator(private val env: SymbolProcessorEnvironment) : SymbolProces
     }
 }
 
-class ModelGeneratorProvider : SymbolProcessorProvider {
+class ModelProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-        return ModelGenerator(environment)
+        return ModelProcessor(environment)
     }
 }

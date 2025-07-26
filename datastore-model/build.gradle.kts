@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.agp.library)
     alias(libs.plugins.vanniktech.maven.publish)
 }
@@ -28,12 +29,24 @@ kotlin {
                 implementation(libs.kotlin.test)
             }
         }
-        jvmMain {
+        val jvmCommonMain by creating {
             dependsOn(commonMain.get())
         }
-        androidMain {
-            dependsOn(jvmMain.get())
+        jvmMain {
+            dependsOn(jvmCommonMain)
         }
+        androidMain {
+            dependsOn(jvmCommonMain)
+        }
+    }
+}
+
+dependencies {
+    listOf(
+        "kspJvmTest",
+        "kspAndroidTest",
+    ).forEach { configurationName ->
+        add(configurationName, project(":datastore-model-processor"))
     }
 }
 

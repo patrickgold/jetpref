@@ -16,7 +16,7 @@ data class LocalTime(
     val isAfternoon
         get() = hour >= 12
 
-    fun hourForDisplay(is24hour: Boolean): Int {
+    private fun hourForDisplay(is24hour: Boolean): Int {
         return when {
             is24hour -> hour % 24
             hour % 12 == 0 -> 12

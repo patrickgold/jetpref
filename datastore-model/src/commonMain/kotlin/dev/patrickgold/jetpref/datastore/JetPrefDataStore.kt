@@ -205,6 +205,14 @@ class JetPrefDataStore<T : PreferenceModel>(
     }
 }
 
+class JetPrefModelNotFoundException(
+    modelQualifiedName: String,
+    causedBy: Throwable,
+) : Exception(
+    "No model with qualified name '$modelQualifiedName' could be found",
+    causedBy,
+)
+
 /**
  * Creates a preference model store and returns it.
  *
@@ -212,6 +220,7 @@ class JetPrefDataStore<T : PreferenceModel>(
  *
  * @since 0.3.0
  */
+@Throws(JetPrefModelNotFoundException::class)
 expect fun <T : PreferenceModel> jetprefDataStoreOf(
     kClass: KClass<T>,
 ): JetPrefDataStore<T>

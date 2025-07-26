@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class StringEncoderTest {
+    @Suppress("SpellCheckingInspection")
     private val stringsToTest = listOf(
         "test" to "\"test\"",
         "\r\n" to "\"\\r\\n\"",
