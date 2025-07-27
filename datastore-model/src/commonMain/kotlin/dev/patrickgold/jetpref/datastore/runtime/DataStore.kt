@@ -37,12 +37,23 @@ private typealias RawEncodedValues = MutableMap<PreferenceModel.TypedKey, String
 
 private const val DELIMITER = ";"
 
-class DataStore<T : PreferenceModel>(
+/**
+ * Runtime datastore implementation managing events, loading, and persisting of the model data.
+ *
+ * To construct a new datastore instance, see [dev.patrickgold.jetpref.datastore.jetprefDataStoreOf].
+ *
+ * @since 0.3.0
+ */
+class DataStore<T : PreferenceModel> internal constructor(
     private val model: T,
 ): ReadOnlyProperty<Any?, T> {
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val eventQueue = Channel<Event>(Channel.UNLIMITED)
-    private var currentStoreRef: Store? = null
+    private var currentStoreRef = Store(
+        loadStrategy = LoadStrategy.Disabled,
+        persistStrategy = PersistStrategy.Disabled,
+        rawEncodedValues = generateEmptyRawEncodedValues(),
+    )
 
     init {
         scope.launch {
@@ -71,7 +82,6 @@ class DataStore<T : PreferenceModel>(
                 )
             }
             is Event.SetValueAndTryPersist -> {
-                requireNotNull(currentStore)
                 require(currentStore.rawEncodedValues.contains(event.typedKey))
                 currentStore.rawEncodedValues.put(event.typedKey, event.rawEncodedValue)
                 when (currentStore.persistStrategy) {
@@ -82,7 +92,6 @@ class DataStore<T : PreferenceModel>(
                 }
             }
             is Event.Import -> {
-                requireNotNull(currentStore)
                 val rawEncodedValues = loadAndUpdate(event.importReader)
                 currentStoreRef = currentStore.copy(rawEncodedValues = rawEncodedValues)
                 when (currentStore.persistStrategy) {
@@ -93,12 +102,40 @@ class DataStore<T : PreferenceModel>(
                 }
             }
             is Event.Export -> {
-                requireNotNull(currentStore)
                 persist(event.exportWriter, currentStore.rawEncodedValues)
             }
         }
     }
 
+    /**
+     * Initialize the datastore with given [loadStrategy] and [persistStrategy]. If both strategies are
+     * disabled, this model effectively operates as an in-memory-only model. Given a non-disabled load
+     * strategy, the initialization handler will also immediately load the model with given reader into
+     * memory. Any failure in the loading process will influence this request's result.
+     *
+     * Typically, this method is called once in the main method of the application, or for Android the
+     * `Application.onCreate()` method. If this method is never called, the model behaves as if it had
+     * been called with the following init request:
+     * ```kt
+     * datastore.init(
+     *   loadStrategy = LoadStrategy.Disabled,
+     *   persistStrategy = PersistStrategy.Disabled,
+     * )
+     * ```
+     *
+     * In special contexts it can make sense to call this method more than once. In this case, ALL existing
+     * in-memory values get overridden irreversible (regardless of success or failure of the request), so use
+     * this with caution!
+     *
+     * @param loadStrategy The load strategy for interaction with storage.
+     * @param persistStrategy The persist strategy for interaction with storage.
+     * @return A result object. When this method returns, the request is guaranteed to have been completed,
+     *  either with success or with provided failure exception. In any case, the model is usable after this
+     *  method returns, however data loss may be occurring if loading fails but persisting to the same file
+     *  in the storage succeeds.
+     *
+     * @since 0.3.0
+     */
     suspend fun init(
         loadStrategy: LoadStrategy,
         persistStrategy: PersistStrategy,
@@ -111,13 +148,60 @@ class DataStore<T : PreferenceModel>(
         return event.done.consumeFirst()
     }
 
-    // Delegate for getting the model with Kotlin's by syntax
+    /**
+     * Imports values from a different storage using [reader] once and persists it back to the main
+     * storage using the configured persist strategy via [init].
+     *
+     * This method causes ALL existing in-memory values get overridden irreversible (regardless of success
+     * or failure of the request), so use this with caution!
+     *
+     * @param reader The reader loading from the different storage.
+     * @return A result object. When this method returns, the request is guaranteed to have been completed,
+     *  either with success or with provided failure exception.
+     *
+     * @since 0.3.0
+     */
+    suspend fun import(
+        reader: DataStoreReader,
+    ): Result<Unit> {
+        val event = Event.Import(
+            importReader = reader,
+        )
+        eventQueue.send(event)
+        return event.done.consumeFirst()
+    }
+
+    /**
+     * Exports values to a different storage via given [writer]. Does modify in-memory values of the loaded
+     * model.
+     *
+     * @param writer The writer persisting to the different storage.
+     * @return A result object. When this method returns, the request is guaranteed to have been completed,
+     *  either with success or with provided failure exception.
+     *
+     * @since 0.3.0
+     */
+    suspend fun export(
+        writer: DataStoreWriter,
+    ): Result<Unit> {
+        val event = Event.Export(
+            exportWriter = writer,
+        )
+        eventQueue.send(event)
+        return event.done.consumeFirst()
+    }
+
+    /**
+     * Delegate for getting the model with Kotlin's by syntax
+     *
+     * @since 0.3.0
+     */
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         return model
     }
 
     private suspend fun loadAndUpdate(reader: DataStoreReader?): RawEncodedValues {
-        val rawEncodedValues: RawEncodedValues = model.declaredPreferenceEntries.mapValues { null }.toMutableMap()
+        val rawEncodedValues: RawEncodedValues = generateEmptyRawEncodedValues()
         try {
             val rawDataStoreContent = reader?.read() ?: ""
             for (line in rawDataStoreContent.lines()) {
@@ -210,6 +294,10 @@ class DataStore<T : PreferenceModel>(
             }
         }
         writer.write(rawDatastoreContent)
+    }
+
+    private fun generateEmptyRawEncodedValues(): RawEncodedValues {
+        return model.declaredPreferenceEntries.mapValues { null }.toMutableMap()
     }
 
     private data class Store(
