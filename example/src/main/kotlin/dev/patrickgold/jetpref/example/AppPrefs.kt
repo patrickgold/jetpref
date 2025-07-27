@@ -12,7 +12,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceType
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 // Defining the instance of the application preferences
-val AppPrefs = jetprefDataStoreOf(AppPrefsModel::class)
+val AppPrefsStore = jetprefDataStoreOf(AppPrefsModel::class)
 
 // Defining the model of the application preferences
 @Preferences

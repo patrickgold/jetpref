@@ -23,6 +23,7 @@ package dev.patrickgold.jetpref.datastore.model
  * @property minute The minute component. Must be in interval [0,59].
  * @property second The second component. Must be in interval [0,59].
  * @property millisecond The millisecond component. Must be in interval [0,999].
+ *
  * @since 0.2.0
  */
 data class LocalTime(

@@ -18,10 +18,45 @@ package dev.patrickgold.jetpref.datastore.model
 
 import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
 
-@Suppress("SameParameterValue")
+/**
+ * Main class for preference model declaration.
+ *
+ * Example declaration of a simple model:
+ * ```kt
+ * val AppPrefsStore = jetprefDataStoreOf(AppPrefsModel::class)
+ *
+ * @Preferences
+ * abstract class AppPrefsModel : PreferenceModel() {
+ *     val numericPref = int(
+ *         key = "numeric_pref",
+ *         default = 0,
+ *     )
+ *
+ *     // Models may contain arbitrary nesting of entries, as long as nested entries
+ *     // are contained within inner classes of the model class:
+ *     val group = Group()
+ *     inner class Group() {
+ *         val numericPref = int(
+ *             key = "numeric_pref",
+ *             default = 0,
+ *         )
+ *     }
+ * }
+ * ```
+ *
+ * @since 0.1.0
+ */
 abstract class PreferenceModel {
     abstract val declaredPreferenceEntries: Map<TypedKey, PreferenceData<*>>
 
+    /**
+     * Declare a `boolean` preference entry. Its [key] must be unique within this preference model.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.1.0
+     */
     protected fun boolean(
         @PreferenceKey key: String,
         default: Boolean,
@@ -34,6 +69,14 @@ abstract class PreferenceModel {
         )
     }
 
+    /**
+     * Declare a `double` preference entry. Its [key] must be unique within this preference model.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.1.0
+     */
     protected fun double(
         @PreferenceKey key: String,
         default: Double,
@@ -46,6 +89,14 @@ abstract class PreferenceModel {
         )
     }
 
+    /**
+     * Declare a `float` preference entry. Its [key] must be unique within this preference model.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.1.0
+     */
     protected fun float(
         @PreferenceKey key: String,
         default: Float,
@@ -58,6 +109,14 @@ abstract class PreferenceModel {
         )
     }
 
+    /**
+     * Declare an `int` preference entry. Its [key] must be unique within this preference model.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.1.0
+     */
     protected fun int(
         @PreferenceKey key: String,
         default: Int,
@@ -70,6 +129,14 @@ abstract class PreferenceModel {
         )
     }
 
+    /**
+     * Declare a `long` preference entry. Its [key] must be unique within this preference model.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.1.0
+     */
     protected fun long(
         @PreferenceKey key: String,
         default: Long,
@@ -82,6 +149,14 @@ abstract class PreferenceModel {
         )
     }
 
+    /**
+     * Declare a `string` preference entry. Its [key] must be unique within this preference model.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.1.0
+     */
     protected fun string(
         @PreferenceKey key: String,
         default: String,
@@ -94,6 +169,19 @@ abstract class PreferenceModel {
         )
     }
 
+    /**
+     * Declare a custom preference entry. Its [key] must be unique within this preference model.
+     *
+     * In addition to the [key] and [default] value, this entry accepts a custom serializer. This allows
+     * for any type to be persisted in the preference model. The custom type must be serializable to a
+     * string with the given [serializer].
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     * @param serializer The serializer for the custom data type.
+     *
+     * @since 0.1.0
+     */
     protected fun <V : Any> custom(
         @PreferenceKey key: String,
         default: V,
@@ -107,6 +195,16 @@ abstract class PreferenceModel {
         )
     }
 
+    /**
+     * Declare a `enum` preference entry. Its [key] must be unique within this preference model.
+     *
+     * Enum values will internally be represented as a string, using the constant name as the value.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.1.0
+     */
     protected inline fun <reified V : Enum<V>> enum(
         @PreferenceKey key: String,
         default: V,
@@ -127,6 +225,16 @@ abstract class PreferenceModel {
         return custom(key, default, serializer)
     }
 
+    /**
+     * Declare a `local time` preference entry. Its [key] must be unique within this preference model.
+     *
+     * Local time values will internally be represented as a string.
+     *
+     * @param key The key of the preference, used for uniquely identifying this entry.
+     * @param default The default value of this entry.
+     *
+     * @since 0.2.0
+     */
     protected fun localTime(
         @PreferenceKey key: String,
         default: LocalTime,
@@ -149,8 +257,9 @@ abstract class PreferenceModel {
      *
      * @param entry The migration entry, which contains all the necessary data and verbose methods for returning an
      *  entry result for migration.
-     *
      * @return A result migration entry as described above.
+     *
+     * @since 0.1.0
      */
     open fun migrate(entry: PreferenceMigrationEntry): PreferenceMigrationEntry {
         // By default, keep as is

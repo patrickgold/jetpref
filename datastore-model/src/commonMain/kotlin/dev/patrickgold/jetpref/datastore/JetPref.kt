@@ -27,6 +27,7 @@ import kotlin.reflect.KClass
  * @param modelClass The class of the preference model to create.
  * @throws PreferenceModelNotFoundException If the model referenced by [modelClass]
  *  does not exist.
+ *
  * @since 0.3.0
  */
 @Throws(PreferenceModelNotFoundException::class)

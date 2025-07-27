@@ -30,6 +30,7 @@ fun interface DataStoreReader {
      * On errors, this function may throw.
      *
      * @return The read datastore file content.
+     *
      * @since 0.3.0
      */
     suspend fun read(): String
@@ -49,6 +50,7 @@ fun interface DataStoreWriter {
      * On errors, this function may throw.
      *
      * @param content The datastore file content to write.
+     *
      * @since 0.3.0
      */
     suspend fun write(content: String)

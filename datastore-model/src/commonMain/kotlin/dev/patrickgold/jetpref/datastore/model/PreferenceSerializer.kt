@@ -28,6 +28,7 @@ interface PreferenceSerializer<V : Any> {
      *
      * @param value The value to serialize.
      * @return The serialized value or null.
+     *
      * @since 0.1.0
      */
     fun serialize(value: V): String?
@@ -38,6 +39,7 @@ interface PreferenceSerializer<V : Any> {
      *
      * @param value The value to de-serialize.
      * @return The de-serialized value or null.
+     *
      * @since 0.1.0
      */
     fun deserialize(value: String): V?

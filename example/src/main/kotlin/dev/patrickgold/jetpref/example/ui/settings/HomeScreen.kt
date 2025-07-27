@@ -20,12 +20,9 @@ import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
@@ -39,7 +36,7 @@ import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import dev.patrickgold.jetpref.datastore.ui.isMaterialYou
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.datastore.ui.vectorResource
-import dev.patrickgold.jetpref.example.AppPrefs
+import dev.patrickgold.jetpref.example.AppPrefsStore
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.ui.theme.Theme
@@ -47,7 +44,7 @@ import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 
 @OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
-fun HomeScreen() = ScrollablePreferenceLayout(AppPrefs) {
+fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
     val navController = LocalNavController.current
     val context = LocalContext.current
 

@@ -11,7 +11,7 @@ class ExampleApplication : Application() {
 
         // Initialize your datastore here (required)
         runBlocking {
-            AppPrefs.init(
+            AppPrefsStore.init(
                 context = this@ExampleApplication,
                 datastoreName = "example-app-preferences",
             )

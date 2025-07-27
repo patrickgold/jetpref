@@ -27,6 +27,7 @@ import dev.patrickgold.jetpref.datastore.annotations.PreferenceKey
  * @property key The key of the preference entry. Must conform to [PreferenceData.key]'s rules.
  * @property rawValue The raw value of the preference entry. If the preference is a string, the string is guaranteed to
  *  be properly decoded.
+ *
  * @since 0.1.0
  */
 class PreferenceMigrationEntry internal constructor(
