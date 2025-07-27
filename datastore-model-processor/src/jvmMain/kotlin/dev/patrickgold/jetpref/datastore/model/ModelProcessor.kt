@@ -18,6 +18,8 @@ import kotlin.contracts.contract
 class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
     companion object {
         const val PREFERENCE_DATA_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.model.PreferenceData"
+
+        val SAFE_SYMBOL_PATTERN = "^[a-zA-Z_][a-zA-Z0-9_]*$".toRegex()
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -50,7 +52,7 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
                 val mediumRareName = buildList {
                     addAll(groupPrefix)
                     add(property.simpleName.asString())
-                }.joinToString(".") { "`$it`" }
+                }.joinToString(".") { it.escapedSymbolName() }
                 preferenceNames.add(mediumRareName)
             } else if (isInnerClassOf(modelClassDecl, propertyTypeDecl)) {
                 val groupPrefix = buildList {
@@ -73,20 +75,33 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
             packageName = packageName,
             fileName = finalModelName,
         )
+        // TODO: use kotlinpoet
         file.bufferedWriter().use {
             it.appendLine("package $packageName")
             it.appendLine()
             it.appendLine("import $PREFERENCE_DATA_QUALIFIED_NAME")
+            it.appendLine("import dev.patrickgold.jetpref.datastore.runtime.PreferenceModelDuplicateKeyException")
             it.appendLine()
-            it.appendLine("class `$finalModelName` : `$abstractModelName`() {")
+            it.appendLine("class ${finalModelName.escapedSymbolName()} : ${abstractModelName.escapedSymbolName()}() {")
             it.appendLine("  override val declaredPreferenceEntries: Map<TypedKey, PreferenceData<*>>")
             it.appendLine("  init {")
             if (preferenceNames.isEmpty()) {
-                it.appendLine("  declaredPreferenceEntries = emptyMap()")
+                it.appendLine("    declaredPreferenceEntries = emptyMap()")
             } else {
-                it.appendLine("  declaredPreferenceEntries = listOf(")
-                it.appendLine("    ${preferenceNames.joinToString(",\n      ")},")
-                it.appendLine("  ).associateBy { TypedKey(it.type, it.key) }")
+                val entries = preferenceNames.map { name -> "$name to \"$name\"" }
+                it.appendLine("    val entries = listOf(")
+                it.appendLine("      ${entries.joinToString(",\n      ")},")
+                it.appendLine("    )")
+                it.appendLine("    val duplicates = entries")
+                it.appendLine("      .groupBy { (entry, _) -> entry.key }")
+                it.appendLine("      .filter { it.value.size > 1 }")
+                it.appendLine("      .mapValues { (_, duplicates) -> duplicates.map { (_, varName) -> varName } }")
+                it.appendLine("    if (duplicates.isNotEmpty()) {")
+                it.appendLine("        throw PreferenceModelDuplicateKeyException(\"${modelClassDecl.qualifiedName!!.asString()}\", duplicates)")
+                it.appendLine("    }")
+                it.appendLine("    declaredPreferenceEntries = entries")
+                it.appendLine("      .map { (entry, _) -> entry }")
+                it.appendLine("      .associateBy { TypedKey(it.type, it.key) }")
             }
             it.appendLine("  }")
             it.appendLine("}")
@@ -110,6 +125,14 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
             parent = parent.parent
         }
         return false
+    }
+
+    fun String.escapedSymbolName(): String {
+        return if (SAFE_SYMBOL_PATTERN.matches(this)) {
+            this
+        } else {
+            "`$this`"
+        }
     }
 }
 
