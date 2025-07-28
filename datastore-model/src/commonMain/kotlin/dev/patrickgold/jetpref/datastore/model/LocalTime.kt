@@ -16,6 +16,8 @@
 
 package dev.patrickgold.jetpref.datastore.model
 
+import dev.patrickgold.jetpref.datastore.runCatchingCancellationAware
+
 /**
  * Data class holding a local unqualified time.
  *
@@ -76,7 +78,7 @@ data class LocalTime(
     companion object {
         private val PATTERN = "^(?<hh>2[0-3]|[0-1][0-9]):(?<mm>[0-5][0-9]):(?<ss>[0-5][0-9])[.](?<sss>[0-9]{3})$".toRegex()
 
-        fun parse(str: String): Result<LocalTime> = runCatching {
+        fun parse(str: String): Result<LocalTime> = runCatchingCancellationAware {
             val match = PATTERN.matchEntire(str)!!
             LocalTime(
                 hour = match.groups["hh"]!!.value.toInt(),
@@ -89,7 +91,7 @@ data class LocalTime(
 }
 
 internal object LocalTimePreferenceSerializer : PreferenceSerializer<LocalTime> {
-    override fun serialize(value: LocalTime): String? {
+    override fun serialize(value: LocalTime): String {
         return value.toString()
     }
 
