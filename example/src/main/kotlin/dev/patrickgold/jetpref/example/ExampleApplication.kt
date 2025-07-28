@@ -1,7 +1,7 @@
 package dev.patrickgold.jetpref.example
 
 import android.app.Application
-import dev.patrickgold.jetpref.datastore.runtime.init
+import dev.patrickgold.jetpref.datastore.runtime.initAndroid
 import kotlinx.coroutines.runBlocking
 
 @Suppress("unused")
@@ -11,7 +11,7 @@ class ExampleApplication : Application() {
 
         // Initialize your datastore here (required)
         runBlocking {
-            AppPrefsStore.init(
+            AppPrefsStore.initAndroid(
                 context = this@ExampleApplication,
                 datastoreName = "example-app-preferences",
             )

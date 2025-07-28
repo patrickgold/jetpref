@@ -80,7 +80,7 @@ private class AndroidStorageProvider(
  *
  * @since 0.3.0
  */
-suspend fun <T : PreferenceModel> DataStore<T>.init(
+suspend fun <T : PreferenceModel> DataStore<T>.initAndroid(
     context: Context,
     datastoreName: String,
     shouldPersist: Boolean = true,

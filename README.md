@@ -7,59 +7,58 @@ Disclaimer: This library is still in beta and therefore should only be used with
 currently tested out in FlorisBoard, so bugs or other issues in runtime use can be found and fixed. Feel free to ask if
 you need help using this library or to file feature requests / bug reports in the issue's page!
 
+> [!NOTE]
+> This README applies to JetPref 0.3 and higher. For documentation on how to use JetPref 0.2 and lower, please read [this document](https://github.com/patrickgold/jetpref/blob/v0.2.0/README.md).
+
 ## Importing the library
 
-<details open>
-<summary>0.1.0-beta14 or newer</summary>
-
-JetPref is hosted on Maven Central:
+JetPref is hosted on Maven Central, so ensure the Maven Central repo is enabled for your project:
 
 ```kts
-subprojects {
-    repositories {
-        mavenCentral()
-    }
+repositories {
+    mavenCentral()
 }
 ```
-</details>
-
-<details>
-<summary>0.1.0-beta13 or older</summary>
-
-JetPref dependencies were hosted on [JitPack](https://jitpack.io/#dev.patrickgold/jetpref). Thus the JitPack
-repository needs to be added in your global repository config:
-
-```kts
-subprojects {
-    repositories {
-        maven { url = uri("https://jitpack.io") }
-    }
-}
-```
-</details>
 
 ### Adding the dependencies
 
-Then in your app module `build.gradle.kts`, add the dependencies:
+This project uses [Google's KSP library](https://github.com/google/ksp) for processing model declarations during compilation. The KSP version used MUST match the Kotlin version used, please check the [KSP releases](https://github.com/google/ksp/releases) for a matching version. If you use a library that also uses KSP for processing (e.g. AndroidX room, the plugin may already be applied).
+
+In your top-level `build.gradle.kts` file, add the following:
 
 ```kt
-// JetPref Datastore module
-implementation("dev.patrickgold.jetpref:jetpref-datastore-model:$version")
+plugins {
+    id("com.google.devtools.ksp") version "$kspVersion" apply false
+}
+```
 
-// JetPref Datastore UI module
-implementation("dev.patrickgold.jetpref:jetpref-datastore-ui:$version")
+Then, in your module-level `build.gradle.kts` file, add the following:
 
-// JetPref Material UI components module (optional)
-implementation("dev.patrickgold.jetpref:jetpref-material-ui:$version")
+```kt
+plugins {
+    id("com.google.devtools.ksp")
+}
+
+dependencies {
+    // JetPref Datastore module (required)
+    implementation("dev.patrickgold.jetpref:jetpref-datastore-model:$jetprefVersion")
+
+    // JetPref Datastore module processor (required)
+    ksp("dev.patrickgold.jetpref:jetpref-datastore-model-processor:$jetprefVersion")
+
+    // JetPref Datastore UI module (optional, but recommended)
+    implementation("dev.patrickgold.jetpref:jetpref-datastore-ui:$jetprefVersion")
+
+    // JetPref Material UI components module (optional)
+    implementation("dev.patrickgold.jetpref:jetpref-material-ui:$jetprefVersion")
+}
 ```
 
 ## Usage
 
 ### Set up model and initializer
 
-First, you need to define the preference model of your app. Preference models are the core logic of this library and
-manage loading the preferences from storage, persisting any changes back to storage and to manage observers on each
-preference.
+First, you need to define the preference model of your app. Preference models are the core logic of this library and manage the runtime state, as well as loading and persisting from/to storage.
 
 You can define different preference entries in a model, each having a `key`, `default value` and `serializer`. For
 primitive types and enums a default serializer is already provided. For all other types (`custom`) a serializer must be
@@ -70,14 +69,12 @@ Example preference model file with comments:
 ```kotlin
 // AppPrefs.kt
 
-// Defining a getter function for easy retrieval of the AppPrefs model.
-// You can name this however you want, the convention is <projectName>PreferenceModel
-fun examplePreferenceModel() = JetPref.getOrCreatePreferenceModel(AppPrefs::class, ::AppPrefs)
+// Defining the instance of the application preferences
+val AppPrefsStore = jetprefDataStoreOf(AppPrefsModel::class)
 
-// Defining a preference model for our app prefs
-// The name we give here is the file name of the preferences and is saved
-// within the app's `jetpref_datastore` directory.
-class AppPrefs : PreferenceModel("example-app-preferences") {
+// Defining the model of the application preferences
+@Preferences
+abstract class AppPrefsModel : PreferenceModel() {
     val showExampleGroup = boolean(
         key = "show_example_group",
         default = true,
@@ -103,7 +100,7 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
 }
 ```
 
-Next, we need to extend the default `Application` class to be able to initialize the model, configure `JetPref` and
+Next, we need to extend the default `Application` class to be able to initialize the model and
 define the custom application in the `manifest.xml` file. Should you already have a custom application class you can
 insert the config and initializer into your existing one.
 
@@ -111,20 +108,16 @@ insert the config and initializer into your existing one.
 // ExampleApplication.kt
 
 class ExampleApplication : Application() {
-    private val prefs by examplePreferenceModel()
-
     override fun onCreate() {
         super.onCreate()
 
-        // Optionally initialize global JetPref configs. This must be done before
-        // any preference datastore is initialized!
-        JetPref.configure(
-            saveIntervalMs = 500,
-            encodeDefaultValues = true,
-        )
-
         // Initialize your datastore here (required)
-        prefs.initializeBlocking(this)
+        runBlocking {
+            AppPrefsStore.initAndroid(
+                context = this@ExampleApplication,
+                datastoreName = "example-app-preferences",
+            )
+        }
     }
 }
 ```
@@ -146,28 +139,26 @@ Throughout your code base you can now use the preference model wherever you need
 // Example.kt
 
 // Get a reference to the preference model
-val prefs by examplePreferenceModel()
+val prefs by AppPrefsStore
 
 // Read a preference value manually
 prefs.preferenceName.get()
 
 // Write a preference value manually
-prefs.preferenceName.set(value)
+coroutineScope.launch {
+    prefs.preferenceName.set(value)
+}
 
 // Resets a preference value back to default value (`null` internally)
-prefs.preferenceName.reset()
-
-// Observe a preference value which automatically removes observer if the lifecycle stops
-prefs.preferenceName.observe(lifecycleOwner) { newValue ->
-    // Do something with it
+coroutineScope.launch {
+    prefs.preferenceName.reset()
 }
 
-// Observe a preference value forever, requires manual removal of observer
-prefs.preferenceName.observeForever { newValue ->
-    // Do something with it
-}
+// Get a Kotlin flow, which allows to observe state changes
+prefs.preferenceName.getFlow()
 
 // Observe a preference value as a Jetpack Compose state with automatic disposal
+// (required datastore-ui module dependency)
 val myPreference by prefs.preferenceName.observeAsState()
 ```
 
@@ -177,21 +168,23 @@ This section assumes you already have set up Jetpack Compose properly and have p
 
 JetPref provides a handful of pre-configured and ready Material preference widgets:
 
-- [`Preference`](datastore-ui/src/main/kotlin/dev/patrickgold/jetpref/datastore/ui/Preference.kt): Widget without a
+- [`Preference`](datastore-ui/src/androidMain/kotlin/dev/patrickgold/jetpref/datastore/ui/Preference.kt): Widget without a
   backing preference data, which allows to have a custom UI element with the same semantics and behavior of a normal
   preference widget.
-- [`SwitchPreference`](datastore-ui/src/main/kotlin/dev/patrickgold/jetpref/datastore/ui/SwitchPreference.kt): Widget
+- [`SwitchPreference`](datastore-ui/src/androidMain/kotlin/dev/patrickgold/jetpref/datastore/ui/SwitchPreference.kt): Widget
   which is backed by a boolean preference data and draws a switch on the end, representing the current state.
-- [`ListPreference`](datastore-ui/src/main/kotlin/dev/patrickgold/jetpref/datastore/ui/ListPreference.kt): Widget which
+- [`ListPreference`](datastore-ui/src/androidMain/kotlin/dev/patrickgold/jetpref/datastore/ui/ListPreference.kt): Widget which
   is backed by a preference data with any value and allows to choose from different pre-set values ina list-style format
   within a dialog. Optionally this can also be combined with an additional boolean preference data backer, which adds a
   switch in the same dialog as the list.
-- [`TextFieldPreference`](datastore-ui/src/main/kotlin/dev/patrickgold/jetpref/datastore/ui/TextFieldPreference.kt):
+- [`TextFieldPreference`](datastore-ui/src/androidMain/kotlin/dev/patrickgold/jetpref/datastore/ui/TextFieldPreference.kt):
   Widget which is backed by a string preference data and shows a free-text input field. Additionally allows for on-the-fly
   validation and automatic text transform (e.g. string trimming).
-- [`DialogSliderPreference`](datastore-ui/src/main/kotlin/dev/patrickgold/jetpref/datastore/ui/DialogSliderPreference.kt):
+- [`DialogSliderPreference`](datastore-ui/src/androidMain/kotlin/dev/patrickgold/jetpref/datastore/ui/DialogSliderPreference.kt):
   Widget is is backed by one or two numeric preference data fields and which provides a dialog slider for each data
   field.
+- [`ColorPickerPreference`](datastore-ui/src/androidMain/kotlin/dev/patrickgold/jetpref/datastore/ui/ColorPickerPreference.kt):
+  Widget which is backed by a color preference data and shows a rich color picker.
 
 Example Settings UI screen (detailed docs are provided through the docstrings of each widget):
 
@@ -371,10 +364,10 @@ class AppPrefs : PreferenceModel("example-app-preferences") {
             // it back to the default value you set in the preference entry.
             entry.key == "foo_box_names" && entry.rawValue.contains("#") -> entry.reset()
 
-            // If we have a pref that does not exist nor is needed anymore we need to do nothing, the delete happens
+            // If we have a pref that does not exist nor is needed anymore we need to do nothing, delete happens
             // automatically!
 
-            // By default we keep each entry as is (you could also return entry directly but this is more readable)
+            // By default, we keep each entry as is (you could also return entry directly but this is more readable)
             else -> entry.keepAsIs()
         }
     }
@@ -397,7 +390,7 @@ JetPref additionally provides ready-to-use custom Material components Jetpack Co
 - [`JetPrefTextField`](material-ui/src/main/kotlin/dev/patrickgold/jetpref/material/ui/JetPrefDropdown.kt): Ease of use
 - of material3 text field, which allow to toggle filled/outlined appearance via parameters.
 
-The Material UI package can be used independently from JetPref too, if you only need one of the above components!
+The Material UI package can be used independently of JetPref too, if you only need one of the above components!
 
 ## Additional notes
 
