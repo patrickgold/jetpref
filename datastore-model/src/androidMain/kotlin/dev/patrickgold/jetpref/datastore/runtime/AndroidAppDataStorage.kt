@@ -19,44 +19,18 @@ package dev.patrickgold.jetpref.datastore.runtime
 import android.content.Context
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.Validator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 
-private class AndroidStorageProvider(
+private const val JETPREF_DIR_NAME = "jetpref_datastore"
+private const val JETPREF_FILE_EXT = "jetpref"
+
+private fun androidAppDataStorageOf(
     context: Context,
     datastoreName: String,
-) : DataStoreReader, DataStoreWriter {
-    private val datastoreDir: File = context.jetprefDatastoreDir
-    private val datastoreFile = datastoreDir.jetprefDatastoreFile(datastoreName)
-    private val tempDir: File = context.jetprefTempDir
-    private val tempFile = tempDir.jetprefTempFile(datastoreName)
-
-    init {
-        Validator.validateFileName(datastoreName)
-        datastoreDir.mkdirs()
-        tempDir.mkdirs()
-    }
-
-    override suspend fun read(): String {
-        return withContext(Dispatchers.IO) {
-            datastoreFile.readText()
-        }
-    }
-
-    override suspend fun write(content: String) {
-        withContext(Dispatchers.IO) {
-            tempFile.writeText(content)
-        }
-        check(tempFile.renameTo(datastoreFile)) {
-            "Failed to rename temp file to actual file name"
-        }
-    }
-
-    companion object {
-        const val JETPREF_DIR_NAME = "jetpref_datastore"
-        const val JETPREF_FILE_EXT = "jetpref"
-    }
+) : FileBasedStorage {
+    Validator.validateFileName(datastoreName)
+    val path = context.jetprefDatastoreDir.jetprefDatastoreFile(datastoreName).absolutePath
+    return FileBasedStorage(path)
 }
 
 /**
@@ -85,7 +59,7 @@ suspend fun <T : PreferenceModel> DataStore<T>.initAndroid(
     datastoreName: String,
     shouldPersist: Boolean = true,
 ): Result<Unit> {
-    val storageProvider = AndroidStorageProvider(context, datastoreName)
+    val storageProvider = androidAppDataStorageOf(context, datastoreName)
     return this.init(
         loadStrategy = LoadStrategy.UseReader(storageProvider),
         persistStrategy = if (shouldPersist) {
@@ -106,15 +80,8 @@ suspend fun <T : PreferenceModel> DataStore<T>.initAndroid(
  * @since 0.1.0
  */
 val Context.jetprefDatastoreDir: File
-    get() = File(this.filesDir.parent, AndroidStorageProvider.JETPREF_DIR_NAME)
+    get() = File(this.filesDir.parent, JETPREF_DIR_NAME)
 
 private fun File.jetprefDatastoreFile(name: String): File {
-    return File(this, "$name.${AndroidStorageProvider.JETPREF_FILE_EXT}")
-}
-
-private val Context.jetprefTempDir: File
-    get() = File(this.jetprefDatastoreDir, "temp")
-
-private fun File.jetprefTempFile(name: String): File {
-    return File(this, "$name.${AndroidStorageProvider.JETPREF_FILE_EXT}.tmp")
+    return File(this, "$name.$JETPREF_FILE_EXT")
 }
