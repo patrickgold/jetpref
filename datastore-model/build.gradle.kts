@@ -8,7 +8,11 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
     androidTarget {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11

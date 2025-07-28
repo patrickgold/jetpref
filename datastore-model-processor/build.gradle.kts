@@ -1,4 +1,4 @@
-import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -6,7 +6,11 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
 
     sourceSets {
         jvmMain {
