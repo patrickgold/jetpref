@@ -21,8 +21,10 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.model.Validator
 import java.io.File
 
-private const val JETPREF_DIR_NAME = "jetpref_datastore"
-private const val JETPREF_FILE_EXT = "jetpref"
+object AndroidAppDataStorage {
+    const val JETPREF_DIR_NAME = "jetpref_datastore"
+    const val JETPREF_FILE_EXT = "jetpref"
+}
 
 private fun androidAppDataStorageOf(
     context: Context,
@@ -80,8 +82,8 @@ suspend fun <T : PreferenceModel> DataStore<T>.initAndroid(
  * @since 0.1.0
  */
 val Context.jetprefDatastoreDir: File
-    get() = File(this.filesDir.parent, JETPREF_DIR_NAME)
+    get() = File(this.filesDir.parent, AndroidAppDataStorage.JETPREF_DIR_NAME)
 
 private fun File.jetprefDatastoreFile(name: String): File {
-    return File(this, "$name.$JETPREF_FILE_EXT")
+    return File(this, "$name.${AndroidAppDataStorage.JETPREF_FILE_EXT}")
 }

@@ -24,6 +24,8 @@ import java.io.File
  * Implements a file-based datastore storage for JVM-backed applications.
  *
  * @param path The path to the datastore file.
+ *
+ * @since 0.3.0
  */
 class FileBasedStorage(path: String) : DataStoreReader, DataStoreWriter {
     private val datastoreFile = File(path)
