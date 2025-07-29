@@ -92,7 +92,12 @@ interface PreferenceData<V : Any> {
      */
     fun getOrNull(): V?
 
-    fun getAsFlow(): StateFlow<V>
+    /**
+     * Returns a state flow for this preference data, allowing to collect or observe the value.
+     *
+     * @since 0.3.0
+     */
+    fun asFlow(): StateFlow<V>
 
     /**
      * Sets the value of this preference data.

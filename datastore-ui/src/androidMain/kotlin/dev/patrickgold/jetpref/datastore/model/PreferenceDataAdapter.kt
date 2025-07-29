@@ -22,10 +22,10 @@ import androidx.compose.runtime.collectAsState
 
 @Composable
 fun <V : Any> PreferenceData<V>.observeAsState(): State<V> {
-    return getAsFlow().collectAsState()
+    return asFlow().collectAsState()
 }
 
 @Composable
 fun <V : Any> PreferenceData<V>.observeAsState(initial: V): State<V> {
-    return getAsFlow().collectAsState(initial)
+    return asFlow().collectAsState(initial)
 }

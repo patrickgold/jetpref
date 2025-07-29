@@ -155,7 +155,7 @@ coroutineScope.launch {
 }
 
 // Get a Kotlin flow, which allows to observe state changes
-prefs.preferenceName.getFlow()
+prefs.preferenceName.asFlow()
 
 // Observe a preference value as a Jetpack Compose state with automatic disposal
 // (required datastore-ui module dependency)

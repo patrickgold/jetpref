@@ -17,7 +17,7 @@
 package dev.patrickgold.jetpref.datastore.model
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicReference
@@ -42,7 +42,7 @@ private class PreferenceDataImpl<V : Any>(
 
     override fun getOrNull(): V? = cachedValue.get()
 
-    override fun getAsFlow(): StateFlow<V> = cachedValueFlow
+    override fun asFlow() = cachedValueFlow.asStateFlow()
 
     override suspend fun set(value: V) = cachedValueWriteGuard.withLock {
         cachedValue.set(value)
