@@ -6,9 +6,10 @@ androidx-core = "1.16.0"
 androidx-lifecycle = "2.9.0"
 androidx-navigation = "2.9.0"
 compose-multiplatform = "1.8.2"
-ksp = "2.1.21-2.0.2"
 kotlin = "2.1.21"
 kotlinx-coroutines = "1.10.2"
+kover = "0.9.1"
+ksp = "2.1.21-2.0.2"
 vanniktech-maven-publish = "0.32.0"
 
 [libraries]
@@ -31,8 +32,9 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 agp-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 agp-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }
