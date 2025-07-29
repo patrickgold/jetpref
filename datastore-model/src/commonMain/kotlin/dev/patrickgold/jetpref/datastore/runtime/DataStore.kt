@@ -92,7 +92,11 @@ class DataStore<T : PreferenceModel> internal constructor(
                 }
             }
             is Event.Import -> {
-                val rawEncodedValues = loadAndUpdate(event.importReader)
+                val baseRawEncodedValues = when (event.importStrategy) {
+                    ImportStrategy.Merge -> currentStore.rawEncodedValues
+                    ImportStrategy.Erase -> null
+                }
+                val rawEncodedValues = loadAndUpdate(event.importReader, baseRawEncodedValues)
                 currentStoreRef = currentStore.copy(rawEncodedValues = rawEncodedValues)
                 when (currentStore.persistStrategy) {
                     is PersistStrategy.Disabled -> {}
@@ -152,9 +156,7 @@ class DataStore<T : PreferenceModel> internal constructor(
      * Imports values from a different storage using [reader] once and persists it back to the main
      * storage using the configured persist strategy via [init].
      *
-     * This method causes ALL existing in-memory values get overridden irreversible (regardless of success
-     * or failure of the request), so use this with caution!
-     *
+     * @param strategy The import strategy, describing how to handle current in-memory values.
      * @param reader The reader loading from the different storage.
      * @return A result object. When this method returns, the request is guaranteed to have been completed,
      *  either with success or with provided failure exception.
@@ -162,9 +164,11 @@ class DataStore<T : PreferenceModel> internal constructor(
      * @since 0.3.0
      */
     suspend fun import(
+        strategy: ImportStrategy,
         reader: DataStoreReader,
     ): Result<Unit> {
         val event = Event.Import(
+            importStrategy = strategy,
             importReader = reader,
         )
         eventQueue.send(event)
@@ -200,8 +204,11 @@ class DataStore<T : PreferenceModel> internal constructor(
         return model
     }
 
-    private suspend fun loadAndUpdate(reader: DataStoreReader?): RawEncodedValues {
-        val rawEncodedValues: RawEncodedValues = generateEmptyRawEncodedValues()
+    private suspend fun loadAndUpdate(
+        reader: DataStoreReader?,
+        baseRawEncodedValues: RawEncodedValues? = null,
+    ): RawEncodedValues {
+        val rawEncodedValues = baseRawEncodedValues ?: generateEmptyRawEncodedValues()
         try {
             val rawDataStoreContent = reader?.read() ?: ""
             for (line in rawDataStoreContent.lines()) {
@@ -320,6 +327,7 @@ class DataStore<T : PreferenceModel> internal constructor(
         ) : Event()
 
         data class Import(
+            val importStrategy: ImportStrategy,
             val importReader: DataStoreReader,
         ) : Event()
 

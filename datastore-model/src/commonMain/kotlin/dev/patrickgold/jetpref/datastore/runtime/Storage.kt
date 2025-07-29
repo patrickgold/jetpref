@@ -101,3 +101,23 @@ sealed interface PersistStrategy {
         val writer: DataStoreWriter,
     ) : PersistStrategy
 }
+
+/**
+ * Describes how values should be handled upon importing a new datastore.
+ *
+ * @since 0.3.0
+ */
+enum class ImportStrategy {
+    /**
+     * Merge current in-memory values with incoming values.
+     *
+     * @since 0.3.0
+     */
+    Merge,
+    /**
+     * Erase current in-memory values and set incoming values.
+     *
+     * @since 0.3.0
+     */
+    Erase,
+}
