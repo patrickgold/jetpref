@@ -6,6 +6,7 @@ androidx-core = "1.16.0"
 androidx-lifecycle = "2.9.0"
 androidx-navigation = "2.9.0"
 compose-multiplatform = "1.8.2"
+junit-jupiter = "5.13.3"
 kotlin = "2.1.21"
 kotlinx-coroutines = "1.10.2"
 kover = "0.9.1"
@@ -23,10 +24,12 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+junit-jupiter-api = {  module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-params = {  module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 [plugins]
 agp-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

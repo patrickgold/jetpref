@@ -39,10 +39,17 @@ class FileBasedStorage(path: String) : DataStoreReader, DataStoreWriter {
 
     override suspend fun write(content: String) {
         withContext(Dispatchers.IO) {
-            tempFile.parentFile?.mkdirs()
+            val parentDir = requireNotNull(tempFile.parentFile) {
+                "Temp file '$tempFile' has no associated parent dir (was null)"
+            }
+            if (!parentDir.exists()) {
+                check(parentDir.mkdirs()) {
+                    "Failed to perform mkdirs for parent dir '$parentDir'"
+                }
+            }
             tempFile.writeText(content)
             check(tempFile.renameTo(datastoreFile)) {
-                "Failed to rename temp file to actual file name"
+                "Failed to rename temp file '$tempFile' to actual file name '$datastoreFile'"
             }
         }
     }

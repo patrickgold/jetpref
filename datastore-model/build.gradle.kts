@@ -36,11 +36,24 @@ kotlin {
         val jvmCommonMain by creating {
             dependsOn(commonMain.get())
         }
+        val jvmCommonTest by creating {
+            dependsOn(commonTest.get())
+            dependencies {
+                implementation(libs.junit.jupiter.api)
+                implementation(libs.junit.jupiter.params)
+            }
+        }
         jvmMain {
             dependsOn(jvmCommonMain)
         }
+        jvmTest {
+            dependsOn(jvmCommonTest)
+        }
         androidMain {
             dependsOn(jvmCommonMain)
+        }
+        androidUnitTest {
+            dependsOn(jvmCommonTest)
         }
     }
 }
