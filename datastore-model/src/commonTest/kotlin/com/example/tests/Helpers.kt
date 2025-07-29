@@ -17,6 +17,7 @@
 package com.example.tests
 
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 // TODO: this should be provided by kotlin.test (is on jvm, but for some reason not on multiplatform)
 internal inline fun <reified T : Throwable> assertThrows(block: () -> Unit): T {
@@ -28,4 +29,14 @@ internal inline fun <reified T : Throwable> assertThrows(block: () -> Unit): T {
     }
     assertEquals(T::class, exception?.let { it::class })
     return exception as T
+}
+
+internal fun <T> Result<T>.assertIsSuccess(): T {
+    assertTrue(isSuccess, "Expected success, but was failure: ${exceptionOrNull()}")
+    return getOrNull()!!
+}
+
+internal fun <T> Result<T>.assertIsFailure(): Throwable {
+    assertTrue(isFailure, "Expected failure, but was success: ${getOrNull()}")
+    return exceptionOrNull()!!
 }

@@ -28,7 +28,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class ModelImportTest {
     suspend fun baseLoadDatastore(
@@ -44,7 +43,7 @@ class ModelImportTest {
                 """.trimIndent()
             },
             persistStrategy = persistStrategy,
-        ).let { assertTrue(it.isSuccess) }
+        ).assertIsSuccess()
         val prefs by datastore
         assertEquals(43, prefs.integer.getOrNull())
         assertEquals("test data", prefs.string.getOrNull())
@@ -59,7 +58,7 @@ class ModelImportTest {
 
         datastore.import(ImportStrategy.Merge) {
             "" // empty datastore
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertEquals(43, prefs.integer.getOrNull())
         assertEquals("test data", prefs.string.getOrNull())
         assertEquals(LocalTime(14, 35), prefs.localTime.getOrNull())
@@ -68,7 +67,7 @@ class ModelImportTest {
             """
             i;integer;20
             """.trimIndent()
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertEquals(20, prefs.integer.getOrNull())
         assertEquals("test data", prefs.string.getOrNull())
         assertEquals(LocalTime(14, 35), prefs.localTime.getOrNull())
@@ -77,7 +76,7 @@ class ModelImportTest {
             """
             s;string;"new data"
             """.trimIndent()
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertEquals(20, prefs.integer.getOrNull())
         assertEquals("new data", prefs.string.getOrNull())
         assertEquals(LocalTime(14, 35), prefs.localTime.getOrNull())
@@ -94,7 +93,7 @@ class ModelImportTest {
             b;string;true
             d;local_time;14.35
             """.trimIndent()
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertEquals(43, prefs.integer.getOrNull())
         assertEquals("test data", prefs.string.getOrNull())
         assertEquals(LocalTime(14, 35), prefs.localTime.getOrNull())
@@ -107,7 +106,7 @@ class ModelImportTest {
 
         datastore.import(ImportStrategy.Merge) {
             throw Exception()
-        }.let { assertTrue(it.isFailure) }
+        }.assertIsFailure()
         assertEquals(43, prefs.integer.getOrNull())
         assertEquals("test data", prefs.string.getOrNull())
         assertEquals(LocalTime(14, 35), prefs.localTime.getOrNull())
@@ -131,7 +130,7 @@ class ModelImportTest {
             s;string;"new data"
             i;non_existent_pref;42
             """.trimIndent()
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertEquals(expectedContentWritten, actualContentWritten)
     }
 
@@ -144,7 +143,7 @@ class ModelImportTest {
             """
             i;integer;20
             """.trimIndent()
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertEquals(20, prefs.integer.getOrNull())
         assertNull(prefs.string.getOrNull())
         assertNull(prefs.localTime.getOrNull())
@@ -161,7 +160,7 @@ class ModelImportTest {
             b;string;true
             d;local_time;14.35
             """.trimIndent()
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertNull(prefs.integer.getOrNull())
         assertNull(prefs.string.getOrNull())
         assertNull(prefs.localTime.getOrNull())
@@ -174,7 +173,7 @@ class ModelImportTest {
 
         datastore.import(ImportStrategy.Erase) {
             throw Exception()
-        }.let { assertTrue(it.isFailure) }
+        }.assertIsFailure()
         assertNull(prefs.integer.getOrNull())
         assertNull(prefs.string.getOrNull())
         assertNull(prefs.localTime.getOrNull())
@@ -196,7 +195,7 @@ class ModelImportTest {
             s;string;"new data"
             i;non_existent_pref;42
             """.trimIndent()
-        }.let { assertTrue(it.isSuccess) }
+        }.assertIsSuccess()
         assertEquals(expectedContentWritten, actualContentWritten)
     }
 }

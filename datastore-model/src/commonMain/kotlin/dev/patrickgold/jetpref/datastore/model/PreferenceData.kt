@@ -101,14 +101,14 @@ interface PreferenceData<V : Any> {
      *
      * @since 0.1.0
      */
-    suspend fun set(value: V)
+    suspend fun set(value: V): Result<Unit>
 
     /**
      * Resets this preference data to [default].
      *
      * @since 0.1.0
      */
-    suspend fun reset()
+    suspend fun reset(): Result<Unit>
 
     suspend fun init(value: V?, handler: ValuePersistHandler<V>)
 

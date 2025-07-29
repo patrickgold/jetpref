@@ -44,16 +44,16 @@ private class PreferenceDataImpl<V : Any>(
 
     override fun getAsFlow(): StateFlow<V> = cachedValueFlow
 
-    override suspend fun set(value: V): Unit = cachedValueWriteGuard.withLock {
+    override suspend fun set(value: V) = cachedValueWriteGuard.withLock {
         cachedValue.set(value)
         cachedValueFlow.value = value
-        valuePersistHandler?.onValueChanged(value)
+        valuePersistHandler?.onValueChanged(value) ?: Result.success(Unit)
     }
 
-    override suspend fun reset(): Unit = cachedValueWriteGuard.withLock {
+    override suspend fun reset() = cachedValueWriteGuard.withLock {
         cachedValue.set(null)
         cachedValueFlow.value = default
-        valuePersistHandler?.onValueChanged(default)
+        valuePersistHandler?.onValueChanged(null) ?: Result.success(Unit)
     }
 
     override suspend fun init(
