@@ -50,6 +50,8 @@ class ModelImportTest {
         persistStrategy: PersistStrategy,
     ): DataStore<ModelForImportTest> {
         val datastore = jetprefDataStoreOf(ModelForImportTest::class)
+        val prefs by datastore
+
         datastore.init(
             loadStrategy = LoadStrategy.UseReader {
                 """
@@ -60,7 +62,7 @@ class ModelImportTest {
             },
             persistStrategy = persistStrategy,
         ).assertIsSuccess()
-        val prefs by datastore
+
         assertEquals(43, prefs.integer.getOrNull())
         assertEquals("test data", prefs.string.getOrNull())
         assertEquals(LocalTime(14, 35), prefs.localTime.getOrNull())

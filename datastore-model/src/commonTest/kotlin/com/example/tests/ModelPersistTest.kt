@@ -49,11 +49,13 @@ class ModelPersistTest {
         persistStrategy: PersistStrategy,
     ): DataStore<ModelForPersistTest> {
         val datastore = jetprefDataStoreOf(ModelForPersistTest::class)
+        val prefs by datastore
+
         datastore.init(
             loadStrategy = LoadStrategy.Disabled,
             persistStrategy = persistStrategy,
         ).assertIsSuccess()
-        val prefs by datastore
+
         assertEquals(null, prefs.integer.getOrNull())
         assertEquals(null, prefs.string.getOrNull())
         assertEquals(null, prefs.localTime.getOrNull())

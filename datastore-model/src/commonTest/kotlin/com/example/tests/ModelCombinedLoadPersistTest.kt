@@ -49,8 +49,10 @@ abstract class ModelForCombinedLoadPersistTest : PreferenceModel() {
 class ModelCombinedLoadPersistTest {
     @Test
     fun `failing loader still allows to persist correctly`() = runTest {
-        var actualContentWritten: String? = null
         val datastore = jetprefDataStoreOf(ModelForCombinedLoadPersistTest::class)
+        val prefs by datastore
+
+        var actualContentWritten: String? = null
         datastore.init(
             loadStrategy = LoadStrategy.UseReader {
                 throw Exception()
@@ -59,7 +61,6 @@ class ModelCombinedLoadPersistTest {
                 actualContentWritten = content.trim()
             },
         ).assertIsFailure()
-        val prefs by datastore
 
         prefs.integer.set(34).assertIsSuccess()
         assertEquals("""

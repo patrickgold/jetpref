@@ -55,11 +55,13 @@ class ModelValueFlowTest {
         persistStrategy: PersistStrategy,
     ): DataStore<ModelForValueFlowTest> {
         val datastore = jetprefDataStoreOf(ModelForValueFlowTest::class)
+        val prefs by datastore
+
         datastore.init(
             loadStrategy = LoadStrategy.Disabled,
             persistStrategy = persistStrategy,
         ).assertIsSuccess()
-        val prefs by datastore
+
         assertEquals(null, prefs.integer.getOrNull())
         assertEquals(null, prefs.string.getOrNull())
         assertEquals(null, prefs.localTime.getOrNull())

@@ -85,6 +85,8 @@ class ModelLoadTest {
     @Test
     fun `model is loaded correctly`() = runTest {
         val datastore = jetprefDataStoreOf(ModelForLoadTest::class)
+        val prefs by datastore
+
         datastore.init(
             loadStrategy = LoadStrategy.UseReader {
                 """
@@ -101,7 +103,6 @@ class ModelLoadTest {
             persistStrategy = PersistStrategy.Disabled,
         ).assertIsSuccess()
 
-        val prefs by datastore
         assertEquals(false, prefs.boolean.getOrNull())
         assertEquals(99.123, prefs.double.getOrNull())
         assertEquals(12.34f, prefs.float.getOrNull())
@@ -115,6 +116,8 @@ class ModelLoadTest {
     @Test
     fun `model failed load sets all values default`() = runTest {
         val datastore = jetprefDataStoreOf(ModelForLoadTest::class)
+        val prefs by datastore
+
         val exception = Exception("File not found")
         datastore.init(
             loadStrategy = LoadStrategy.UseReader {
@@ -123,7 +126,6 @@ class ModelLoadTest {
             persistStrategy = PersistStrategy.Disabled,
         ).assertIsFailure(exception)
 
-        val prefs by datastore
         assertEquals(null, prefs.boolean.getOrNull())
         assertEquals(null, prefs.double.getOrNull())
         assertEquals(null, prefs.float.getOrNull())
@@ -137,6 +139,8 @@ class ModelLoadTest {
     @Test
     fun `model failed re-load resets all entries`() = runTest {
         val datastore = jetprefDataStoreOf(ModelForLoadTest::class)
+        val prefs by datastore
+
         datastore.init(
             loadStrategy = LoadStrategy.UseReader {
                 """
@@ -153,7 +157,6 @@ class ModelLoadTest {
             persistStrategy = PersistStrategy.Disabled,
         ).assertIsSuccess()
 
-        val prefs by datastore
         assertEquals(false, prefs.boolean.getOrNull())
         assertEquals(99.123, prefs.double.getOrNull())
         assertEquals(12.34f, prefs.float.getOrNull())
