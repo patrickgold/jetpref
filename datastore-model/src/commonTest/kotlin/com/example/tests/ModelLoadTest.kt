@@ -30,7 +30,7 @@ import kotlin.test.assertNull
 // TODO: extend with a lot more examples for error cases and edge cases!!
 class ModelLoadTest {
     @Test
-    fun `model schema v1 is loaded correctly`() = runTest {
+    fun `model is loaded correctly`() = runTest {
         val datastore = jetprefDataStoreOf(GenericFlatModel::class)
         val reader = createLoadableReader(
             """

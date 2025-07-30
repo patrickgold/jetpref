@@ -74,12 +74,14 @@ class DataStore<T : PreferenceModel> internal constructor(
                     is LoadStrategy.Disabled -> null
                     is LoadStrategy.UseReader -> event.loadStrategy.reader
                 }
-                val rawEncodedValues = loadAndUpdate(reader)
-                currentStoreRef = Store(
-                    loadStrategy = event.loadStrategy,
-                    persistStrategy = event.persistStrategy,
-                    rawEncodedValues = rawEncodedValues,
-                )
+                loadAndUpdate(reader) { rawEncodedValues ->
+                    currentStoreRef = Store(
+                        loadStrategy = event.loadStrategy,
+                        persistStrategy = event.persistStrategy,
+                        rawEncodedValues = rawEncodedValues,
+                    )
+                }
+
             }
             is Event.SetValueAndTryPersist -> {
                 require(currentStore.rawEncodedValues.contains(event.typedKey))
@@ -96,12 +98,13 @@ class DataStore<T : PreferenceModel> internal constructor(
                     ImportStrategy.Merge -> currentStore.rawEncodedValues
                     ImportStrategy.Erase -> null
                 }
-                val rawEncodedValues = loadAndUpdate(event.importReader, baseRawEncodedValues)
-                currentStoreRef = currentStore.copy(rawEncodedValues = rawEncodedValues)
-                when (currentStore.persistStrategy) {
-                    is PersistStrategy.Disabled -> {}
-                    is PersistStrategy.UseWriter -> {
-                        persist(currentStore.persistStrategy.writer, rawEncodedValues)
+                loadAndUpdate(event.importReader, baseRawEncodedValues) { rawEncodedValues ->
+                    currentStoreRef = currentStore.copy(rawEncodedValues = rawEncodedValues)
+                    when (currentStore.persistStrategy) {
+                        is PersistStrategy.Disabled -> {}
+                        is PersistStrategy.UseWriter -> {
+                            persist(currentStore.persistStrategy.writer, rawEncodedValues)
+                        }
                     }
                 }
             }
@@ -207,7 +210,8 @@ class DataStore<T : PreferenceModel> internal constructor(
     private suspend fun loadAndUpdate(
         reader: DataStoreReader?,
         baseRawEncodedValues: RawEncodedValues? = null,
-    ): RawEncodedValues {
+        finallyAction: suspend (RawEncodedValues) -> Unit,
+    ) {
         val rawEncodedValues = baseRawEncodedValues ?: generateEmptyRawEncodedValues()
         try {
             val rawDataStoreContent = reader?.read() ?: ""
@@ -257,8 +261,8 @@ class DataStore<T : PreferenceModel> internal constructor(
                 val value = rawEncodedValues[typedKey]
                 entry.init(value)
             }
+            finallyAction(rawEncodedValues)
         }
-        return rawEncodedValues
     }
 
     private suspend fun <V : Any> PreferenceData<V>.init(rawEncodedValue: String?) {
