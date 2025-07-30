@@ -29,11 +29,27 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
+@Preferences
+abstract class ModelForImportTest : PreferenceModel() {
+    val integer = int(
+        key = "integer",
+        default = 0,
+    )
+    val string = string(
+        key = "string",
+        default = "",
+    )
+    val localTime = localTime(
+        key = "local_time",
+        default = LocalTime(0, 0),
+    )
+}
+
 class ModelImportTest {
     suspend fun baseLoadDatastore(
         persistStrategy: PersistStrategy,
-    ): DataStore<ModelToBeImported> {
-        val datastore = jetprefDataStoreOf(ModelToBeImported::class)
+    ): DataStore<ModelForImportTest> {
+        val datastore = jetprefDataStoreOf(ModelForImportTest::class)
         datastore.init(
             loadStrategy = LoadStrategy.UseReader {
                 """
@@ -198,20 +214,4 @@ class ModelImportTest {
         }.assertIsSuccess()
         assertEquals(expectedContentWritten, actualContentWritten)
     }
-}
-
-@Preferences
-abstract class ModelToBeImported : PreferenceModel() {
-    val integer = int(
-        key = "integer",
-        default = 0,
-    )
-    val string = string(
-        key = "string",
-        default = "",
-    )
-    val localTime = localTime(
-        key = "local_time",
-        default = LocalTime(0, 0),
-    )
 }

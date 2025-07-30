@@ -28,11 +28,27 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
+@Preferences
+abstract class ModelForPersistTest : PreferenceModel() {
+    val integer = int(
+        key = "integer",
+        default = 0,
+    )
+    val string = string(
+        key = "string",
+        default = "",
+    )
+    val localTime = localTime(
+        key = "local_time",
+        default = LocalTime(0, 0),
+    )
+}
+
 class ModelPersistTest {
     suspend fun baseLoadDatastore(
         persistStrategy: PersistStrategy,
-    ): DataStore<ModelToBePersisted> {
-        val datastore = jetprefDataStoreOf(ModelToBePersisted::class)
+    ): DataStore<ModelForPersistTest> {
+        val datastore = jetprefDataStoreOf(ModelForPersistTest::class)
         datastore.init(
             loadStrategy = LoadStrategy.Disabled,
             persistStrategy = persistStrategy,
@@ -120,20 +136,4 @@ class ModelPersistTest {
         assertEquals("test data string", prefs.string.getOrNull())
         assertEquals(null, prefs.localTime.getOrNull())
     }
-}
-
-@Preferences
-abstract class ModelToBePersisted : PreferenceModel() {
-    val integer = int(
-        key = "integer",
-        default = 0,
-    )
-    val string = string(
-        key = "string",
-        default = "",
-    )
-    val localTime = localTime(
-        key = "local_time",
-        default = LocalTime(0, 0),
-    )
 }

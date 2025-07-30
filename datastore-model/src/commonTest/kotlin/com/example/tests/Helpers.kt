@@ -40,3 +40,9 @@ internal fun <T> Result<T>.assertIsFailure(): Throwable {
     assertTrue(isFailure, "Expected failure, but was success: ${getOrNull()}")
     return exceptionOrNull()!!
 }
+
+internal fun <T> Result<T>.assertIsFailure(expectedThrowable: Throwable): Throwable {
+    val actualThrowable = assertIsFailure()
+    assertEquals(expectedThrowable, actualThrowable, "Result was failure, but failure objects mismatch")
+    return actualThrowable
+}

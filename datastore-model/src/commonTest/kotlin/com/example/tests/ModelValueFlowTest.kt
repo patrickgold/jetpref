@@ -27,6 +27,29 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Preferences
+abstract class ModelForValueFlowTest : PreferenceModel() {
+    companion object {
+        // Do not use 0-ish/-1 values, as these are often defaults on failures
+        const val DEFAULT_INTEGER = 817
+        const val DEFAULT_STRING = "default string 1287648764"
+        val DEFAULT_LOCAL_TIME = LocalTime(14, 8, 34, 7)
+    }
+
+    val integer = int(
+        key = "integer",
+        default = DEFAULT_INTEGER,
+    )
+    val string = string(
+        key = "string",
+        default = DEFAULT_STRING,
+    )
+    val localTime = localTime(
+        key = "local_time",
+        default = DEFAULT_LOCAL_TIME,
+    )
+}
+
 class ModelValueFlowTest {
     suspend fun baseLoadDatastore(
         persistStrategy: PersistStrategy,
@@ -56,27 +79,4 @@ class ModelValueFlowTest {
         prefs.integer.reset()
         assertEquals(ModelForValueFlowTest.DEFAULT_INTEGER, prefs.integer.asFlow().value)
     }
-}
-
-@Preferences
-abstract class ModelForValueFlowTest : PreferenceModel() {
-    companion object {
-        // Do not use 0-ish/-1 values, as these are often defaults on failures
-        const val DEFAULT_INTEGER = 817
-        const val DEFAULT_STRING = "default string 1287648764"
-        val DEFAULT_LOCAL_TIME = LocalTime(14, 8, 34, 7)
-    }
-
-    val integer = int(
-        key = "integer",
-        default = DEFAULT_INTEGER,
-    )
-    val string = string(
-        key = "string",
-        default = DEFAULT_STRING,
-    )
-    val localTime = localTime(
-        key = "local_time",
-        default = DEFAULT_LOCAL_TIME,
-    )
 }

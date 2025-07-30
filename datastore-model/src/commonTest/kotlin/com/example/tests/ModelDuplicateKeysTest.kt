@@ -22,24 +22,8 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.runtime.PreferenceModelDuplicateKeyException
 import kotlin.test.Test
 
-class ModelDuplicateKeysTest {
-    @Test
-    fun `duplicate keys with same type should throw`() {
-        assertThrows<PreferenceModelDuplicateKeyException> {
-            jetprefDataStoreOf(DuplicateKeysSameType::class)
-        }
-    }
-
-    @Test
-    fun `duplicate keys with different type should throw`() {
-        assertThrows<PreferenceModelDuplicateKeyException> {
-            jetprefDataStoreOf(DuplicateKeysDifferentType::class)
-        }
-    }
-}
-
 @Preferences
-abstract class DuplicateKeysSameType : PreferenceModel() {
+abstract class ModelForDuplicateKeysSameTypeTest : PreferenceModel() {
     val pref1 = int(
         key = "numeric_pref",
         default = 0,
@@ -51,7 +35,7 @@ abstract class DuplicateKeysSameType : PreferenceModel() {
 }
 
 @Preferences
-abstract class DuplicateKeysDifferentType : PreferenceModel() {
+abstract class ModelForDuplicateKeysDifferentTypeTest : PreferenceModel() {
     val pref1 = int(
         key = "numeric_pref",
         default = 0,
@@ -60,4 +44,20 @@ abstract class DuplicateKeysDifferentType : PreferenceModel() {
         key = "numeric_pref",
         default = "0",
     )
+}
+
+class ModelDuplicateKeysTest {
+    @Test
+    fun `duplicate keys with same type should throw`() {
+        assertThrows<PreferenceModelDuplicateKeyException> {
+            jetprefDataStoreOf(ModelForDuplicateKeysSameTypeTest::class)
+        }
+    }
+
+    @Test
+    fun `duplicate keys with different type should throw`() {
+        assertThrows<PreferenceModelDuplicateKeyException> {
+            jetprefDataStoreOf(ModelForDuplicateKeysDifferentTypeTest::class)
+        }
+    }
 }
