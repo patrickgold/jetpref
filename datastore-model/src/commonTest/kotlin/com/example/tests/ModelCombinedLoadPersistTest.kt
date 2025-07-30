@@ -27,7 +27,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Preferences
-abstract class ModelForLoadPersistCombinedTest : PreferenceModel() {
+abstract class ModelForCombinedLoadPersistTest : PreferenceModel() {
     val integer = int(
         key = "integer",
         default = 0,
@@ -50,7 +50,7 @@ class ModelCombinedLoadPersistTest {
     @Test
     fun `failing loader still allows to persist correctly`() = runTest {
         var actualContentWritten: String? = null
-        val datastore = jetprefDataStoreOf(ModelForLoadPersistCombinedTest::class)
+        val datastore = jetprefDataStoreOf(ModelForCombinedLoadPersistTest::class)
         datastore.init(
             loadStrategy = LoadStrategy.UseReader {
                 throw Exception()
