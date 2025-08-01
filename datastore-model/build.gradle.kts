@@ -1,33 +1,76 @@
-/*
- * Copyright 2022-2025 Patrick Goldinger
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kover)
     alias(libs.plugins.agp.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
-val projectCompileSdk: String by project
-val projectMinSdk: String by project
-val projectGroupId: String by project
-val artifactId = "jetpref-datastore-model"
-val projectVersion: String by project
+kotlin {
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
+    androidTarget {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
+
+    applyDefaultHierarchyTemplate()
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core)
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+        val jvmCommonMain by creating {
+            dependsOn(commonMain.get())
+        }
+        val jvmCommonTest by creating {
+            dependsOn(commonTest.get())
+            dependencies {
+                implementation(libs.junit.jupiter.api)
+                implementation(libs.junit.jupiter.params)
+            }
+        }
+        jvmMain {
+            dependsOn(jvmCommonMain)
+        }
+        jvmTest {
+            dependsOn(jvmCommonTest)
+        }
+        androidMain {
+            dependsOn(jvmCommonMain)
+        }
+        androidUnitTest {
+            dependsOn(jvmCommonTest)
+        }
+    }
+}
+
+dependencies {
+    listOf(
+        "kspJvmTest",
+        "kspAndroidTest",
+    ).forEach { configurationName ->
+        add(configurationName, project(":datastore-model-processor"))
+    }
+}
 
 android {
+    val projectCompileSdk: String by project
+    val projectMinSdk: String by project
+
     namespace = "dev.patrickgold.jetpref.datastore"
     compileSdk = projectCompileSdk.toInt()
 
@@ -40,38 +83,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    sourceSets {
-        maybeCreate("main").apply {
-            java.srcDir("src/main/kotlin")
-        }
-    }
-}
-
-dependencies {
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.kotlinx.coroutines)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(project(":datastore-annotations"))
-
-    testImplementation(libs.junit.jupiter.api)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.kotlin.test.junit5)
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-val sourcesJar = tasks.register<Jar>("sourcesJar") {
-    archiveClassifier.set("sources")
-    from(android.sourceSets.getByName("main").java.srcDirs)
-}
-
 mavenPublishing {
+    val projectGroupId: String by project
+    val artifactId = "jetpref-datastore-model"
+    val projectVersion: String by project
     coordinates(projectGroupId, artifactId, projectVersion)
 }

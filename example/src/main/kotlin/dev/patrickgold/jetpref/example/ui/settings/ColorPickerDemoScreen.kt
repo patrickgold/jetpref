@@ -33,7 +33,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
-import dev.patrickgold.jetpref.example.examplePreferenceModel
+import dev.patrickgold.jetpref.example.AppPrefsStore
 import dev.patrickgold.jetpref.material.ui.ExperimentalJetPrefMaterial3Ui
 import dev.patrickgold.jetpref.material.ui.JetPrefColorPicker
 import dev.patrickgold.jetpref.material.ui.checkeredBackground
@@ -42,7 +42,7 @@ import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 @OptIn(ExperimentalJetPrefMaterial3Ui::class)
 @Composable
 fun ColorPickerDemoScreen() = ScrollablePreferenceLayout(
-    cachedPrefModel = examplePreferenceModel(),
+    dataStore = AppPrefsStore,
     modifier = Modifier.fillMaxSize(),
 ) {
     var color by remember { mutableStateOf(Color.Red) }
