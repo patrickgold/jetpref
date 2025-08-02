@@ -22,7 +22,9 @@ import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ExperimentalJetPrefDatastoreUi
@@ -35,7 +37,6 @@ import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import dev.patrickgold.jetpref.datastore.ui.isMaterialYou
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
-import dev.patrickgold.jetpref.datastore.ui.vectorResource
 import dev.patrickgold.jetpref.example.AppPrefsStore
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
@@ -147,7 +148,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
     )
     SwitchPreference(
         prefs.showExampleGroup,
-        icon = vectorResource(R.drawable.ic_question_answer_black_24dp),
+        icon = ImageVector.vectorResource(R.drawable.ic_question_answer_black_24dp),
         title = "Show example group",
         summary = "Show/hide the example group",
     )
@@ -162,7 +163,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         )
         SwitchPreference(
             prefs.example.isButtonShowing2,
-            icon = vectorResource(R.drawable.ic_question_answer_black_24dp),
+            icon = ImageVector.vectorResource(R.drawable.ic_question_answer_black_24dp),
             title = "isBtnShow2",
             summaryOn = "Hello",
             summaryOff = "Bye",
