@@ -1,8 +1,6 @@
 package dev.patrickgold.jetpref.datastore.model
 
-import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAbstract
-import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
@@ -12,19 +10,34 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MAP
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STAR
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.buildCodeBlock
+import com.squareup.kotlinpoet.ksp.addOriginatingKSFile
+import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.writeTo
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
     companion object {
         const val PREFERENCE_DATA_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.model.PreferenceData"
-
-        val SAFE_SYMBOL_PATTERN = "^[a-zA-Z_][a-zA-Z0-9_]*$".toRegex()
+        const val PREFERENCES_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.annotations.Preferences"
+        const val PREFERNCE_MODEL_DUPLICATE_KEY_EXCEPTION_QUALIFIED_NAME =
+            "dev.patrickgold.jetpref.datastore.runtime.PreferenceModelDuplicateKeyException"
+        const val TYPED_KEY_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.model.PreferenceModel.TypedKey"
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (symbols, symbolsToProcessNextRound) = resolver
-            .getSymbolsWithAnnotation("dev.patrickgold.jetpref.datastore.annotations.Preferences")
+            .getSymbolsWithAnnotation(PREFERENCES_QUALIFIED_NAME)
             .partition { it.validate() }
         val (modelSymbols, invalidModelSymbols) = symbols
             .filterIsInstance<KSClassDeclaration>()
@@ -41,71 +54,157 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
         return symbolsToProcessNextRound
     }
 
-    fun generateModelImplementation(env: SymbolProcessorEnvironment, modelClassDecl: KSClassDeclaration) {
-        val preferenceNames = mutableListOf<String>()
-        val propertiesToVisit = ArrayDeque<Pair<KSPropertyDeclaration, List<String>>>()
-        propertiesToVisit.addAll(modelClassDecl.getDeclaredProperties().map { it to emptyList() })
-        while (propertiesToVisit.isNotEmpty()) {
-            val (property, groupPrefix) = propertiesToVisit.removeFirst()
-            val propertyTypeDecl = property.type.resolve().declaration
-            if (isPreferenceData(propertyTypeDecl)) {
-                val mediumRareName = buildList {
-                    addAll(groupPrefix)
-                    add(property.simpleName.asString())
-                }.joinToString(".") { it.escapedSymbolName() }
-                preferenceNames.add(mediumRareName)
-            } else if (isInnerClassOf(modelClassDecl, propertyTypeDecl)) {
-                val groupPrefix = buildList {
-                    addAll(groupPrefix)
-                    add(property.simpleName.asString())
+    fun collectProperties(modelClassDecl: KSClassDeclaration): List<List<KSPropertyDeclaration>> {
+        val results = mutableListOf<List<KSPropertyDeclaration>>()
+
+        fun nestedClassMap(container: KSClassDeclaration) =
+            container.declarations
+                .filterIsInstance<KSClassDeclaration>()
+                .associateBy { it.simpleName.asString() }
+
+        fun recurse(container: KSClassDeclaration, instanceChain: List<KSPropertyDeclaration>) {
+            container.declarations
+                .filterIsInstance<KSPropertyDeclaration>()
+                .filter { isPreferenceData(it.type.resolve().declaration) }
+                .forEach { prop ->
+                    results += (instanceChain + prop)
                 }
-                propertiesToVisit.addAll(propertyTypeDecl.getDeclaredProperties().map { it to groupPrefix })
-            } else {
-                // Ignore??
-            }
+            val nested = nestedClassMap(container)
+            container.declarations
+                .filterIsInstance<KSPropertyDeclaration>()
+                .forEach { holderProp ->
+                    val declaredTypeName = holderProp.type.resolve().declaration.simpleName.asString()
+                    val matched = nested[declaredTypeName]
+                    if (matched != null) {
+                        recurse(matched, instanceChain + holderProp)
+                    }
+                }
         }
+
+        modelClassDecl.declarations
+            .filterIsInstance<KSPropertyDeclaration>()
+            .filter { !isInnerClassOf(modelClassDecl, it.type.resolve().declaration) }
+            .forEach { prop ->
+                if (isPreferenceData(prop.type.resolve().declaration)) {
+                    results += listOf(prop)
+                }
+            }
+
+        modelClassDecl.declarations
+            .filterIsInstance<KSPropertyDeclaration>()
+            .forEach { holderProp ->
+                val nested = nestedClassMap(modelClassDecl)
+                val declaredTypeName = holderProp.type.resolve().declaration.simpleName.asString()
+                val matched = nested[declaredTypeName]
+                if (matched != null) recurse(matched, listOf(holderProp))
+            }
+        return results
+    }
+
+    fun generateModelImplementation(env: SymbolProcessorEnvironment, modelClassDecl: KSClassDeclaration) {
+        val properties = collectProperties(modelClassDecl)
         val packageName = modelClassDecl.packageName.asString()
         val abstractModelName = modelClassDecl.simpleName.asString()
         val finalModelName = abstractModelName + "Impl"
-        val file = env.codeGenerator.createNewFile(
-            dependencies = Dependencies(
-                aggregating = true,
-                modelClassDecl.containingFile!!,
-            ),
+        val declaredPreferenceEntriesName = "declaredPreferenceEntries"
+        val duplicateClassName = ClassName.bestGuess(PREFERNCE_MODEL_DUPLICATE_KEY_EXCEPTION_QUALIFIED_NAME)
+        val typedKeyClassName = ClassName.bestGuess(TYPED_KEY_QUALIFIED_NAME)
+        val preferenceDataClassName = ClassName.bestGuess(PREFERENCE_DATA_QUALIFIED_NAME)
+
+        val initBlock = buildCodeBlock {
+            val entriesName = "entries"
+            val duplicatesName = "duplicates"
+            if (properties.isEmpty()) {
+                add("%N = emptyMap()", declaredPreferenceEntriesName)
+            } else {
+                add("val %N = listOf(\n", entriesName)
+                withIndent {
+                    properties.forEach { props ->
+                        val first = CodeBlock.builder()
+                        val second = CodeBlock.builder()
+                        props.forEachIndexed { index, declaration ->
+                            fun computeDeclaration(block: CodeBlock.Builder, modifier: String) {
+                                val name = declaration.simpleName.getShortName()
+                                if (index != props.lastIndex) {
+                                    block.add("$modifier.", name)
+                                } else {
+                                    block.add(modifier, name)
+                                }
+                            }
+                            computeDeclaration(first, "%N")
+                            computeDeclaration(second, "%L")
+                        }
+                        add(first.build())
+                        add(" to ")
+                        add("%S", second.build())
+                        add(",\n")
+                    }
+                }
+                add(")\n")
+                add("val %N = %N\n", duplicatesName, entriesName)
+                withIndent {
+                    add(".%1N { (%2N, _) -> %2N.key }\n", "groupBy", "entry")
+                    add(".%1N { it.value.size > 1 }\n", "filter")
+                    add(".%1N { (_, %2N) -> %2N.map { (_, %3N) -> %3N } }\n", "mapValues", duplicatesName, "varName")
+                }
+                controlFlow("if ($duplicatesName.isNotEmpty()) {") {
+                    add(
+                        "throw %T(%S, %N)\n",
+                        duplicateClassName,
+                        modelClassDecl.qualifiedName!!.asString(),
+                        duplicatesName
+                    )
+                }
+                add("%N = %N\n", declaredPreferenceEntriesName, entriesName)
+                withIndent {
+                    add(".%1N { (%2N, _) -> %2N }\n", "map", "entry")
+                    add(".%1N { %2T(it.type, it.key) }\n", "associateBy", typedKeyClassName)
+                }
+            }
+        }
+
+        val declaredPreferencesEntriesProperty = PropertySpec
+            .builder(
+                declaredPreferenceEntriesName,
+                MAP.parameterizedBy(
+                    typedKeyClassName,
+                    preferenceDataClassName
+                        .parameterizedBy(STAR)
+                )
+            ).apply {
+                addModifiers(KModifier.OVERRIDE)
+                addOriginatingKSFile(modelClassDecl.containingFile!!)
+            }.build()
+
+        val modelImplClass = TypeSpec
+            .classBuilder(finalModelName)
+            .apply {
+                superclass(modelClassDecl.toClassName())
+                addProperty(
+                    declaredPreferencesEntriesProperty
+                )
+                addInitializerBlock(
+                    initBlock
+                )
+                addOriginatingKSFile(modelClassDecl.containingFile!!)
+            }.build()
+
+        val fileSpec = FileSpec.builder(
             packageName = packageName,
             fileName = finalModelName,
-        )
-        // TODO: use kotlinpoet
-        file.bufferedWriter().use {
-            it.appendLine("package $packageName")
-            it.appendLine()
-            it.appendLine("import $PREFERENCE_DATA_QUALIFIED_NAME")
-            it.appendLine("import dev.patrickgold.jetpref.datastore.runtime.PreferenceModelDuplicateKeyException")
-            it.appendLine()
-            it.appendLine("class ${finalModelName.escapedSymbolName()} : ${abstractModelName.escapedSymbolName()}() {")
-            it.appendLine("  override val declaredPreferenceEntries: Map<TypedKey, PreferenceData<*>>")
-            it.appendLine("  init {")
-            if (preferenceNames.isEmpty()) {
-                it.appendLine("    declaredPreferenceEntries = emptyMap()")
-            } else {
-                val entries = preferenceNames.map { name -> "$name to \"$name\"" }
-                it.appendLine("    val entries = listOf(")
-                it.appendLine("      ${entries.joinToString(",\n      ")},")
-                it.appendLine("    )")
-                it.appendLine("    val duplicates = entries")
-                it.appendLine("      .groupBy { (entry, _) -> entry.key }")
-                it.appendLine("      .filter { it.value.size > 1 }")
-                it.appendLine("      .mapValues { (_, duplicates) -> duplicates.map { (_, varName) -> varName } }")
-                it.appendLine("    if (duplicates.isNotEmpty()) {")
-                it.appendLine("        throw PreferenceModelDuplicateKeyException(\"${modelClassDecl.qualifiedName!!.asString()}\", duplicates)")
-                it.appendLine("    }")
-                it.appendLine("    declaredPreferenceEntries = entries")
-                it.appendLine("      .map { (entry, _) -> entry }")
-                it.appendLine("      .associateBy { TypedKey(it.type, it.key) }")
-            }
-            it.appendLine("  }")
-            it.appendLine("}")
-        }
+        ).apply {
+            addType(
+                modelImplClass
+            )
+            indent("    ")
+            addFileComment(
+                "%L\n%L\n%L",
+                "This file is autogenerated by jetpref.",
+                "DO NOT EDIT BY HAND!",
+                "ALL EDITS ARE OVERWRITTEN WITH THE NEXT RECOMPILATION!"
+            )
+        }.build()
+        fileSpec.writeTo(env.codeGenerator, aggregating = true)
     }
 
     fun isPreferenceData(propertyTypeDecl: KSDeclaration): Boolean {
@@ -126,14 +225,18 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
         }
         return false
     }
+}
 
-    fun String.escapedSymbolName(): String {
-        return if (SAFE_SYMBOL_PATTERN.matches(this)) {
-            this
-        } else {
-            "`$this`"
-        }
-    }
+private inline fun CodeBlock.Builder.withIndent(block: CodeBlock.Builder.() -> Unit) = apply {
+    indent()
+    block()
+    unindent()
+}
+
+private inline fun CodeBlock.Builder.controlFlow(controlFlow: String, block: CodeBlock.Builder.() -> Unit) = apply {
+    beginControlFlow(controlFlow)
+    block()
+    endControlFlow()
 }
 
 class ModelProcessorProvider : SymbolProcessorProvider {
