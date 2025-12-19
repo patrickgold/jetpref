@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.agp.application)
     alias(libs.plugins.ksp)
@@ -9,6 +11,12 @@ val projectCompileSdk: String by project
 val projectMinSdk: String by project
 val projectTargetSdk: String by project
 val projectVersion: String by project
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+    }
+}
 
 android {
     namespace = "dev.patrickgold.jetpref.example"
@@ -46,9 +54,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         compose = true
     }
@@ -66,10 +71,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
-    implementation(project(":datastore-model"))
-    ksp(project(":datastore-model-processor"))
-    implementation(project(":datastore-ui"))
-    implementation(project(":material-ui"))
+    implementation(projects.datastoreModel)
+    ksp(projects.datastoreModelProcessor)
+    implementation(projects.datastoreUi)
+    implementation(projects.materialUi)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

@@ -16,6 +16,8 @@ dependencyResolutionManagement {
     }
 }
 
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 include(":datastore-model")
 include(":datastore-model-processor")
 include(":datastore-ui")
