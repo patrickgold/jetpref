@@ -1,10 +1,12 @@
+import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.kover)
-    alias(libs.plugins.agp.library)
+    // Disable kover until kotin/kotlinx-kover#772 is fixed
+    // alias(libs.plugins.kover)
+    alias(libs.plugins.agp.multiplatform.library)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
@@ -14,9 +16,24 @@ kotlin {
             jvmTarget = JvmTarget.JVM_11
         }
     }
-    androidTarget {
+
+    androidLibrary {
+        val projectCompileSdk: String by project
+        val projectMinSdk: String by project
+
+        namespace = "dev.patrickgold.jetpref.datastore"
+        compileSdk = projectCompileSdk.toInt()
+        minSdk = projectMinSdk.toInt()
+
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
+        }
+
+        withHostTest {}
+
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.files.add(File("consumer-rules.pro"))
         }
     }
 
@@ -52,7 +69,7 @@ kotlin {
         androidMain {
             dependsOn(jvmCommonMain)
         }
-        androidUnitTest {
+        getByName("androidHostTest") {
             dependsOn(jvmCommonTest)
         }
     }
@@ -61,27 +78,9 @@ kotlin {
 dependencies {
     listOf(
         "kspJvmTest",
-        "kspAndroidTest",
+        "kspAndroidHostTest",
     ).forEach { configurationName ->
-        add(configurationName, project(":datastore-model-processor"))
-    }
-}
-
-android {
-    val projectCompileSdk: String by project
-    val projectMinSdk: String by project
-
-    namespace = "dev.patrickgold.jetpref.datastore"
-    compileSdk = projectCompileSdk.toInt()
-
-    defaultConfig {
-        minSdk = projectMinSdk.toInt()
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        add(configurationName, projects.datastoreModelProcessor)
     }
 }
 
