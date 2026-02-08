@@ -21,11 +21,23 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 
 @Composable
+@Deprecated(message = "Use collectAsState for flow like constructs", ReplaceWith("collectAsState()"))
 fun <V : Any> PreferenceData<V>.observeAsState(): State<V> {
     return asFlow().collectAsState()
 }
 
 @Composable
+fun <V : Any> PreferenceData<V>.collectAsState(): State<V> {
+    return asFlow().collectAsState()
+}
+
+@Composable
+@Deprecated(message = "Use collectAsState for flow like constructs", ReplaceWith("collectAsState(initial)"))
 fun <V : Any> PreferenceData<V>.observeAsState(initial: V): State<V> {
+    return asFlow().collectAsState(initial)
+}
+
+@Composable
+fun <V : Any> PreferenceData<V>.collectAsState(initial: V): State<V> {
     return asFlow().collectAsState(initial)
 }

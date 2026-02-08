@@ -48,7 +48,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import kotlinx.coroutines.launch
 
@@ -84,7 +84,7 @@ fun LocalTimePickerPreference(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val prefValue by pref.observeAsState()
+    val prefValue by pref.collectAsState()
     var isDialogOpen by remember { mutableStateOf(false) }
     var displayMode by remember { mutableStateOf(DisplayMode.Picker) }
     var is24hour by remember {

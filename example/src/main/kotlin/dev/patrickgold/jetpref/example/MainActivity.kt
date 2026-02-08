@@ -19,7 +19,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.datastore.ui.ProvideDefaultDialogPrefStrings
 import dev.patrickgold.jetpref.example.ui.settings.ColorPickerDemoScreen
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
 
-            val appTheme by prefs.theme.observeAsState()
+            val appTheme by prefs.theme.collectAsState()
             val isDark = when (appTheme) {
                 Theme.AUTO -> isSystemInDarkTheme()
                 Theme.LIGHT -> false

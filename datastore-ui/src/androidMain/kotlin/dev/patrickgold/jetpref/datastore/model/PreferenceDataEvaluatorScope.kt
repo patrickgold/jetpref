@@ -23,20 +23,20 @@ typealias PreferenceDataEvaluator = @Composable PreferenceDataEvaluatorScope.() 
 object PreferenceDataEvaluatorScope {
     @Composable
     infix fun <V : Any> PreferenceData<V>.isEqualTo(other: PreferenceData<V>): Boolean {
-        val pref1 = this.observeAsState()
-        val pref2 = other.observeAsState()
+        val pref1 = this.collectAsState()
+        val pref2 = other.collectAsState()
         return pref1.value == pref2.value
     }
 
     @Composable
     infix fun <V : Any> PreferenceData<V>.isEqualTo(other: V): Boolean {
-        val pref = this.observeAsState()
+        val pref = this.collectAsState()
         return pref.value == other
     }
 
     @Composable
     infix fun <V : Any> V.isEqualTo(other: PreferenceData<V>): Boolean {
-        val pref = other.observeAsState()
+        val pref = other.collectAsState()
         return this == pref.value
     }
 

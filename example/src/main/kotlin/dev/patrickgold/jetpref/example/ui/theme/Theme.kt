@@ -11,7 +11,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.platform.LocalContext
-import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.example.AppPrefsStore
 
@@ -55,7 +55,7 @@ private fun dynamicColors(darkTheme: Boolean) = if (darkTheme) {
 fun JetPrefTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
 
     val prefs by AppPrefsStore
-    val accentColor = prefs.color1.observeAsState()
+    val accentColor = prefs.color1.collectAsState()
 
     val dynamicColors = accentColor.value.isUnspecified
 

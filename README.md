@@ -159,7 +159,7 @@ prefs.preferenceName.asFlow()
 
 // Observe a preference value as a Jetpack Compose state with automatic disposal
 // (required datastore-ui module dependency)
-val myPreference by prefs.preferenceName.observeAsState()
+val myPreference by prefs.preferenceName.collectAsState()
 ```
 
 ### Write a simple Settings UI in Jetpack Compose
