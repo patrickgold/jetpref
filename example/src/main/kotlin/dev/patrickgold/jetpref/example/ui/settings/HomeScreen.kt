@@ -50,7 +50,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
     val context = LocalContext.current
 
     // TODO: fix again or remove?
-//    val isDatastoreReady by prefs.datastoreReadyStatus.observeAsState()
+//    val isDatastoreReady by prefs.datastoreReadyStatus.collectAsState()
 //    Text(text = "is datastore ready = $isDatastoreReady")
 
     Preference(

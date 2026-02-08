@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefTextField
 import dev.patrickgold.jetpref.material.ui.JetPrefTextFieldDefaults
@@ -81,7 +81,7 @@ fun TextFieldPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val scope = rememberCoroutineScope()
-    val prefValue by pref.observeAsState()
+    val prefValue by pref.collectAsState()
     var localPrefValue by remember { mutableStateOf("") }
     var isDialogOpen by remember { mutableStateOf(false) }
 

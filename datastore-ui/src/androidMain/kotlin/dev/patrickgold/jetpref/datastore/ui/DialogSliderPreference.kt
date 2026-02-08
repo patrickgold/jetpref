@@ -40,7 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import kotlinx.coroutines.launch
 import kotlin.math.round
@@ -70,7 +70,7 @@ internal fun <V> DialogSliderPreference(
     require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
 
     val scope = rememberCoroutineScope()
-    val prefValue by pref.observeAsState()
+    val prefValue by pref.collectAsState()
     var sliderValue by remember { mutableFloatStateOf(0.0f) }
     var isDialogOpen by remember { mutableStateOf(false) }
 
@@ -160,8 +160,8 @@ internal fun <V> DialogSliderPreference(
     require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
 
     val scope = rememberCoroutineScope()
-    val primaryPrefValue by primaryPref.observeAsState()
-    val secondaryPrefValue by secondaryPref.observeAsState()
+    val primaryPrefValue by primaryPref.collectAsState()
+    val secondaryPrefValue by secondaryPref.collectAsState()
     var primarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
     var secondarySliderValue by remember { mutableStateOf(convertToV(0.0f)) }
     var isDialogOpen by remember { mutableStateOf(false) }

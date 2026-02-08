@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import kotlinx.coroutines.launch
 
 /**
@@ -65,7 +65,7 @@ fun SwitchPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val scope = rememberCoroutineScope()
-    val prefValue by pref.observeAsState()
+    val prefValue by pref.collectAsState()
 
     Preference(
         modifier = modifier,

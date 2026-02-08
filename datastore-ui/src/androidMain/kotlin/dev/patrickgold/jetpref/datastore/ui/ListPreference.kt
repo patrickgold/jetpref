@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.observeAsState
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialogDefaults
 import dev.patrickgold.jetpref.material.ui.copy
@@ -245,8 +245,8 @@ fun <V : Any> ListPreference(
     entries: List<ListPreferenceEntry<V>>,
 ) {
     val scope = rememberCoroutineScope()
-    val listPrefValue by listPref.observeAsState()
-    val switchPrefValue = switchPref?.observeAsState() // can't use delegate because nullable
+    val listPrefValue by listPref.collectAsState()
+    val switchPrefValue = switchPref?.collectAsState() // can't use delegate because nullable
     val (tmpListPrefValue, setTmpListPrefValue) = remember { mutableStateOf(listPref.get()) }
     val (tmpSwitchPrefValue, setTmpSwitchPrefValue) = remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
