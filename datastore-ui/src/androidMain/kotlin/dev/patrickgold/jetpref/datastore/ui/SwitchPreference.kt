@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -100,5 +101,23 @@ fun SwitchPreference(
         },
         enabledIf = enabledIf,
         visibleIf = visibleIf,
+    )
+}
+
+@Composable
+fun SwitchPreference(
+    component: PreferenceComponent.Switch,
+    modifier: Modifier = Modifier,
+) {
+    SwitchPreference(
+        pref = component.pref,
+        modifier = modifier,
+        icon = component.icon?.resolve(),
+        title = component.title.resolve(),
+        summary = component.summary?.resolve(),
+        summaryOn = component.summaryOn?.resolve(),
+        summaryOff = component.summaryOff?.resolve(),
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
     )
 }

@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -47,13 +48,12 @@ import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-@ExperimentalJetPrefDatastoreUi
 @Composable
 internal fun <V> DialogSliderPreference(
     pref: PreferenceData<V>,
     modifier: Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     valueLabel: @Composable (V) -> String,
     summary: @Composable (V) -> String,
@@ -133,14 +133,13 @@ internal fun <V> DialogSliderPreference(
     }
 }
 
-@ExperimentalJetPrefDatastoreUi
 @Composable
 internal fun <V> DialogSliderPreference(
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     modifier: Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     primaryLabel: String,
     secondaryLabel: String,
@@ -289,7 +288,6 @@ private fun customSliderDialogColors(): SliderColors {
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     pref: PreferenceData<Int>,
@@ -352,7 +350,6 @@ fun DialogSliderPreference(
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     primaryPref: PreferenceData<Int>,
@@ -414,7 +411,6 @@ fun DialogSliderPreference(
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     pref: PreferenceData<Long>,
@@ -477,7 +473,6 @@ fun DialogSliderPreference(
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     primaryPref: PreferenceData<Long>,
@@ -539,7 +534,6 @@ fun DialogSliderPreference(
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     pref: PreferenceData<Double>,
@@ -596,7 +590,6 @@ fun DialogSliderPreference(
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     primaryPref: PreferenceData<Double>,
@@ -652,7 +645,6 @@ fun DialogSliderPreference(
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     pref: PreferenceData<Float>,
@@ -709,7 +701,6 @@ fun DialogSliderPreference(
  *
  * @since 0.1.0
  */
-@ExperimentalJetPrefDatastoreUi
 @Composable
 fun DialogSliderPreference(
     primaryPref: PreferenceData<Float>,
@@ -736,4 +727,59 @@ fun DialogSliderPreference(
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
         onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
     ) { it }
+}
+
+@Composable
+fun <V> DialogSliderPreference(
+    component: PreferenceComponent.SingleSlider<V>,
+    modifier: Modifier = Modifier,
+    onPreviewSelectedValue: (V) -> Unit = { },
+    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
+) where V : Number, V : Comparable<V> {
+    DialogSliderPreference(
+        pref = component.pref,
+        modifier = modifier,
+        icon = component.icon?.resolve(),
+        title = component.title.resolve(),
+        valueLabel = { component.valueLabel.resolve(it) },
+        summary = { component.summary.resolve(it) },
+        min = component.min,
+        max = component.max,
+        stepIncrement = component.stepIncrement,
+        onPreviewSelectedValue = onPreviewSelectedValue,
+        dialogStrings = dialogStrings,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        convertToV = component.convertToV,
+    )
+}
+
+@Composable
+fun <V> DialogSliderPreference(
+    component: PreferenceComponent.DualSlider<V>,
+    modifier: Modifier = Modifier,
+    onPreviewSelectedPrimaryValue: (V) -> Unit = { },
+    onPreviewSelectedSecondaryValue: (V) -> Unit = { },
+    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
+) where V : Number, V : Comparable<V> {
+    DialogSliderPreference(
+        primaryPref = component.pref1,
+        secondaryPref = component.pref2,
+        modifier = modifier,
+        icon = component.icon?.resolve(),
+        title = component.title.resolve(),
+        primaryLabel = component.pref1Label.resolve(),
+        secondaryLabel = component.pref2Label.resolve(),
+        valueLabel = { component.valueLabel.resolve(it) },
+        summary = { v1, v2 -> component.summary.resolve(v1, v2) },
+        min = component.min,
+        max = component.max,
+        stepIncrement = component.stepIncrement,
+        onPreviewSelectedPrimaryValue = onPreviewSelectedPrimaryValue,
+        onPreviewSelectedSecondaryValue = onPreviewSelectedSecondaryValue,
+        dialogStrings = dialogStrings,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        convertToV = component.convertToV,
+    )
 }
