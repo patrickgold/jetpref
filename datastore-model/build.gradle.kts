@@ -3,10 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.agp.library.multiplatform)
+    alias(libs.plugins.kover)
     alias(libs.plugins.ksp)
-    // Disable kover until kotin/kotlinx-kover#772 is fixed
-    // alias(libs.plugins.kover)
-    alias(libs.plugins.agp.multiplatform.library)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
