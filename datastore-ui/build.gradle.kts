@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.plugin.compose)
-    alias(libs.plugins.agp.multiplatform.library)
+    alias(libs.plugins.agp.library.multiplatform)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.vanniktech.maven.publish)
 }
@@ -33,10 +33,10 @@ kotlin {
     sourceSets {
         androidMain {
             dependencies {
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
-                implementation(compose.runtime)
-                implementation(compose.ui)
+                implementation(libs.jetbrains.compose.material3)
+                implementation(libs.jetbrains.compose.material.icons.extended)
+                implementation(libs.jetbrains.compose.runtime)
+                implementation(libs.jetbrains.compose.ui)
                 implementation(libs.androidx.core.ktx)
                 implementation(projects.datastoreModel)
                 implementation(projects.materialUi)

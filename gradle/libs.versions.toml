@@ -1,18 +1,18 @@
 [versions]
-android-gradle-plugin = "8.12.3"
-androidx-activity = "1.12.2"
-androidx-compose-bom = "2025.12.01"
+agp = "8.13.2"
+androidx-activity = "1.12.3"
+androidx-compose-bom = "2026.01.01"
 androidx-core = "1.17.0"
 androidx-lifecycle = "2.10.0"
-androidx-navigation = "2.9.6"
-compose-multiplatform = "1.9.3"
+androidx-navigation = "2.9.7"
+compose-multiplatform = "1.10.1"
 junit-jupiter = "5.13.4"
-kotlin = "2.3.0"
+kotlin = "2.3.10"
 kotlinpoet = "2.2.0"
 kotlinx-coroutines = "1.10.2"
-kover = "0.9.4"
-ksp = "2.3.4"
-vanniktech-maven-publish = "0.35.0"
+kover = "0.9.6"
+ksp = "2.3.5"
+vanniktech-maven-publish = "0.36.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -25,6 +25,10 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
+jetbrains-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version = "1.9.0" }
+jetbrains-compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3" }
+jetbrains-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+jetbrains-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 junit-jupiter-api = {  module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-params = {  module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
@@ -35,8 +39,8 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 [plugins]
-agp-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
-agp-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle-plugin" }
+agp-application = { id = "com.android.application", version.ref = "agp" }
+agp-library-multiplatform = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
