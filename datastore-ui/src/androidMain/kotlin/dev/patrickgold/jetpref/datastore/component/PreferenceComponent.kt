@@ -16,89 +16,92 @@
 
 package dev.patrickgold.jetpref.datastore.component
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import dev.patrickgold.jetpref.datastore.ui.ListPreferenceEntry
 
-sealed class PreferenceComponent {
-    abstract val title: StringDescriptor.ZeroArg
+sealed interface PreferenceComponent {
+    val title: @Composable () -> String
 
-    sealed class LeafNode : PreferenceComponent() {
-        abstract val icon: IconDescriptor?
+    sealed interface LeafNode : PreferenceComponent {
+        val icon: (@Composable () -> ImageVector)?
 
-        abstract val enabledIf: PreferenceDataEvaluator
+        val enabledIf: PreferenceDataEvaluator
 
-        abstract val visibleIf: PreferenceDataEvaluator
+        val visibleIf: PreferenceDataEvaluator
     }
 
-    sealed class SinglePrefLeafNode<V1 : Any> : LeafNode() {
-        abstract val pref: PreferenceData<V1>
+    interface Switch : LeafNode {
+        val pref: PreferenceData<Boolean>
+        val summary: (@Composable () -> String)?
+        val summaryOn: (@Composable () -> String)?
+        val summaryOff: (@Composable () -> String)?
     }
 
-    sealed class DualPrefLeafNode<V1 : Any, V2 : Any> : LeafNode() {
-        abstract val pref1: PreferenceData<V1>
-
-        abstract val pref2: PreferenceData<V2>
+    interface TextField : LeafNode {
+        val pref: PreferenceData<String>
+        val summaryIfBlank: (@Composable () -> String)?
+        val summaryIfEmpty: (@Composable () -> String)?
+        val summary: @Composable (String) -> String?
+        val transformValue: (String) -> String
+        val validateValue: (String) -> Unit
     }
 
-    abstract class Switch(
-        override val pref: PreferenceData<Boolean>,
-        override val title: StringDescriptor.ZeroArg,
-        override val icon: IconDescriptor?,
-        val summary: StringDescriptor.ZeroArg?,
-        val summaryOn: StringDescriptor.ZeroArg?,
-        val summaryOff: StringDescriptor.ZeroArg?,
-        override val enabledIf: PreferenceDataEvaluator,
-        override val visibleIf: PreferenceDataEvaluator,
-    ) : SinglePrefLeafNode<Boolean>()
-
-    abstract class SingleSlider<V>(
-        override val pref: PreferenceData<V>,
-        override val title: StringDescriptor.ZeroArg,
-        override val icon: IconDescriptor?,
-        open val valueLabel: StringDescriptor.OneArg<V>,
-        open val summary: StringDescriptor.OneArg<V>,
-        open val min: V,
-        open val max: V,
-        open val stepIncrement: V,
-        override val enabledIf: PreferenceDataEvaluator,
-        override val visibleIf: PreferenceDataEvaluator,
-        open val convertToV: (Float) -> V,
-    ) : SinglePrefLeafNode<V>() where V : Number, V : Comparable<V> {
-        init {
-            require(stepIncrement > convertToV(0f)) { "Step increment must be greater than 0!" }
-            require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
-        }
+    interface ListPref<V : Any> : LeafNode {
+        val listPref: PreferenceData<V>
+        val entries: List<ListPreferenceEntry<V>>
     }
 
-    abstract class DualSlider<V>(
-        override val pref1: PreferenceData<V>,
-        override val pref2: PreferenceData<V>,
-        override val title: StringDescriptor.ZeroArg,
-        override val icon: IconDescriptor?,
-        val pref1Label: StringDescriptor.ZeroArg,
-        val pref2Label: StringDescriptor.ZeroArg,
-        open val valueLabel: StringDescriptor.OneArg<V>,
-        open val summary: StringDescriptor.TwoArg<V, V>,
-        open val min: V,
-        open val max: V,
-        open val stepIncrement: V,
-        override val enabledIf: PreferenceDataEvaluator,
-        override val visibleIf: PreferenceDataEvaluator,
-        open val convertToV: (Float) -> V,
-    ) : DualPrefLeafNode<V, V>() where V : Number, V : Comparable<V> {
-        init {
-            require(stepIncrement > convertToV(0f)) { "Step increment must be greater than 0!" }
-            require(max > min) { "Maximum value ($max) must be greater than minimum value ($min)!" }
-        }
+    interface TogglableListPref<V : Any> : ListPref<V> {
+        val switchPref: PreferenceData<Boolean>
+        val summarySwitchDisabled: @Composable () -> String
     }
 
-    sealed class BranchNode : PreferenceComponent()
+    interface SingleSlider<V> : LeafNode where V : Number, V : Comparable<V> {
+        val pref: PreferenceData<V>
+        val valueLabel: @Composable (V) -> String
+        val summary: @Composable (V) -> String
+        val min: V
+        val max: V
+        val stepIncrement: V
+        val convertToV: (Float) -> V
+    }
+
+    interface DualSlider<V> : LeafNode where V : Number, V : Comparable<V> {
+        val pref1: PreferenceData<V>
+        val pref2: PreferenceData<V>
+        val pref1Label: @Composable () -> String
+        val pref2Label: @Composable () -> String
+        val valueLabel: @Composable (V) -> String
+        val summary: @Composable (V, V) -> String
+        val min: V
+        val max: V
+        val stepIncrement: V
+        val convertToV: (Float) -> V
+    }
+
+    interface ColorPicker : LeafNode {
+        val pref: PreferenceData<Color>
+        val summary: (@Composable () -> String)?
+        val defaultValueLabel: (@Composable () -> String)?
+        val showAlphaSlider: Boolean
+        val enableAdvancedLayout: Boolean
+        val defaultColors: List<Color>
+    }
+
+    interface LocalTimePicker : LeafNode {
+        val pref: PreferenceData<LocalTime>
+    }
 
     abstract class Group(
-        override val title: StringDescriptor.ZeroArg,
-    ) : BranchNode()
+        override val title: @Composable (() -> String),
+    ) : PreferenceComponent
 
     abstract class Screen(
-        override val title: StringDescriptor.ZeroArg,
-    ) : BranchNode()
+        override val title: @Composable (() -> String),
+    ) : Group(title)
 }

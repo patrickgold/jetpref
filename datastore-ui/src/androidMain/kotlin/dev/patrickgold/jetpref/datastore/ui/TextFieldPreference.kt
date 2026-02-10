@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -67,7 +68,7 @@ fun TextFieldPreference(
     title: String,
     summaryIfBlank: String? = null,
     summaryIfEmpty: String? = null,
-    summary: (String) -> String? = {
+    summary: @Composable (String) -> String? = {
         when {
             it.isEmpty() -> summaryIfEmpty ?: it
             it.isBlank() -> summaryIfBlank ?: it
@@ -143,4 +144,24 @@ fun TextFieldPreference(
             }
         }
     }
+}
+
+@Composable
+fun TextFieldPreference(
+    component: PreferenceComponent.TextField,
+    modifier: Modifier = Modifier,
+) {
+    TextFieldPreference(
+        pref = component.pref,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summaryIfBlank = component.summaryIfBlank?.invoke(),
+        summaryIfEmpty = component.summaryIfEmpty?.invoke(),
+        summary = component.summary,
+        transformValue = component.transformValue,
+        validateValue = component.validateValue,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+    )
 }

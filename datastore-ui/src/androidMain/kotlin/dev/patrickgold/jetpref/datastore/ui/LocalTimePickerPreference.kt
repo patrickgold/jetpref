@@ -45,13 +45,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import kotlinx.coroutines.launch
-
 
 /**
  * Material preference which provides a dialog with a time picker for choosing a time.
@@ -156,6 +156,21 @@ fun LocalTimePickerPreference(
             }
         }
     }
+}
+
+@Composable
+fun LocalTimePickerPreference(
+    component: PreferenceComponent.LocalTimePicker,
+    modifier: Modifier = Modifier,
+) {
+    LocalTimePickerPreference(
+        pref = component.pref,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

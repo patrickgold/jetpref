@@ -112,11 +112,11 @@ fun SwitchPreference(
     SwitchPreference(
         pref = component.pref,
         modifier = modifier,
-        icon = component.icon?.resolve(),
-        title = component.title.resolve(),
-        summary = component.summary?.resolve(),
-        summaryOn = component.summaryOn?.resolve(),
-        summaryOff = component.summaryOff?.resolve(),
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summary = component.summary?.invoke(),
+        summaryOn = component.summaryOn?.invoke(),
+        summaryOff = component.summaryOff?.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
     )

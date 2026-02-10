@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -38,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -49,28 +51,25 @@ import dev.patrickgold.jetpref.material.ui.checkeredBackground
 import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 import kotlinx.coroutines.launch
 
-
 /**
  * Material Color picker preference with a preset and a custom layout
  *
  * @param pref The color preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
  * @param icon The [ImageVector] of the list entry.
- * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
- *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
  * @param defaultValueLabel The label for the default color box.
  * @param showAlphaSlider If the alpha slider should be shown.
  * @param enableAdvancedLayout If the advancedLayout should be shown.
- * @param defaultColors [Array] of [Color] which will be shown as default colors.
- * @param colorOverride Optional callback for overriding colors with other colors.
- * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param defaultColors [List] of [Color] which will be shown as default colors.
+ * @param onTransformValue Optional callback for overriding colors with other colors.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
  *  visible (true) or hidden (false).
- * @since 0.2.0
+ *
+ * @since 0.4.0
  */
 @OptIn(ExperimentalJetPrefMaterial3Ui::class)
 @Composable
@@ -78,18 +77,17 @@ fun ColorPickerPreference(
     pref: PreferenceData<Color>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summary: String? = null,
     defaultValueLabel: String? = null,
     showAlphaSlider: Boolean = false,
     enableAdvancedLayout: Boolean = false,
-    defaultColors: Array<Color>,
-    colorOverride: (Color) -> Color = { it },
-    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
+    defaultColors: List<Color>,
+    onTransformValue: (Color) -> Color = { it },
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
+    val dialogStrings = LocalDefaultDialogPrefStrings.current
     val scope = rememberCoroutineScope()
     var showPicker by remember { mutableStateOf(false) }
     var dialogValue by remember { mutableIntStateOf(0) }
@@ -99,7 +97,6 @@ fun ColorPickerPreference(
     Preference(
         modifier = modifier,
         icon = icon,
-        iconSpaceReserved = iconSpaceReserved,
         trailing = {
             Box(
                 modifier = Modifier
@@ -246,7 +243,7 @@ fun ColorPickerPreference(
                 confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     scope.launch {
-                        pref.set(colorOverride(Color(dialogValue)))
+                        pref.set(onTransformValue(Color(dialogValue)))
                     }
                     showPicker = false
                 },
@@ -255,6 +252,82 @@ fun ColorPickerPreference(
             )
         }
     }
+}
+
+/**
+ * Material Color picker preference with a preset and a custom layout
+ *
+ * @param pref The color preference data entry from the datastore.
+ * @param modifier Modifier to be applied to the underlying list item.
+ * @param icon The [ImageVector] of the list entry.
+ * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
+ *  space) if no icon ID is provided.
+ * @param title The title of this preference, shown as the list item primary text (max 1 line).
+ * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
+ * @param defaultValueLabel The label for the default color box.
+ * @param showAlphaSlider If the alpha slider should be shown.
+ * @param enableAdvancedLayout If the advancedLayout should be shown.
+ * @param defaultColors [Array] of [Color] which will be shown as default colors.
+ * @param colorOverride Optional callback for overriding colors with other colors.
+ * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
+ * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  enabled (true) or disabled (false).
+ * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
+ *  visible (true) or hidden (false).
+ *
+ * @since 0.2.0
+ */
+@OptIn(ExperimentalJetPrefMaterial3Ui::class)
+@Composable
+@Deprecated("Use newly added variant of ColorPickerPreference")
+fun ColorPickerPreference(
+    pref: PreferenceData<Color>,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    title: String,
+    summary: String? = null,
+    defaultValueLabel: String? = null,
+    showAlphaSlider: Boolean = false,
+    enableAdvancedLayout: Boolean = false,
+    defaultColors: Array<Color>,
+    colorOverride: (Color) -> Color = { it },
+    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+) {
+    CompositionLocalProvider(
+        LocalIconSpaceReserved provides iconSpaceReserved,
+        LocalDefaultDialogPrefStrings provides dialogStrings,
+    ) {
+        ColorPickerPreference(
+            pref, modifier, icon, title, summary, defaultValueLabel, showAlphaSlider,
+            enableAdvancedLayout, defaultColors.toList(), onTransformValue = colorOverride,
+            enabledIf, visibleIf,
+        )
+    }
+}
+
+@Composable
+fun ColorPickerPreference(
+    component: PreferenceComponent.ColorPicker,
+    modifier: Modifier = Modifier,
+    onTransformValue: (Color) -> Color = { it },
+) {
+    ColorPickerPreference(
+        pref = component.pref,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summary = component.summary?.invoke(),
+        defaultValueLabel = component.defaultValueLabel?.invoke(),
+        showAlphaSlider = component.showAlphaSlider,
+        enableAdvancedLayout = component.enableAdvancedLayout,
+        defaultColors = component.defaultColors,
+        onTransformValue = onTransformValue,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+    )
 }
 
 /**
