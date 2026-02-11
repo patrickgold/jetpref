@@ -79,7 +79,7 @@ import kotlinx.coroutines.launch
  * @param showAlphaSlider If the alpha slider should be shown.
  * @param enableAdvancedLayout If the advancedLayout should be shown.
  * @param defaultColors [List] of [Color] which will be shown as default colors.
- * @param onTransformValue Optional callback for overriding colors with other colors.
+ * @param transformValue Optional callback for overriding colors with other colors.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
@@ -99,7 +99,7 @@ fun ColorPickerPreference(
     showAlphaSlider: Boolean = false,
     enableAdvancedLayout: Boolean = false,
     defaultColors: List<Color>,
-    onTransformValue: (Color) -> Color = { it },
+    transformValue: (Color) -> Color = { it },
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
@@ -259,7 +259,7 @@ fun ColorPickerPreference(
                 confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     scope.launch {
-                        pref.set(onTransformValue(Color(dialogValue)))
+                        pref.set(transformValue(Color(dialogValue)))
                     }
                     showPicker = false
                 },
@@ -295,7 +295,7 @@ fun ColorPickerPreference(
     ) {
         ColorPickerPreference(
             pref, modifier, icon, title, summary, defaultValueLabel, showAlphaSlider,
-            enableAdvancedLayout, defaultColors.toList(), onTransformValue = colorOverride,
+            enableAdvancedLayout, defaultColors.toList(), transformValue = colorOverride,
             enabledIf, visibleIf,
         )
     }
@@ -305,7 +305,7 @@ fun ColorPickerPreference(
 fun ColorPickerPreference(
     component: PreferenceComponent.ColorPicker,
     modifier: Modifier = Modifier,
-    onTransformValue: (Color) -> Color = { it },
+    transformValue: (Color) -> Color = { it },
 ) {
     ColorPickerPreference(
         pref = component.pref,
@@ -317,7 +317,7 @@ fun ColorPickerPreference(
         showAlphaSlider = component.showAlphaSlider,
         enableAdvancedLayout = component.enableAdvancedLayout,
         defaultColors = component.defaultColors,
-        onTransformValue = onTransformValue,
+        transformValue = transformValue,
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
     )

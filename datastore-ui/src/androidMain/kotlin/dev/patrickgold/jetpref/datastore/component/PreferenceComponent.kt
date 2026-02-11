@@ -27,22 +27,52 @@ import dev.patrickgold.jetpref.datastore.ui.ListPreferenceEntry
 sealed interface PreferenceComponent {
     val title: @Composable () -> String
 
-    sealed interface LeafNode : PreferenceComponent {
-        val icon: (@Composable () -> ImageVector)?
+    val icon: (@Composable () -> ImageVector)?
 
-        val enabledIf: PreferenceDataEvaluator
+    val enabledIf: PreferenceDataEvaluator
 
-        val visibleIf: PreferenceDataEvaluator
+    val visibleIf: PreferenceDataEvaluator
+
+    interface Generic : PreferenceComponent {
+        val content: @Composable () -> Unit
     }
 
-    interface Switch : LeafNode {
+    interface NavigationEntry : PreferenceComponent {
+        val targetScreen: PreferenceScreen
+        val summary: (@Composable () -> String)?
+    }
+
+    interface Switch : PreferenceComponent {
         val pref: PreferenceData<Boolean>
         val summary: (@Composable () -> String)?
         val summaryOn: (@Composable () -> String)?
         val summaryOff: (@Composable () -> String)?
     }
 
-    interface TextField : LeafNode {
+    interface ListPicker<V : Any> : PreferenceComponent {
+        val listPref: PreferenceData<V>
+        val entries: @Composable () -> List<ListPreferenceEntry<V>>
+    }
+
+    interface ListPickerWithSwitch<V : Any> : ListPicker<V> {
+        val switchPref: PreferenceData<Boolean>
+        val summarySwitchDisabled: (@Composable () -> String)?
+    }
+
+    interface ColorPicker : PreferenceComponent {
+        val pref: PreferenceData<Color>
+        val summary: (@Composable () -> String)?
+        val defaultValueLabel: (@Composable () -> String)?
+        val showAlphaSlider: Boolean
+        val enableAdvancedLayout: Boolean
+        val defaultColors: List<Color>
+    }
+
+    interface LocalTimePicker : PreferenceComponent {
+        val pref: PreferenceData<LocalTime>
+    }
+
+    interface TextField : PreferenceComponent {
         val pref: PreferenceData<String>
         val summaryIfBlank: (@Composable () -> String)?
         val summaryIfEmpty: (@Composable () -> String)?
@@ -51,17 +81,7 @@ sealed interface PreferenceComponent {
         val validateValue: (String) -> Unit
     }
 
-    interface ListPref<V : Any> : LeafNode {
-        val listPref: PreferenceData<V>
-        val entries: List<ListPreferenceEntry<V>>
-    }
-
-    interface TogglableListPref<V : Any> : ListPref<V> {
-        val switchPref: PreferenceData<Boolean>
-        val summarySwitchDisabled: @Composable () -> String
-    }
-
-    interface SingleSlider<V> : LeafNode where V : Number, V : Comparable<V> {
+    interface SingleSlider<V> : PreferenceComponent where V : Number, V : Comparable<V> {
         val pref: PreferenceData<V>
         val valueLabel: @Composable (V) -> String
         val summary: @Composable (V) -> String
@@ -71,7 +91,7 @@ sealed interface PreferenceComponent {
         val convertToV: (Float) -> V
     }
 
-    interface DualSlider<V> : LeafNode where V : Number, V : Comparable<V> {
+    interface DualSlider<V> : PreferenceComponent where V : Number, V : Comparable<V> {
         val pref1: PreferenceData<V>
         val pref2: PreferenceData<V>
         val pref1Label: @Composable () -> String
@@ -83,25 +103,4 @@ sealed interface PreferenceComponent {
         val stepIncrement: V
         val convertToV: (Float) -> V
     }
-
-    interface ColorPicker : LeafNode {
-        val pref: PreferenceData<Color>
-        val summary: (@Composable () -> String)?
-        val defaultValueLabel: (@Composable () -> String)?
-        val showAlphaSlider: Boolean
-        val enableAdvancedLayout: Boolean
-        val defaultColors: List<Color>
-    }
-
-    interface LocalTimePicker : LeafNode {
-        val pref: PreferenceData<LocalTime>
-    }
-
-    abstract class Group(
-        override val title: @Composable (() -> String),
-    ) : PreferenceComponent
-
-    abstract class Screen(
-        override val title: @Composable (() -> String),
-    ) : Group(title)
 }

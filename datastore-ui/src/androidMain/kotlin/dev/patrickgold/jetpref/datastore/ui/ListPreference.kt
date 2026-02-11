@@ -424,7 +424,7 @@ fun <V : Any> ListPreference(
 
 @Composable
 fun <V : Any> ListPreference(
-    component: PreferenceComponent.ListPref<V>,
+    component: PreferenceComponent.ListPicker<V>,
     modifier: Modifier = Modifier
 ) {
     ListPreference(
@@ -436,13 +436,13 @@ fun <V : Any> ListPreference(
         summarySwitchDisabled = null,
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
-        entries = component.entries,
+        entries = component.entries.invoke(),
     )
 }
 
 @Composable
 fun <V : Any> ListPreference(
-    component: PreferenceComponent.TogglableListPref<V>,
+    component: PreferenceComponent.ListPickerWithSwitch<V>,
     modifier: Modifier = Modifier,
 ) {
     ListPreference(
@@ -451,9 +451,9 @@ fun <V : Any> ListPreference(
         modifier = modifier,
         icon = component.icon?.invoke(),
         title = component.title.invoke(),
-        summarySwitchDisabled = component.summarySwitchDisabled.invoke(),
+        summarySwitchDisabled = component.summarySwitchDisabled?.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
-        entries = component.entries,
+        entries = component.entries.invoke(),
     )
 }

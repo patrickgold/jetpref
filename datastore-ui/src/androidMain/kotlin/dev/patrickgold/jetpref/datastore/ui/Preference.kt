@@ -22,6 +22,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
@@ -112,4 +113,20 @@ fun Preference(
             modifier, icon,  title, summary, trailing, enabledIf, visibleIf, onClick, eventModifier,
        )
     }
+}
+
+@Composable
+fun NavigationEntryPreference(
+    component: PreferenceComponent.NavigationEntry,
+    modifier: Modifier = Modifier,
+) {
+    Preference(
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summary = component.summary?.invoke(),
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        onClick = { TODO() },
+    )
 }
