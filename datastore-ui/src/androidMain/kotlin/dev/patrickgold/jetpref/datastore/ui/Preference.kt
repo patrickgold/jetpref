@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,6 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  *
  * @param modifier Modifier to be applied to the underlying list item.
  * @param icon The [ImageVector] of the list entry icon.
- * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
- *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
  * @param trailing Optional trailing composable, will be placed at the end of the list item.
@@ -49,13 +47,12 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param eventModifier An optional modifier to apply to the preference item. This can be used to set up toggles or
  *  other interactions. Mutually exclusive with [onClick].
  *
- * @since 0.1.0
+ * @since 0.4.0
  */
 @Composable
 fun Preference(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summary: String? = null,
     trailing: @Composable (() -> Unit)? = null,
@@ -67,10 +64,10 @@ fun Preference(
     require(!(onClick != null && eventModifier != null)) {
         "You cannot provide both an onClick lambda and an eventModifier."
     }
+    val iconSpaceReserved = LocalIconSpaceReserved.current
     if (LocalIsPrefVisible.current && visibleIf(PreferenceDataEvaluatorScope)) {
         val isEnabled = LocalIsPrefEnabled.current && enabledIf(PreferenceDataEvaluatorScope)
         CompositionLocalProvider(
-            LocalIconSpaceReserved provides iconSpaceReserved,
             LocalIsPrefEnabled provides isEnabled,
             LocalIsPrefVisible provides true,
         ) {
@@ -84,12 +81,35 @@ fun Preference(
                 } else {
                     modifier.then(eventModifier?.invoke() ?: Modifier)
                 },
-                icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                icon = maybeJetIcon(imageVector = icon, iconSpaceReserved),
                 text = title,
                 secondaryText = summary,
                 trailing = trailing,
                 enabled = isEnabled,
             )
         }
+    }
+}
+
+@Deprecated("Use new Preference instead.")
+@Composable
+fun Preference(
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    title: String,
+    summary: String? = null,
+    trailing: @Composable (() -> Unit)? = null,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+    onClick: (() -> Unit)? = null,
+    eventModifier: (@Composable () -> Modifier)? = null,
+) {
+    CompositionLocalProvider(
+        LocalIconSpaceReserved provides iconSpaceReserved,
+    ) {
+        Preference(
+            modifier, icon,  title, summary, trailing, enabledIf, visibleIf, onClick, eventModifier,
+       )
     }
 }

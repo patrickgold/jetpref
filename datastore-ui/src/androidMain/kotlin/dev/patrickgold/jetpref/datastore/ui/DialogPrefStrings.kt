@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,43 @@ data class DialogPrefStrings(
     val neutralLabel: String,
 )
 
-val LocalDefaultDialogPrefStrings = staticCompositionLocalOf {
+val LocalDialogPrefStrings = staticCompositionLocalOf {
     DialogPrefStrings(
         confirmLabel = "Ok",
         dismissLabel = "Cancel",
         neutralLabel = "Default",
+    )
+}
+
+@Deprecated("Use the renamed LocalDialogPrefStrings composition local.",
+    ReplaceWith("LocalDialogPrefStrings"))
+val LocalDefaultDialogPrefStrings = LocalDialogPrefStrings
+
+/**
+ * Provides the button strings to use in preference dialogs.
+ *
+ * @param confirmLabel The label for the confirm button. Null means
+ *  no preferred value.
+ * @param dismissLabel The label for the dismiss button. Null means
+ *  no preferred value.
+ * @param neutralLabel The label for the neutral button. Null means
+ *  no preferred value.
+ *
+ * @since 0.4.0
+ */
+@Composable
+fun ProvideDialogPrefStrings(
+    confirmLabel: String = stringResource(android.R.string.ok),
+    dismissLabel: String = stringResource(android.R.string.cancel),
+    neutralLabel: String = "Default",
+    content: @Composable () -> Unit,
+) {
+    val dialogPrefStrings = remember(confirmLabel, dismissLabel, neutralLabel) {
+        DialogPrefStrings(confirmLabel, dismissLabel, neutralLabel)
+    }
+    CompositionLocalProvider(
+        LocalDialogPrefStrings provides dialogPrefStrings,
+        content = content,
     )
 }
 
@@ -47,6 +79,7 @@ val LocalDefaultDialogPrefStrings = staticCompositionLocalOf {
  * @param neutralLabel The label for the neutral button. Null means
  *  no preferred default value.
  */
+@Deprecated("Use the renamed ProvideDialogPrefStrings function.")
 @Composable
 fun ProvideDefaultDialogPrefStrings(
     confirmLabel: String = stringResource(android.R.string.ok),
@@ -54,11 +87,5 @@ fun ProvideDefaultDialogPrefStrings(
     neutralLabel: String = "Default",
     content: @Composable () -> Unit,
 ) {
-    val dialogPrefStrings = remember(confirmLabel, dismissLabel, neutralLabel) {
-        DialogPrefStrings(confirmLabel, dismissLabel, neutralLabel)
-    }
-    CompositionLocalProvider(
-        LocalDefaultDialogPrefStrings provides dialogPrefStrings,
-        content = content,
-    )
+    ProvideDialogPrefStrings(confirmLabel, dismissLabel, neutralLabel, content)
 }

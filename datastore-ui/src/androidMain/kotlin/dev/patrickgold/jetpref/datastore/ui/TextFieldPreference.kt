@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Patrick Goldinger
+ * Copyright 2024-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package dev.patrickgold.jetpref.datastore.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,13 +43,11 @@ import kotlinx.coroutines.launch
  * @param pref The string preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
  * @param icon The [ImageVector] of the list entry.
- * @param iconSpaceReserved Whether the icon space should be reserved even if no icon is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summaryIfBlank The summary of this preference if the state is blank.
  * @param summaryIfEmpty The summary of this preference if the state is empty.
  * @param summary The summary function of this preference, shown as the list item secondary text (max 2 lines). If
  *  this is specified it will override provided [summaryIfBlank] and [summaryIfEmpty].
- * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param transformValue The transformation function to transform the entered value before saving/validating it.
  * @param validateValue The validation function to check if the entered value is valid (after transformation). To
  *  indicate an invalid value, throw an exception.
@@ -57,14 +56,13 @@ import kotlinx.coroutines.launch
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be visible (true) or
  *  hidden (false).
  *
- * @since 0.2.0
+ * @since 0.4.0
  */
 @Composable
 fun TextFieldPreference(
     pref: PreferenceData<String>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summaryIfBlank: String? = null,
     summaryIfEmpty: String? = null,
@@ -75,12 +73,12 @@ fun TextFieldPreference(
             else -> it
         }
     },
-    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     transformValue: (String) -> String = { it },
     validateValue: (String) -> Unit = { },
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
+    val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
     val prefValue by pref.collectAsState()
     var localPrefValue by remember { mutableStateOf("") }
@@ -89,7 +87,6 @@ fun TextFieldPreference(
     Preference(
         modifier = modifier,
         icon = icon,
-        iconSpaceReserved = iconSpaceReserved,
         title = title,
         summary = summary(prefValue),
         enabledIf = enabledIf,
@@ -143,6 +140,40 @@ fun TextFieldPreference(
                 )
             }
         }
+    }
+}
+
+@Deprecated("Use new TextFieldPreference instead.")
+@Composable
+fun TextFieldPreference(
+    pref: PreferenceData<String>,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    title: String,
+    summaryIfBlank: String? = null,
+    summaryIfEmpty: String? = null,
+    summary: @Composable (String) -> String? = {
+        when {
+            it.isEmpty() -> summaryIfEmpty ?: it
+            it.isBlank() -> summaryIfBlank ?: it
+            else -> it
+        }
+    },
+    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
+    transformValue: (String) -> String = { it },
+    validateValue: (String) -> Unit = { },
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+) {
+    CompositionLocalProvider(
+        LocalIconSpaceReserved provides iconSpaceReserved,
+        LocalDialogPrefStrings provides dialogStrings,
+    ) {
+        TextFieldPreference(
+            pref, modifier, icon, title, summaryIfBlank, summaryIfEmpty, summary, transformValue, validateValue,
+            enabledIf,
+        )
     }
 }
 

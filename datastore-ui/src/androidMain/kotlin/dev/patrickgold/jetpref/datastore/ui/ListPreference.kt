@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +31,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -214,36 +215,32 @@ fun <V : Any> listPrefEntries(
  * @param switchPref The [PreferenceData] for the switch preference. If null, no switch will be shown.
  * @param modifier Modifier to be applied to the underlying list item.
  * @param icon The [ImageVector] of the list entry.
- * @param iconSpaceReserved Whether the icon space should be reserved even if no icon is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summarySwitchDisabled The summary of this preference if the switch is disabled. If this is
  *  specified it will override the auto-generated summary. Shown as the list item secondary text (max 2 lines).
- * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be enabled (true) or
  *  disabled (false).
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be visible (true) or
  *  hidden (false).
  * @param entries The list of list preference entries.
  *
- * @since 0.1.0
+ * @since 0.4.0
  *
  * @see listPrefEntries
  */
-@SuppressLint("ModifierParameter")
 @Composable
 fun <V : Any> ListPreference(
     listPref: PreferenceData<V>,
     switchPref: PreferenceData<Boolean>? = null,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
     summarySwitchDisabled: String? = null,
-    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     entries: List<ListPreferenceEntry<V>>,
 ) {
+    val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
     val listPrefValue by listPref.collectAsState()
     val switchPrefValue = switchPref?.collectAsState() // can't use delegate because nullable
@@ -254,7 +251,6 @@ fun <V : Any> ListPreference(
     Preference(
         modifier = modifier,
         icon = icon,
-        iconSpaceReserved = iconSpaceReserved,
         title = title,
         summary = if (switchPrefValue?.value == true || switchPrefValue == null) {
             entries.find {
@@ -399,4 +395,65 @@ fun <V : Any> ListPreference(
             }
         }
     }
+}
+
+@Deprecated("Use new ListPreference instead.")
+@Composable
+fun <V : Any> ListPreference(
+    listPref: PreferenceData<V>,
+    switchPref: PreferenceData<Boolean>? = null,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    title: String,
+    summarySwitchDisabled: String? = null,
+    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+    entries: List<ListPreferenceEntry<V>>,
+) {
+    CompositionLocalProvider(
+        LocalIconSpaceReserved provides iconSpaceReserved,
+        LocalDialogPrefStrings provides dialogStrings,
+    ) {
+        ListPreference(
+            listPref, switchPref, modifier, icon, title, summarySwitchDisabled, enabledIf, visibleIf, entries
+        )
+    }
+}
+
+@Composable
+fun <V : Any> ListPreference(
+    component: PreferenceComponent.ListPref<V>,
+    modifier: Modifier = Modifier
+) {
+    ListPreference(
+        listPref = component.listPref,
+        switchPref = null,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summarySwitchDisabled = null,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        entries = component.entries,
+    )
+}
+
+@Composable
+fun <V : Any> ListPreference(
+    component: PreferenceComponent.TogglableListPref<V>,
+    modifier: Modifier = Modifier,
+) {
+    ListPreference(
+        listPref = component.listPref,
+        switchPref = component.switchPref,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summarySwitchDisabled = component.summarySwitchDisabled.invoke(),
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        entries = component.entries,
+    )
 }

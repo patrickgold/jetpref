@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025-2026 Patrick Goldinger
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package dev.patrickgold.jetpref.datastore.ui
 
 import android.content.Context
@@ -87,7 +103,7 @@ fun ColorPickerPreference(
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
-    val dialogStrings = LocalDefaultDialogPrefStrings.current
+    val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
     var showPicker by remember { mutableStateOf(false) }
     var dialogValue by remember { mutableIntStateOf(0) }
@@ -254,32 +270,9 @@ fun ColorPickerPreference(
     }
 }
 
-/**
- * Material Color picker preference with a preset and a custom layout
- *
- * @param pref The color preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
- *  space) if no icon ID is provided.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
- * @param defaultValueLabel The label for the default color box.
- * @param showAlphaSlider If the alpha slider should be shown.
- * @param enableAdvancedLayout If the advancedLayout should be shown.
- * @param defaultColors [Array] of [Color] which will be shown as default colors.
- * @param colorOverride Optional callback for overriding colors with other colors.
- * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.2.0
- */
+@Deprecated("Use new ColorPickerPreference instead.")
 @OptIn(ExperimentalJetPrefMaterial3Ui::class)
 @Composable
-@Deprecated("Use newly added variant of ColorPickerPreference")
 fun ColorPickerPreference(
     pref: PreferenceData<Color>,
     modifier: Modifier = Modifier,
@@ -292,13 +285,13 @@ fun ColorPickerPreference(
     enableAdvancedLayout: Boolean = false,
     defaultColors: Array<Color>,
     colorOverride: (Color) -> Color = { it },
-    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
+    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     CompositionLocalProvider(
         LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDefaultDialogPrefStrings provides dialogStrings,
+        LocalDialogPrefStrings provides dialogStrings,
     ) {
         ColorPickerPreference(
             pref, modifier, icon, title, summary, defaultValueLabel, showAlphaSlider,

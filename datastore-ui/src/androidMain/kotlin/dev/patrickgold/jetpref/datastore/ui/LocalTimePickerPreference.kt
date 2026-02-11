@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,16 +60,13 @@ import kotlinx.coroutines.launch
  * @param pref The localTime preference data entry from the datastore.
  * @param modifier Modifier to be applied to the underlying list item.
  * @param icon The [ImageVector] of the list entry.
- * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
- *  space) if no icon ID is provided.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
  *  visible (true) or hidden (false).
  *
- * @since 0.2.0-rc04
+ * @since 0.4.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,13 +74,12 @@ fun LocalTimePickerPreference(
     pref: PreferenceData<LocalTime>,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
-    dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val context = LocalContext.current
+    val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
     val prefValue by pref.collectAsState()
     var isDialogOpen by remember { mutableStateOf(false) }
@@ -99,7 +96,6 @@ fun LocalTimePickerPreference(
     Preference(
         modifier = modifier,
         icon = icon,
-        iconSpaceReserved = iconSpaceReserved,
         title = title,
         summary = prefValue.stringRepresentation(is24hour),
         enabledIf = enabledIf,
@@ -155,6 +151,26 @@ fun LocalTimePickerPreference(
                 DisplayModeToggleButton(displayMode, onDisplayModeChange = { displayMode = it })
             }
         }
+    }
+}
+
+@Deprecated("Use new LocalTimePickerPreference instead.")
+@Composable
+fun LocalTimePickerPreference(
+    pref: PreferenceData<LocalTime>,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    title: String,
+    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+) {
+    CompositionLocalProvider(
+        LocalIconSpaceReserved provides iconSpaceReserved,
+        LocalDialogPrefStrings provides dialogStrings,
+    ) {
+        LocalTimePickerPreference(pref, modifier, icon, title, enabledIf, visibleIf)
     }
 }
 
