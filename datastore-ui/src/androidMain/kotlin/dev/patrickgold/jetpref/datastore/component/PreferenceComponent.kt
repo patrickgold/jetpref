@@ -38,7 +38,7 @@ sealed interface PreferenceComponent {
     }
 
     interface NavigationEntry : PreferenceComponent {
-        val targetScreen: PreferenceScreen
+        val targetScreen: PreferenceComponentScreen
         val summary: (@Composable () -> String)?
     }
 

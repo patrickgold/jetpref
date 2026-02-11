@@ -26,19 +26,21 @@ import dev.patrickgold.jetpref.datastore.ui.ListPreferenceEntry
 import kotlin.Comparable
 import kotlin.Number
 
-interface PreferenceGroup : PreferenceComponent {
-    val components: List<PreferenceComponent>
+@DslMarker
+@Target(AnnotationTarget.CLASS)
+annotation class PreferenceComponentBuilderDslMarker
+
+fun buildScreen(
+    title: @Composable () -> String,
+    block: PreferenceComponentGroupBuilder.() -> Unit,
+): PreferenceComponentScreen {
+    val builder = PreferenceComponentGroupBuilder()
+    builder.block()
+    return PreferenceComponentScreenImpl(title, builder.components.toList())
 }
 
-internal data class PreferenceGroupImpl(
-    override val title: @Composable () -> String,
-    override val icon: @Composable (() -> ImageVector)?,
-    override val enabledIf: PreferenceDataEvaluator,
-    override val visibleIf: PreferenceDataEvaluator,
-    override val components: List<PreferenceComponent>,
-) : PreferenceGroup
-
-class PreferenceGroupBuilder internal constructor() {
+@PreferenceComponentBuilderDslMarker
+class PreferenceComponentGroupBuilder internal constructor() {
     internal val components = mutableListOf<PreferenceComponent>()
 
     fun addGroup(
@@ -46,11 +48,11 @@ class PreferenceGroupBuilder internal constructor() {
         icon: (@Composable () -> ImageVector)? = null,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
-        block: PreferenceGroupBuilder.() -> Unit,
+        block: PreferenceComponentGroupBuilder.() -> Unit,
     ) {
-        val builder = PreferenceGroupBuilder()
+        val builder = PreferenceComponentGroupBuilder()
         builder.block()
-        val component = PreferenceGroupImpl(title, icon, enabledIf, visibleIf, builder.components.toList())
+        val component = PreferenceComponentGroupImpl(title, icon, enabledIf, visibleIf, builder.components.toList())
         components.add(component)
     }
 
@@ -70,7 +72,7 @@ class PreferenceGroupBuilder internal constructor() {
     }
 
     fun addNavigationTo(
-        targetScreen: PreferenceScreen,
+        targetScreen: PreferenceComponentScreen,
         title: @Composable () -> String = targetScreen.title,
         icon: (@Composable () -> ImageVector)? = null,
         summary: (@Composable () -> String)? = null,
