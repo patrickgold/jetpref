@@ -22,51 +22,75 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
+import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
+import dev.patrickgold.jetpref.datastore.ui.ListPreference
 import dev.patrickgold.jetpref.datastore.ui.ListPreferenceEntry
+import dev.patrickgold.jetpref.datastore.ui.LocalTimePickerPreference
+import dev.patrickgold.jetpref.datastore.ui.NavigationEntryPreference
+import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
+import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import kotlin.Comparable
 import kotlin.Number
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 @DslMarker
 @Target(AnnotationTarget.CLASS)
 annotation class PreferenceComponentBuilderDslMarker
 
-fun buildScreen(
-    title: @Composable () -> String,
+@OptIn(ExperimentalContracts::class)
+inline fun buildScreen(
+    noinline title: @Composable () -> String,
     block: PreferenceComponentGroupBuilder.() -> Unit,
 ): PreferenceComponentScreen {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val builder = PreferenceComponentGroupBuilder()
     builder.block()
     return PreferenceComponentScreenImpl(title, builder.components.toList())
 }
 
 @PreferenceComponentBuilderDslMarker
-class PreferenceComponentGroupBuilder internal constructor() {
+class PreferenceComponentGroupBuilder {
+    @PublishedApi
     internal val components = mutableListOf<PreferenceComponent>()
 
-    fun addGroup(
-        title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
-        enabledIf: PreferenceDataEvaluator = { true },
-        visibleIf: PreferenceDataEvaluator = { true },
+    @OptIn(ExperimentalContracts::class)
+    inline fun addGroup(
+        noinline title: @Composable () -> String,
+        noinline icon: (@Composable () -> ImageVector)? = null,
+        noinline enabledIf: PreferenceDataEvaluator = { true },
+        noinline visibleIf: PreferenceDataEvaluator = { true },
         block: PreferenceComponentGroupBuilder.() -> Unit,
     ) {
+        contract {
+            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        }
         val builder = PreferenceComponentGroupBuilder()
         builder.block()
         val component = PreferenceComponentGroupImpl(title, icon, enabledIf, visibleIf, builder.components.toList())
         components.add(component)
     }
 
-    fun addGeneric(
+    fun addComposableContent(
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
         content: @Composable () -> Unit,
     ) {
-        val component = object : PreferenceComponent.Generic {
+        val component = object : PreferenceComponent.ComposableContent {
             override val title = @Composable { "<generic component impl>" }
             override val icon = null
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
             override val content = content
+
+            @Composable
+            override fun Render() {
+                content()
+            }
         }
         components.add(component)
     }
@@ -86,6 +110,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val summary = summary
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
+
+            @Composable
+            override fun Render() {
+                NavigationEntryPreference(this)
+            }
         }
         components.add(component)
     }
@@ -109,6 +138,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val summaryOff = summaryOff
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
+
+            @Composable
+            override fun Render() {
+                SwitchPreference(this)
+            }
         }
         components.add(component)
     }
@@ -128,6 +162,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
             override val entries = entries
+
+            @Composable
+            override fun Render() {
+                ListPreference(this)
+            }
         }
         components.add(component)
     }
@@ -151,6 +190,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
             override val entries = entries
+
+            @Composable
+            override fun Render() {
+                ListPreference(this)
+            }
         }
         components.add(component)
     }
@@ -178,6 +222,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val defaultColors = defaultColors
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
+
+            @Composable
+            override fun Render() {
+                ColorPickerPreference(this)
+            }
         }
         components.add(component)
     }
@@ -185,7 +234,7 @@ class PreferenceComponentGroupBuilder internal constructor() {
     fun addLocalTimePicker(
         pref: PreferenceData<LocalTime>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)?,
+        icon: (@Composable () -> ImageVector)? = null,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
@@ -195,6 +244,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val icon = icon
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
+
+            @Composable
+            override fun Render() {
+                LocalTimePickerPreference(this)
+            }
         }
         components.add(component)
     }
@@ -214,8 +268,8 @@ class PreferenceComponentGroupBuilder internal constructor() {
         },
         transformValue: (String) -> String = { it },
         validateValue: (String) -> Unit = { },
-        enabledIf: PreferenceDataEvaluator,
-        visibleIf: PreferenceDataEvaluator,
+        enabledIf: PreferenceDataEvaluator = { true },
+        visibleIf: PreferenceDataEvaluator = { true },
     ) {
         val component = object : PreferenceComponent.TextField {
             override val pref = pref
@@ -228,6 +282,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val validateValue = validateValue
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
+
+            @Composable
+            override fun Render() {
+                TextFieldPreference(this)
+            }
         }
         components.add(component)
     }
@@ -258,6 +317,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
             override val convertToV = convertToV
+
+            @Composable
+            override fun Render() {
+                DialogSliderPreference(this)
+            }
         }
         components.add(component)
     }
@@ -321,6 +385,11 @@ class PreferenceComponentGroupBuilder internal constructor() {
             override val enabledIf = enabledIf
             override val visibleIf = visibleIf
             override val convertToV = convertToV
+
+            @Composable
+            override fun Render() {
+                DialogSliderPreference(this)
+            }
         }
         components.add(component)
     }

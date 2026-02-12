@@ -33,7 +33,10 @@ sealed interface PreferenceComponent {
 
     val visibleIf: PreferenceDataEvaluator
 
-    interface Generic : PreferenceComponent {
+    @Composable
+    fun Render()
+
+    interface ComposableContent : PreferenceComponent {
         val content: @Composable () -> Unit
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 internal fun maybeJetIcon(
     imageVector: ImageVector?,
-    iconSpaceReserved: Boolean,
     contentDescription: String? = null,
 ): @Composable (() -> Unit)? {
+    val iconSpaceReserved = LocalIconSpaceReserved.current
     return when {
         imageVector != null -> ({
             Icon(

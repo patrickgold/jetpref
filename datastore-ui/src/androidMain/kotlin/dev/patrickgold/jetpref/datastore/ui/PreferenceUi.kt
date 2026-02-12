@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentGroup
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
@@ -195,7 +196,7 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
                 LocalIsPrefVisible provides visibleIf(PreferenceDataEvaluatorScope),
             ) {
                 ListItem(
-                    leadingContent = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                    leadingContent = maybeJetIcon(icon),
                     headlineContent = { Text(
                         text = title,
                         color = MaterialTheme.colorScheme.secondary,
@@ -205,6 +206,34 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
                     ) },
                 )
                 content(preferenceScope)
+            }
+        }
+    }
+}
+
+@Composable
+fun PreferenceGroup(
+    component: PreferenceComponentGroup,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    if (LocalIsPrefVisible.current && component.visibleIf(PreferenceDataEvaluatorScope)) {
+        Column(modifier = modifier) {
+            CompositionLocalProvider(
+                LocalIsPrefEnabled provides component.enabledIf(PreferenceDataEvaluatorScope),
+                LocalIsPrefVisible provides component.visibleIf(PreferenceDataEvaluatorScope),
+            ) {
+                ListItem(
+                    leadingContent = maybeJetIcon(component.icon?.invoke()),
+                    headlineContent = { Text(
+                        text = component.title.invoke(),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    ) },
+                )
+                content(this)
             }
         }
     }

@@ -65,7 +65,6 @@ fun Preference(
     require(!(onClick != null && eventModifier != null)) {
         "You cannot provide both an onClick lambda and an eventModifier."
     }
-    val iconSpaceReserved = LocalIconSpaceReserved.current
     if (LocalIsPrefVisible.current && visibleIf(PreferenceDataEvaluatorScope)) {
         val isEnabled = LocalIsPrefEnabled.current && enabledIf(PreferenceDataEvaluatorScope)
         CompositionLocalProvider(
@@ -82,7 +81,7 @@ fun Preference(
                 } else {
                     modifier.then(eventModifier?.invoke() ?: Modifier)
                 },
-                icon = maybeJetIcon(imageVector = icon, iconSpaceReserved),
+                icon = maybeJetIcon(icon),
                 text = title,
                 secondaryText = summary,
                 trailing = trailing,

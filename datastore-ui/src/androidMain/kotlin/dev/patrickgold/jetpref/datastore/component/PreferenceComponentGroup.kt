@@ -19,15 +19,27 @@ package dev.patrickgold.jetpref.datastore.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
 
 interface PreferenceComponentGroup : PreferenceComponent {
     val components: List<PreferenceComponent>
 }
 
+@PublishedApi
 internal data class PreferenceComponentGroupImpl(
     override val title: @Composable () -> String,
     override val icon: @Composable (() -> ImageVector)?,
     override val enabledIf: PreferenceDataEvaluator,
     override val visibleIf: PreferenceDataEvaluator,
     override val components: List<PreferenceComponent>,
-) : PreferenceComponentGroup
+) : PreferenceComponentGroup {
+    @Composable
+    override fun Render() {
+        PreferenceGroup(this) {
+            // TODO LazyColumn, might need flattening
+            for (component in components) {
+                component.Render()
+            }
+        }
+    }
+}

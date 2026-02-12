@@ -22,6 +22,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 
 interface PreferenceComponentScreen : PreferenceComponentGroup
 
+@PublishedApi
 internal data class PreferenceComponentScreenImpl(
     override val title: @Composable () -> String,
     override val components: List<PreferenceComponent>,
@@ -29,4 +30,12 @@ internal data class PreferenceComponentScreenImpl(
     override val icon: @Composable (() -> ImageVector)? = null
     override val enabledIf: PreferenceDataEvaluator = { true }
     override val visibleIf: PreferenceDataEvaluator = { true }
+
+    @Composable
+    override fun Render() {
+        // TODO LazyColumn
+        for (component in components) {
+            component.Render()
+        }
+    }
 }
