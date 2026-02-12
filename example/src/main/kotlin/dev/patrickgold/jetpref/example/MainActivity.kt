@@ -20,7 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.patrickgold.jetpref.datastore.model.collectAsState
-import dev.patrickgold.jetpref.datastore.ui.ProvideDefaultDialogPrefStrings
+import dev.patrickgold.jetpref.datastore.ui.ProvideDialogPrefStrings
 import dev.patrickgold.jetpref.example.ui.settings.ColorPickerDemoScreen
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
@@ -29,7 +29,7 @@ import dev.patrickgold.jetpref.example.ui.theme.Theme
 val LocalNavController = staticCompositionLocalOf<NavHostController> { error("not init") }
 
 class MainActivity : ComponentActivity() {
-    private val prefs by AppPrefsStore
+    private val prefs by ExamplePreferenceStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppContent(navController: NavHostController) {
-    ProvideDefaultDialogPrefStrings(
+    ProvideDialogPrefStrings(
         confirmLabel = "OK",
         dismissLabel = "Cancel",
         neutralLabel = "Default",

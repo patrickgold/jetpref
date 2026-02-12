@@ -12,46 +12,19 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceType
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 
 // Defining the instance of the application preferences
-val AppPrefsStore = jetprefDataStoreOf(AppPrefsModel::class)
+val ExamplePreferenceStore = jetprefDataStoreOf(ExamplePreferenceModel::class)
 
 // Defining the model of the application preferences
 @Preferences
-abstract class AppPrefsModel : PreferenceModel() {
+abstract class ExamplePreferenceModel : PreferenceModel() {
     val theme = enum(
         key = "theme",
         default = Theme.AUTO,
     )
-    val color1 = custom(
-        key = "accent_color1",
-        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            true -> Color.Unspecified
-            false -> Color.Red
-        },
-        serializer = ColorPreferenceSerializer,
-    )
-    val color2 = custom(
-        key = "accent_color2",
-        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            true -> Color.Unspecified
-            false -> Color.Red
-        },
-        serializer = ColorPreferenceSerializer,
-    )
-    val color3 = custom(
-        key = "accent_color3",
-        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            true -> Color.Unspecified
-            false -> Color.Red
-        },
-        serializer = ColorPreferenceSerializer,
-    )
-    val color4 = custom(
-        key = "accent_color4",
-        default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            true -> Color.Unspecified
-            false -> Color.Red
-        },
-        serializer = ColorPreferenceSerializer,
+
+    val boxFontSize = float(
+        key = "box_font_size",
+        default = 30.0f,
     )
     val boxSizePortrait = int(
         key = "box_size_portrait",
@@ -61,9 +34,14 @@ abstract class AppPrefsModel : PreferenceModel() {
         key = "box_size_landscape",
         default = 20,
     )
-    val showExampleGroup = boolean(
-        key = "show_example_group",
-        default = true,
+
+    val exampleTime = localTime(
+        key = "example_time",
+        default = LocalTime(18, 0)
+    )
+    val exampleText = string(
+        key = "example_text",
+        default = "",
     )
 
     // You can also define groups for preferences by packing them into an inner class like below. Groups are only for
@@ -83,10 +61,6 @@ abstract class AppPrefsModel : PreferenceModel() {
             key = "test__main_font_size",
             default = 20.0,
         )
-        val fontSize = float(
-            key = "test__font_size",
-            default = 30.0f,
-        )
         val buttonSize = int(
             key = "test__button_size",
             default = 10,
@@ -103,10 +77,6 @@ abstract class AppPrefsModel : PreferenceModel() {
             key = "test__show_title",
             default = true,
         )
-        val description = string(
-            key = "test__description",
-            default = "",
-        )
         val itemKey = string(
             key = "test__item_key",
             default = "abc_item_key",
@@ -116,10 +86,45 @@ abstract class AppPrefsModel : PreferenceModel() {
             key = "test__long_list",
             default = "str1"
         )
+    }
 
-        val time = localTime(
-            key = "test__time",
-            default = LocalTime(18, 0)
+    val accentColors = AccentColors()
+    inner class AccentColors {
+        val show = boolean(
+            key = "accent_colors_show",
+            default = true,
+        )
+        val color1 = custom(
+            key = "accent_color1",
+            default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                true -> Color.Unspecified
+                false -> Color.Red
+            },
+            serializer = ColorPreferenceSerializer,
+        )
+        val color2 = custom(
+            key = "accent_color2",
+            default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                true -> Color.Unspecified
+                false -> Color.Red
+            },
+            serializer = ColorPreferenceSerializer,
+        )
+        val color3 = custom(
+            key = "accent_color3",
+            default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                true -> Color.Unspecified
+                false -> Color.Red
+            },
+            serializer = ColorPreferenceSerializer,
+        )
+        val color4 = custom(
+            key = "accent_color4",
+            default = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                true -> Color.Unspecified
+                false -> Color.Red
+            },
+            serializer = ColorPreferenceSerializer,
         )
     }
 

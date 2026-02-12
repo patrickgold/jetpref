@@ -7,7 +7,7 @@ val Purple500 = Color(0xFF6200EE)
 val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
 
-val defaultColors = arrayOf(
+val defaultColors = listOf(
     Color(0xFFF44336), // RED 500
     Color(0xFFE91E63), // PINK 500
     Color(0xFFFF2C93), // LIGHT PINK 500

@@ -37,7 +37,8 @@ import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import dev.patrickgold.jetpref.datastore.ui.isMaterialYou
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
-import dev.patrickgold.jetpref.example.AppPrefsStore
+import dev.patrickgold.jetpref.example.ExamplePreferenceComponentTree
+import dev.patrickgold.jetpref.example.ExamplePreferenceStore
 import dev.patrickgold.jetpref.example.LocalNavController
 import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.ui.theme.Theme
@@ -45,13 +46,12 @@ import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 
 @OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
-fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
+fun HomeScreen() = ScrollablePreferenceLayout(ExamplePreferenceStore) {
+    ExamplePreferenceComponentTree.HomeScreen.Render()
+    return@ScrollablePreferenceLayout
+
     val navController = LocalNavController.current
     val context = LocalContext.current
-
-    // TODO: fix again or remove?
-//    val isDatastoreReady by prefs.datastoreReadyStatus.collectAsState()
-//    Text(text = "is datastore ready = $isDatastoreReady")
 
     Preference(
         onClick = { navController.navigate("color-picker-demo") },
@@ -63,8 +63,9 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         title = "Theme",
         entries = Theme.listEntries(),
     )
+
     ColorPickerPreference(
-        pref = prefs.color1,
+        pref = prefs.accentColors.color1,
         title = "Accent Color",
         summary = "Without advanced and alpha",
         defaultValueLabel = "Default",
@@ -72,7 +73,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         defaultColors = defaultColors,
         showAlphaSlider = false,
         enableAdvancedLayout = false,
-        colorOverride = {
+        transformValue = {
             if (it.isMaterialYou(context)) {
                 Color.Unspecified
             } else {
@@ -81,7 +82,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         }
     )
     ColorPickerPreference(
-        pref = prefs.color2,
+        pref = prefs.accentColors.color2,
         title = "Accent Color",
         summary = "Without advanced with alpha",
         defaultValueLabel = "Default",
@@ -89,7 +90,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         defaultColors = defaultColors,
         showAlphaSlider = true,
         enableAdvancedLayout = false,
-        colorOverride = {
+        transformValue = {
             if (it.isMaterialYou(context)) {
                 Color.Unspecified
             } else {
@@ -98,7 +99,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         }
     )
     ColorPickerPreference(
-        pref = prefs.color3,
+        pref = prefs.accentColors.color3,
         title = "Accent Color",
         summary = "With advanced without alpha",
         defaultValueLabel = "Default",
@@ -106,7 +107,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         defaultColors = defaultColors,
         showAlphaSlider = false,
         enableAdvancedLayout = true,
-        colorOverride = {
+        transformValue = {
             if (it.isMaterialYou(context)) {
                 Color.Unspecified
             } else {
@@ -115,7 +116,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         }
     )
     ColorPickerPreference(
-        pref = prefs.color4,
+        pref = prefs.accentColors.color4,
         title = "Accent Color",
         summary = "With advanced and alpha",
         defaultValueLabel = "Default",
@@ -123,7 +124,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         defaultColors = defaultColors,
         showAlphaSlider = true,
         enableAdvancedLayout = true,
-        colorOverride = {
+        transformValue = {
             if (it.isMaterialYou(context)) {
                 Color.Unspecified
             } else {
@@ -146,15 +147,8 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         onPreviewSelectedPrimaryValue = { Log.d("preview primary", it.toString()) },
         onPreviewSelectedSecondaryValue = { Log.d("preview secondary", it.toString()) },
     )
-    SwitchPreference(
-        prefs.showExampleGroup,
-        icon = ImageVector.vectorResource(R.drawable.ic_question_answer_black_24dp),
-        title = "Show example group",
-        summary = "Show/hide the example group",
-    )
     PreferenceGroup(
         title = "Example group",
-        visibleIf = { prefs.showExampleGroup isEqualTo true },
         iconSpaceReserved = true,
     ) {
         SwitchPreference(
@@ -194,7 +188,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
             stepIncrement = 5.0,
         )
         DialogSliderPreference(
-            prefs.example.fontSize,
+            prefs.boxFontSize,
             title = "Font Size",
             valueLabel = { "$it sp" },
             min = 0.0f,
@@ -253,8 +247,8 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         },
     )
     TextFieldPreference(
-        prefs.example.description,
-        title = "Description",
+        prefs.exampleText,
+        title = "Example test",
         summaryIfBlank = "(blank)",
         summaryIfEmpty = "(empty)",
     )
@@ -313,7 +307,7 @@ fun HomeScreen() = ScrollablePreferenceLayout(AppPrefsStore) {
         }
     )
     LocalTimePickerPreference(
-        pref = prefs.example.time,
+        pref = prefs.exampleTime,
         title = "Test time"
     )
 }
