@@ -23,7 +23,7 @@ data object HomeScreen : PreferenceScreen({
             listPref = prefs.theme,
             icon = { Icons.Default.Palette },
             title = { "Theme" },
-            entries = { Theme.listEntries() },
+            entries = Theme.listEntries(),
         )
 
         group(title = { "Sliders" }) {

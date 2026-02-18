@@ -60,7 +60,7 @@ sealed interface PreferenceComponent {
 
     interface ListPicker<V : Any> : PreferenceComponent {
         val listPref: PreferenceData<V>
-        val entries: @Composable () -> List<ListPreferenceEntry<V>>
+        val entries: List<ListPreferenceEntry<V>>
     }
 
     interface ListPickerWithSwitch<V : Any> : ListPicker<V> {

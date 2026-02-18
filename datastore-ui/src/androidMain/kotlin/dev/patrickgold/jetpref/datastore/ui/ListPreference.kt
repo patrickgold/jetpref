@@ -31,7 +31,6 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,9 +77,9 @@ import kotlinx.coroutines.launch
  */
 data class ListPreferenceEntry<V : Any>(
     val key: V,
-    val label: String,
+    val label: @Composable () -> String,
     val labelComposer: @Composable (String) -> Unit,
-    val description: String,
+    val description: @Composable () -> String,
     val descriptionComposer: @Composable (String) -> Unit,
     val showDescriptionOnlyIfSelected: Boolean,
 )
@@ -96,34 +95,34 @@ interface ListPreferenceEntriesScope<V : Any> {
     /**
      * Creates an entry without a description.
      *
-     * @since 0.1.0
+     * @since 0.4.0
      */
     fun entry(
         key: V,
-        label: String,
+        label: @Composable () -> String,
     )
 
     /**
      * Creates an entry with a label + description.
      *
-     * @since 0.1.0
+     * @since 0.4.0
      */
     fun entry(
         key: V,
-        label: String,
-        description: String,
+        label: @Composable () -> String,
+        description: @Composable () -> String,
         showDescriptionOnlyIfSelected: Boolean = false,
     )
 
     /**
      * Creates an entry with a label + description and custom description composer.
      *
-     * @since 0.1.0
+     * @since 0.4.0
      */
     fun entry(
         key: V,
-        label: String,
-        description: String,
+        label: @Composable () -> String,
+        description: @Composable () -> String,
         descriptionComposer: @Composable (String) -> Unit,
         showDescriptionOnlyIfSelected: Boolean = false,
     )
@@ -131,13 +130,13 @@ interface ListPreferenceEntriesScope<V : Any> {
     /**
      * Creates an entry with a label + description and custom composers for both.
      *
-     * @since 0.1.0
+     * @since 0.4.0
      */
     fun entry(
         key: V,
-        label: String,
+        label: @Composable () -> String,
         labelComposer: @Composable (String) -> Unit,
-        description: String,
+        description: @Composable () -> String,
         descriptionComposer: @Composable (String) -> Unit,
         showDescriptionOnlyIfSelected: Boolean = false,
     )
@@ -148,15 +147,15 @@ private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesSco
 
     override fun entry(
         key: V,
-        label: String,
+        label: @Composable () -> String,
     ) {
-        entries.add(ListPreferenceEntry(key, label, { Text(it) }, "", { }, false))
+        entries.add(ListPreferenceEntry(key, label, { Text(it) }, { "" }, { }, false))
     }
 
     override fun entry(
         key: V,
-        label: String,
-        description: String,
+        label: @Composable () -> String,
+        description: @Composable () -> String,
         showDescriptionOnlyIfSelected: Boolean,
     ) {
         entries.add(ListPreferenceEntry(key, label, { Text(it) }, description, { Text(it, style = MaterialTheme.typography.bodyMedium) }, showDescriptionOnlyIfSelected))
@@ -164,8 +163,8 @@ private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesSco
 
     override fun entry(
         key: V,
-        label: String,
-        description: String,
+        label: @Composable () -> String,
+        description: @Composable () -> String,
         descriptionComposer: @Composable (String) -> Unit,
         showDescriptionOnlyIfSelected: Boolean,
     ) {
@@ -174,9 +173,9 @@ private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesSco
 
     override fun entry(
         key: V,
-        label: String,
+        label: @Composable () -> String,
         labelComposer: @Composable (String) -> Unit,
-        description: String,
+        description: @Composable () -> String,
         descriptionComposer: @Composable (String) -> Unit,
         showDescriptionOnlyIfSelected: Boolean,
     ) {
@@ -196,11 +195,10 @@ private class ListPreferenceEntriesScopeImpl<V : Any> : ListPreferenceEntriesSco
  *
  * @return A list of [ListPreferenceEntry] items.
  *
- * @since 0.1.0
+ * @since 0.4.0
  */
-@Composable
 fun <V : Any> listPrefEntries(
-    scope: @Composable ListPreferenceEntriesScope<V>.() -> Unit,
+    scope: ListPreferenceEntriesScope<V>.() -> Unit,
 ): List<ListPreferenceEntry<V>> {
     val builder = ListPreferenceEntriesScopeImpl<V>()
     scope(builder)
@@ -255,7 +253,7 @@ fun <V : Any> ListPreference(
         summary = if (switchPrefValue?.value == true || switchPrefValue == null) {
             entries.find {
                 it.key == listPrefValue
-            }?.label ?: "!! invalid !!"
+            }?.label?.invoke() ?: "!! invalid !!"
         } else { summarySwitchDisabled },
         trailing = {
             if (switchPrefValue != null) {
@@ -381,44 +379,19 @@ fun <V : Any> ListPreference(
                                 .fillMaxWidth()
                                 .align(Alignment.CenterVertically),
                         ) {
-                            entry.labelComposer(entry.label)
+                            entry.labelComposer(entry.label.invoke())
                             if (entry.showDescriptionOnlyIfSelected) {
                                 if (entry.key == tmpListPrefValue) {
-                                    entry.descriptionComposer(entry.description)
+                                    entry.descriptionComposer(entry.description.invoke())
                                 }
                             } else {
-                                entry.descriptionComposer(entry.description)
+                                entry.descriptionComposer(entry.description.invoke())
                             }
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@Deprecated("Use new ListPreference instead.")
-@Composable
-fun <V : Any> ListPreference(
-    listPref: PreferenceData<V>,
-    switchPref: PreferenceData<Boolean>? = null,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    summarySwitchDisabled: String? = null,
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-    entries: List<ListPreferenceEntry<V>>,
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        ListPreference(
-            listPref, switchPref, modifier, icon, title, summarySwitchDisabled, enabledIf, visibleIf, entries
-        )
     }
 }
 
@@ -436,7 +409,7 @@ fun <V : Any> ListPreference(
         summarySwitchDisabled = null,
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
-        entries = component.entries.invoke(),
+        entries = component.entries,
     )
 }
 
@@ -454,6 +427,6 @@ fun <V : Any> ListPreference(
         summarySwitchDisabled = component.summarySwitchDisabled?.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
-        entries = component.entries.invoke(),
+        entries = component.entries,
     )
 }

@@ -79,19 +79,18 @@ enum class Theme {
     DARK;
 
     companion object {
-        @Composable
         fun listEntries() = listPrefEntries {
             entry(
                 key = AUTO,
-                label = "System default",
+                label = { "System default" },
             )
             entry(
                 key = LIGHT,
-                label = "Light",
+                label = { "Light" },
             )
             entry(
                 key = DARK,
-                label = "Dark",
+                label = { "Dark" },
             )
         }
     }

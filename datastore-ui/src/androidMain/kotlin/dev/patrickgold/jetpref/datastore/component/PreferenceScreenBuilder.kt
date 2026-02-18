@@ -236,7 +236,7 @@ open class PreferenceComponentListBuilder(
         icon: (@Composable () -> ImageVector)? = null,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
-        entries: @Composable () -> List<ListPreferenceEntry<V>>,
+        entries: List<ListPreferenceEntry<V>>,
     ) {
         val component = object : PreferenceComponent.ListPicker<V> {
             override val id = PreferenceComponentId.next()
@@ -264,7 +264,7 @@ open class PreferenceComponentListBuilder(
         summarySwitchDisabled: (@Composable () -> String)? = null,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
-        entries: @Composable () -> List<ListPreferenceEntry<V>>,
+        entries: List<ListPreferenceEntry<V>>,
     ) {
         val component = object : PreferenceComponent.ListPickerWithSwitch<V> {
             override val id = PreferenceComponentId.next()
