@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.datastore.component
+package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentScreen
 
-sealed interface PreferenceComponent {
-    val title: @Composable () -> String
-
-    val icon: (@Composable () -> ImageVector)?
-
-    val enabledIf: PreferenceDataEvaluator
-
-    val visibleIf: PreferenceDataEvaluator
-
-    val level: Int
+@Composable
+fun PreferenceScreen(
+    screen: PreferenceComponentScreen,
+    modifier: Modifier = Modifier,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+) {
+    CompositionLocalProvider(LocalIconSpaceReserved provides iconSpaceReserved) {
+        screen.Render(modifier)
+    }
 }

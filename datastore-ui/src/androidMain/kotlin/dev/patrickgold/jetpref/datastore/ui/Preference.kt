@@ -22,7 +22,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
@@ -116,9 +116,10 @@ fun Preference(
 
 @Composable
 fun NavigationEntryPreference(
-    component: PreferenceComponent.NavigationEntry,
+    component: PreferenceComponentItem.NavigationEntry,
     modifier: Modifier = Modifier,
 ) {
+    val navigationController = LocalPreferenceNavigationRouter.current
     Preference(
         modifier = modifier,
         icon = component.icon?.invoke(),
@@ -126,6 +127,6 @@ fun NavigationEntryPreference(
         summary = component.summary?.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
-        onClick = { TODO() },
+        onClick = { navigationController.navigateTo(component.targetScreen, null) },
     )
 }

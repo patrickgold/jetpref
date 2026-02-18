@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package dev.patrickgold.jetpref.datastore.component
+package dev.patrickgold.jetpref.datastore.ui
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import androidx.compose.runtime.staticCompositionLocalOf
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentScreen
 
-sealed interface PreferenceComponent {
-    val title: @Composable () -> String
+fun interface PreferenceNavigationRouter {
+    fun navigateTo(screen: PreferenceComponentScreen, item: PreferenceComponentItem?)
+}
 
-    val icon: (@Composable () -> ImageVector)?
-
-    val enabledIf: PreferenceDataEvaluator
-
-    val visibleIf: PreferenceDataEvaluator
-
-    val level: Int
+internal val LocalPreferenceNavigationRouter = staticCompositionLocalOf<PreferenceNavigationRouter> {
+    error("No PreferenceNavigationRouter provided.")
 }

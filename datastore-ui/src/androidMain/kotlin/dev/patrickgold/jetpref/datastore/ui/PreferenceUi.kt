@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponentGroup
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.datastore.model.PreferenceModel
@@ -212,29 +211,15 @@ fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
 }
 
 @Composable
-fun PreferenceGroup(
-    component: PreferenceComponentGroup,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
+fun JetPrefHost(
+    router: PreferenceNavigationRouter,
+    iconSpaceReserved: Boolean = true,
+    content: @Composable () -> Unit,
 ) {
-    if (LocalIsPrefVisible.current && component.visibleIf(PreferenceDataEvaluatorScope)) {
-        Column(modifier = modifier) {
-            CompositionLocalProvider(
-                LocalIsPrefEnabled provides component.enabledIf(PreferenceDataEvaluatorScope),
-                LocalIsPrefVisible provides component.visibleIf(PreferenceDataEvaluatorScope),
-            ) {
-                ListItem(
-                    leadingContent = maybeJetIcon(component.icon?.invoke()),
-                    headlineContent = { Text(
-                        text = component.title.invoke(),
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    ) },
-                )
-                content(this)
-            }
-        }
+    CompositionLocalProvider(
+        LocalPreferenceNavigationRouter provides router,
+        LocalIconSpaceReserved provides iconSpaceReserved,
+    ) {
+        content()
     }
 }

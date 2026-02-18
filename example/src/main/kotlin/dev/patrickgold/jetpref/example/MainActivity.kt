@@ -14,12 +14,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.patrickgold.jetpref.datastore.model.collectAsState
+import dev.patrickgold.jetpref.datastore.ui.JetPrefHost
+import dev.patrickgold.jetpref.datastore.ui.PreferenceNavigationRouter
+import dev.patrickgold.jetpref.datastore.ui.PreferenceScreen
 import dev.patrickgold.jetpref.datastore.ui.ProvideDialogPrefStrings
 import dev.patrickgold.jetpref.example.ui.settings.ColorPickerDemoScreen
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
@@ -54,6 +58,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+object ExampleRoutes {
+    const val Home = "home"
+    const val ColorPickerDemo = "color-picker-demo"
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppContent(navController: NavHostController) {
@@ -67,9 +76,23 @@ fun AppContent(navController: NavHostController) {
                 title = { Text(text = "Example JetPref App") },
                 colors = TopAppBarDefaults.topAppBarColors()
             )
-            NavHost(navController = navController, startDestination = "home") {
-                composable("home") { HomeScreen() }
-                composable("color-picker-demo") { ColorPickerDemoScreen() }
+            val router = remember {
+                PreferenceNavigationRouter { screen, item ->
+                    val route = when (screen) {
+                        ExamplePreferenceComponentTree.HomeScreen -> ExampleRoutes.Home
+                        ExamplePreferenceComponentTree.ColorPickerDemoScreen -> ExampleRoutes.ColorPickerDemo
+                        else -> error("unknown route $screen $item")
+                    }
+                    navController.navigate(route)
+                }
+            }
+            JetPrefHost(router) {
+                NavHost(navController = navController, startDestination = ExampleRoutes.Home) {
+                    composable(ExampleRoutes.Home) {
+                        PreferenceScreen(ExamplePreferenceComponentTree.HomeScreen)
+                    }
+                    composable(ExampleRoutes.ColorPickerDemo) { ColorPickerDemoScreen() }
+                }
             }
         }
     }

@@ -39,7 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -946,7 +946,7 @@ fun DialogSliderPreference(
 
 @Composable
 fun <V> DialogSliderPreference(
-    component: PreferenceComponent.SingleSlider<V>,
+    component: PreferenceComponentItem.SingleSlider<V>,
     modifier: Modifier = Modifier,
     onPreviewSelectedValue: (V) -> Unit = { },
 ) where V : Number, V : Comparable<V> {
@@ -969,7 +969,7 @@ fun <V> DialogSliderPreference(
 
 @Composable
 fun <V> DialogSliderPreference(
-    component: PreferenceComponent.DualSlider<V>,
+    component: PreferenceComponentItem.DualSlider<V>,
     modifier: Modifier = Modifier,
     onPreviewSelectedPrimaryValue: (V) -> Unit = { },
     onPreviewSelectedSecondaryValue: (V) -> Unit = { },

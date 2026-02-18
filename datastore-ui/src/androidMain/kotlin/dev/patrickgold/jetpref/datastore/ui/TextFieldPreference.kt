@@ -27,7 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -179,7 +179,7 @@ fun TextFieldPreference(
 
 @Composable
 fun TextFieldPreference(
-    component: PreferenceComponent.TextField,
+    component: PreferenceComponentItem.TextField,
     modifier: Modifier = Modifier,
 ) {
     TextFieldPreference(

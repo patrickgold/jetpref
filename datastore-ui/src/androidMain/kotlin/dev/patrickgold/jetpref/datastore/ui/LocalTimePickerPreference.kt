@@ -46,7 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
@@ -176,7 +176,7 @@ fun LocalTimePickerPreference(
 
 @Composable
 fun LocalTimePickerPreference(
-    component: PreferenceComponent.LocalTimePicker,
+    component: PreferenceComponentItem.LocalTimePicker,
     modifier: Modifier = Modifier,
 ) {
     LocalTimePickerPreference(

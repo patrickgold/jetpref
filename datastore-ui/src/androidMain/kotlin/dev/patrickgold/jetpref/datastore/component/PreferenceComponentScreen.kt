@@ -16,26 +16,35 @@
 
 package dev.patrickgold.jetpref.datastore.component
 
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 
-interface PreferenceComponentScreen : PreferenceComponentGroup
+interface PreferenceComponentScreen : PreferenceComponent {
+    val components: List<PreferenceComponentItem>
+
+    @Composable
+    fun Render(modifier: Modifier) {
+        val lazyListState = rememberLazyListState()
+        LazyColumn(modifier, lazyListState) {
+            items(components) { component ->
+                component.Render()
+            }
+        }
+    }
+}
 
 @PublishedApi
-internal data class PreferenceComponentScreenImpl(
+internal class PreferenceComponentScreenImpl(
     override val title: @Composable () -> String,
-    override val components: List<PreferenceComponent>,
+    override val components: List<PreferenceComponentItem>,
 ) : PreferenceComponentScreen {
     override val icon: @Composable (() -> ImageVector)? = null
     override val enabledIf: PreferenceDataEvaluator = { true }
     override val visibleIf: PreferenceDataEvaluator = { true }
-
-    @Composable
-    override fun Render() {
-        // TODO LazyColumn
-        for (component in components) {
-            component.Render()
-        }
-    }
+    override val level = -1
 }

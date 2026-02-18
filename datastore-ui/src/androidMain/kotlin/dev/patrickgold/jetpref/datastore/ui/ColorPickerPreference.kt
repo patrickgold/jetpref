@@ -55,7 +55,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -303,7 +303,7 @@ fun ColorPickerPreference(
 
 @Composable
 fun ColorPickerPreference(
-    component: PreferenceComponent.ColorPicker,
+    component: PreferenceComponentItem.ColorPicker,
     modifier: Modifier = Modifier,
     transformValue: (Color) -> Color = { it },
 ) {

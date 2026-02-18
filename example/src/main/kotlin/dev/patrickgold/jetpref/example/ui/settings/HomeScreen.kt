@@ -32,7 +32,8 @@ import dev.patrickgold.jetpref.datastore.ui.ListPreference
 import dev.patrickgold.jetpref.datastore.ui.LocalTimePickerPreference
 import dev.patrickgold.jetpref.datastore.ui.Preference
 import dev.patrickgold.jetpref.datastore.ui.PreferenceGroup
-import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
+import dev.patrickgold.jetpref.datastore.ui.PreferenceLayout
+import dev.patrickgold.jetpref.datastore.ui.PreferenceScreen
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import dev.patrickgold.jetpref.datastore.ui.isMaterialYou
@@ -44,11 +45,14 @@ import dev.patrickgold.jetpref.example.R
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 
-@OptIn(ExperimentalJetPrefDatastoreUi::class)
 @Composable
-fun HomeScreen() = ScrollablePreferenceLayout(ExamplePreferenceStore) {
+fun HomeScreen() {
+    PreferenceScreen(ExamplePreferenceComponentTree.HomeScreen, iconSpaceReserved = true)
+}
+
+/*PreferenceLayout(ExamplePreferenceStore) {
     ExamplePreferenceComponentTree.HomeScreen.Render()
-    return@ScrollablePreferenceLayout
+    return@PreferenceLayout
 
     val navController = LocalNavController.current
     val context = LocalContext.current
@@ -310,4 +314,4 @@ fun HomeScreen() = ScrollablePreferenceLayout(ExamplePreferenceStore) {
         pref = prefs.exampleTime,
         title = "Test time"
     )
-}
+}*/
