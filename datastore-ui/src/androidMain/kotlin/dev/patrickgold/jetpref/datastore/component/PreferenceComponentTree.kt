@@ -20,7 +20,7 @@ import dev.patrickgold.jetpref.datastore.model.PreferenceModel
 import dev.patrickgold.jetpref.datastore.runtime.DataStore
 
 abstract class PreferenceComponentTree<T : PreferenceModel>(store: DataStore<T>) {
-    abstract val mainEntryPoint: PreferenceComponentScreen
+    abstract val mainEntryPoint: PreferenceScreen
 
     val prefs by store
 }

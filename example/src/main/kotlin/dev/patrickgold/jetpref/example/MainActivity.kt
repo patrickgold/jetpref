@@ -17,12 +17,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import dev.patrickgold.jetpref.datastore.component.PreferenceScreen
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.datastore.ui.JetPrefHost
 import dev.patrickgold.jetpref.datastore.ui.PreferenceNavigationRouter
-import dev.patrickgold.jetpref.datastore.ui.PreferenceScreen
 import dev.patrickgold.jetpref.datastore.ui.ProvideDialogPrefStrings
-import dev.patrickgold.jetpref.example.ui.settings.ColorPickerDemoScreen
 import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
 import dev.patrickgold.jetpref.example.ui.theme.Theme
@@ -49,12 +48,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed interface ExampleRoutes {
-    val componentId: Int
-
-    data class Home(override val componentId: Int = -1) : ExampleRoutes
-    data class ColorPickerDemo(override val componentId: Int = -1) : ExampleRoutes
-}
+data class ExampleRoute(
+    val screen: PreferenceScreen,
+    val componentId: Int = -1,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,14 +66,10 @@ fun AppContent() {
                 title = { Text(text = "Example JetPref App") },
                 colors = TopAppBarDefaults.topAppBarColors()
             )
-            val backStack = remember { mutableStateListOf<ExampleRoutes>(ExampleRoutes.Home()) }
+            val backStack = remember { mutableStateListOf(ExampleRoute(HomeScreen)) }
             val router = remember {
                 PreferenceNavigationRouter { screen, item ->
-                    val route = when (screen) {
-                        HomeScreen -> ExampleRoutes.Home(item?.id ?: -1)
-                        ColorPickerDemoScreen -> ExampleRoutes.ColorPickerDemo(item?.id ?: -1)
-                        else -> error("unknown route $screen $item")
-                    }
+                    val route = ExampleRoute(screen, componentId = item?.id ?: -1)
                     backStack.add(route)
                 }
             }
@@ -85,18 +78,12 @@ fun AppContent() {
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
                     entryProvider = { route ->
-                        when (route) {
-                            is ExampleRoutes.Home -> NavEntry(route) {
-                                PreferenceScreen(HomeScreen, route.componentId)
-                            }
-                            is ExampleRoutes.ColorPickerDemo -> NavEntry(route) {
-                                ColorPickerDemoScreen()
-                            }
+                        NavEntry(route) {
+                            route.screen(route.componentId)
                         }
-                    }
+                    },
                 )
             }
         }
     }
 }
-

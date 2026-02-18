@@ -47,7 +47,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -424,7 +424,7 @@ fun <V : Any> ListPreference(
 
 @Composable
 fun <V : Any> ListPreference(
-    component: PreferenceComponentItem.ListPicker<V>,
+    component: PreferenceComponent.ListPicker<V>,
     modifier: Modifier = Modifier
 ) {
     ListPreference(
@@ -442,7 +442,7 @@ fun <V : Any> ListPreference(
 
 @Composable
 fun <V : Any> ListPreference(
-    component: PreferenceComponentItem.ListPickerWithSwitch<V>,
+    component: PreferenceComponent.ListPickerWithSwitch<V>,
     modifier: Modifier = Modifier,
 ) {
     ListPreference(
