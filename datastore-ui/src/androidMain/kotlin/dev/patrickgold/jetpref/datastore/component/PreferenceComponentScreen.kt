@@ -20,26 +20,39 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
+import dev.patrickgold.jetpref.datastore.ui.LocalPreferenceComponentIdToHighlight
 
 interface PreferenceComponentScreen : PreferenceComponent {
     val components: List<PreferenceComponentItem>
 
     @Composable
-    fun Render(modifier: Modifier) {
+    fun Render() {
+        val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
         val lazyListState = rememberLazyListState()
-        LazyColumn(modifier, lazyListState) {
-            items(components) { component ->
+        LaunchedEffect(componentIdToHighlight) {
+            val index = components.indexOfFirst { it.id == componentIdToHighlight }
+            if (index == -1) {
+                return@LaunchedEffect
+            }
+            lazyListState.animateScrollToItem(index)
+        }
+        LazyColumn(state = lazyListState) {
+            items(components, key = { it.id }) { component ->
                 component.Render()
             }
         }
     }
+
+    @Composable
+    operator fun invoke() = Render()
 }
 
 @PublishedApi
-internal class PreferenceComponentScreenImpl(
+internal open class PreferenceComponentScreenImpl(
+    override val id: Int,
     override val title: @Composable () -> String,
     override val components: List<PreferenceComponentItem>,
 ) : PreferenceComponentScreen {

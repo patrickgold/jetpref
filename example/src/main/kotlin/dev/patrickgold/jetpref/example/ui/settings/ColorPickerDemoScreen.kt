@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,21 +31,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
-import dev.patrickgold.jetpref.datastore.ui.ScrollablePreferenceLayout
-import dev.patrickgold.jetpref.example.ExamplePreferenceStore
+import dev.patrickgold.jetpref.datastore.component.buildComposableScreen
 import dev.patrickgold.jetpref.material.ui.ExperimentalJetPrefMaterial3Ui
 import dev.patrickgold.jetpref.material.ui.JetPrefColorPicker
 import dev.patrickgold.jetpref.material.ui.checkeredBackground
 import dev.patrickgold.jetpref.material.ui.rememberJetPrefColorPickerState
 
 @OptIn(ExperimentalJetPrefMaterial3Ui::class)
-@Composable
-fun ColorPickerDemoScreen() = ScrollablePreferenceLayout(
-    dataStore = ExamplePreferenceStore,
-    modifier = Modifier.fillMaxSize(),
-) {
+val ColorPickerDemoScreen = buildComposableScreen(title = { "Color picker demo" }) {
     var color by remember { mutableStateOf(Color.Red) }
-    Column(modifier = Modifier.padding(all = 16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = 16.dp),
+    ) {
         val colorPickerState = rememberJetPrefColorPickerState(initColor = color)
 
         Surface(

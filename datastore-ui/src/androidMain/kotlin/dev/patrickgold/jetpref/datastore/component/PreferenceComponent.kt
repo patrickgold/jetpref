@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 
 sealed interface PreferenceComponent {
+    val id: Int
+
     val title: @Composable () -> String
 
     val icon: (@Composable () -> ImageVector)?

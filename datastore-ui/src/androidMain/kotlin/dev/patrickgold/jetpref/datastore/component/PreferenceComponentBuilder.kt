@@ -55,9 +55,23 @@ inline fun buildScreen(
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
+    val screenId = PreferenceComponentId.next()
     val builder = PreferenceComponentGroupBuilder(level = 0)
     builder.block()
-    return PreferenceComponentScreenImpl(title, builder.components.toList())
+    return PreferenceComponentScreenImpl(screenId, title, builder.components.toList())
+}
+
+fun buildComposableScreen(
+    title: @Composable () -> String,
+    content: @Composable () -> Unit,
+): PreferenceComponentScreen {
+    val screenId = PreferenceComponentId.next()
+    return object : PreferenceComponentScreenImpl(screenId, title, emptyList()) {
+        @Composable
+        override fun Render() {
+            content()
+        }
+    }
 }
 
 @PreferenceComponentBuilderDslMarker
@@ -113,6 +127,7 @@ class PreferenceComponentGroupBuilder(
         icon: (@Composable () -> ImageVector)? = null,
     ) {
         val component = object : PreferenceComponentItem.GroupTitle {
+            override val id = PreferenceComponentId.next()
             override val title = title
             override val icon = icon
             override val enabledIf = this@PreferenceComponentGroupBuilder.groupEnabledIf ?: { true }
@@ -146,6 +161,7 @@ class PreferenceComponentGroupBuilder(
         content: @Composable () -> Unit,
     ) {
         val component = object : PreferenceComponentItem.ComposableContent {
+            override val id = PreferenceComponentId.next()
             override val title = @Composable { "<generic component impl>" }
             override val icon = null
             override val enabledIf = combineEnabledIf(enabledIf)
@@ -170,6 +186,7 @@ class PreferenceComponentGroupBuilder(
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
         val component = object : PreferenceComponentItem.NavigationEntry {
+            override val id = PreferenceComponentId.next()
             override val targetScreen = targetScreen
             override val title = title
             override val icon = icon
@@ -197,6 +214,7 @@ class PreferenceComponentGroupBuilder(
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
         val component = object : PreferenceComponentItem.Switch {
+            override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
             override val icon = icon
@@ -224,6 +242,7 @@ class PreferenceComponentGroupBuilder(
         entries: @Composable () -> List<ListPreferenceEntry<V>>,
     ) {
         val component = object : PreferenceComponentItem.ListPicker<V> {
+            override val id = PreferenceComponentId.next()
             override val listPref = listPref
             override val title = title
             override val icon = icon
@@ -251,6 +270,7 @@ class PreferenceComponentGroupBuilder(
         entries: @Composable () -> List<ListPreferenceEntry<V>>,
     ) {
         val component = object : PreferenceComponentItem.ListPickerWithSwitch<V> {
+            override val id = PreferenceComponentId.next()
             override val listPref = listPref
             override val switchPref = switchPref
             override val title = title
@@ -282,6 +302,7 @@ class PreferenceComponentGroupBuilder(
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
         val component = object : PreferenceComponentItem.ColorPicker {
+            override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
             override val icon = icon
@@ -310,6 +331,7 @@ class PreferenceComponentGroupBuilder(
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
         val component = object : PreferenceComponentItem.LocalTimePicker {
+            override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
             override val icon = icon
@@ -344,6 +366,7 @@ class PreferenceComponentGroupBuilder(
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
         val component = object : PreferenceComponentItem.TextField {
+            override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
             override val icon = icon
@@ -379,6 +402,7 @@ class PreferenceComponentGroupBuilder(
         convertToV: (Float) -> V,
     ) where V : Number, V : Comparable<V> {
         val component = object : PreferenceComponentItem.SingleSlider<V> {
+            override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
             override val icon = icon
@@ -445,6 +469,7 @@ class PreferenceComponentGroupBuilder(
         convertToV: (Float) -> V,
     ) where V : Number, V : Comparable<V> {
         val component = object : PreferenceComponentItem.DualSlider<V> {
+            override val id = PreferenceComponentId.next()
             override val pref1 = pref1
             override val pref2 = pref2
             override val title = title

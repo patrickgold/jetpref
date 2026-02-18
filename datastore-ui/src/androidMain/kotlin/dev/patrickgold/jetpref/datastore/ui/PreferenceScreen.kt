@@ -18,16 +18,18 @@ package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponentScreen
 
 @Composable
 fun PreferenceScreen(
     screen: PreferenceComponentScreen,
-    modifier: Modifier = Modifier,
+    componentIdToHighlight: Int = -1,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
 ) {
-    CompositionLocalProvider(LocalIconSpaceReserved provides iconSpaceReserved) {
-        screen.Render(modifier)
+    CompositionLocalProvider(
+        LocalPreferenceComponentIdToHighlight provides componentIdToHighlight,
+        LocalIconSpaceReserved provides iconSpaceReserved,
+    ) {
+        screen()
     }
 }

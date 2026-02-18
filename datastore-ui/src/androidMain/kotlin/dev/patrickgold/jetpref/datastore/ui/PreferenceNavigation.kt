@@ -16,6 +16,7 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponentItem
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponentScreen
@@ -23,6 +24,8 @@ import dev.patrickgold.jetpref.datastore.component.PreferenceComponentScreen
 fun interface PreferenceNavigationRouter {
     fun navigateTo(screen: PreferenceComponentScreen, item: PreferenceComponentItem?)
 }
+
+internal val LocalPreferenceComponentIdToHighlight = compositionLocalOf { -1 }
 
 internal val LocalPreferenceNavigationRouter = staticCompositionLocalOf<PreferenceNavigationRouter> {
     error("No PreferenceNavigationRouter provided.")
