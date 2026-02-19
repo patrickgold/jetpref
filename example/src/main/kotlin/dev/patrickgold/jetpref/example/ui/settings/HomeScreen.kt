@@ -13,7 +13,7 @@ import dev.patrickgold.jetpref.example.ui.theme.Theme
 import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 
 data object HomeScreen : PreferenceScreen({
-    title { "Home Screen" }
+    title { "Settings" }
 
     val prefs by ExamplePreferenceStore
     components {

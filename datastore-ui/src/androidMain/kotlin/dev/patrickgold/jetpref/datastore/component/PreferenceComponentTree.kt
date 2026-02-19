@@ -16,56 +16,46 @@
 
 package dev.patrickgold.jetpref.datastore.component
 
-import androidx.compose.runtime.Composable
-
 abstract class PreferenceComponentTree {
     abstract val mainEntryPoint: PreferenceScreen
 
-    fun buildSearchIndex(options: SearchIndexOptions = SearchIndexOptions.Default): SearchIndex {
-        val entries = mutableListOf<SearchIndexEntry>()
-        val displayPath = emptyList<@Composable () -> String>()
+    fun buildSearchIndex(
+        options: SearchIndex.Options = SearchIndex.Options.Default,
+    ): SearchIndex {
+        val entries = mutableListOf<SearchIndex.Entry>()
+        val displayPath = listOf<Presentable>(mainEntryPoint)
         buildSearchIndexRecursive(options, entries, displayPath, mainEntryPoint)
         return SearchIndex(options, entries.toList())
     }
 
+    // TODO cyclic graph detection
     private fun buildSearchIndexRecursive(
-        options: SearchIndexOptions,
-        entries: MutableList<SearchIndexEntry>,
-        displayPath: List<@Composable () -> String>,
+        options: SearchIndex.Options,
+        entries: MutableList<SearchIndex.Entry>,
+        displayPath: List<Presentable>,
         screen: PreferenceScreen,
     ) {
         for (component in screen.components) {
+            val displayPath = when {
+                component.associatedGroup != null && options.includeGroupsInDisplayPath -> {
+                    displayPath.plus(component.associatedGroup!!)
+                }
+                else -> {
+                    displayPath
+                }
+            }
             when (component) {
                 is PreferenceComponent.NavigationEntry -> {
-                    entries.add(SearchIndexEntry(component, screen, displayPath))
-                    buildSearchIndexRecursive(options, entries, displayPath.plus(component.targetScreen.title), component.targetScreen)
+                    entries.add(SearchIndex.Entry(component, screen, displayPath))
+                    buildSearchIndexRecursive(options, entries, displayPath.plus(component.targetScreen), component.targetScreen)
                 }
                 is PreferenceComponent.ComposableContent -> {
                     // exclude from indexing
                 }
                 else -> {
-                    entries.add(SearchIndexEntry(component, screen, displayPath))
+                    entries.add(SearchIndex.Entry(component, screen, displayPath))
                 }
             }
         }
     }
-
-    data class SearchIndex(
-        val options: SearchIndexOptions,
-        val entries: List<SearchIndexEntry>,
-    )
-
-    data class SearchIndexOptions(
-        val includeGroupsInDisplayPath: Boolean = true,
-    ) {
-        companion object {
-            val Default = SearchIndexOptions()
-        }
-    }
-
-    data class SearchIndexEntry(
-        val component: PreferenceComponent,
-        val associatedScreen: PreferenceScreen,
-        val displayPath: List<@Composable () -> String>,
-    )
 }

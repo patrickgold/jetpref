@@ -1,11 +1,14 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BeachAccess
 import dev.patrickgold.jetpref.datastore.component.PreferenceScreen
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.example.ExamplePreferenceStore
 
 data object AdditionalScreen : PreferenceScreen({
-    title { "Advanced Screen" }
+    title { "Additional Screen" }
+    icon { Icons.Default.BeachAccess }
 
     val prefs by ExamplePreferenceStore
     components {

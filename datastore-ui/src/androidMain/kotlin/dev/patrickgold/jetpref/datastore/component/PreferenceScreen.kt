@@ -26,10 +26,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.ui.LocalIconSpaceReserved
 import dev.patrickgold.jetpref.datastore.ui.LocalPreferenceComponentIdToHighlight
 
-abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) {
-    val title: @Composable () -> String
+abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Presentable {
+    private val titleBacking: @Composable () -> String
 
-    val icon: (@Composable () -> ImageVector)?
+    override val title: @Composable () -> String
+        get() = titleBacking
+
+    private val iconBacking: (@Composable () -> ImageVector)?
+
+    override val icon: (@Composable () -> ImageVector)?
+        get() = iconBacking
 
     val components: List<PreferenceComponent>
 
@@ -38,8 +44,8 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) {
     init {
         val builder = PreferenceScreenBuilder(this::class)
         builder.block()
-        title = builder.title
-        icon = builder.icon
+        titleBacking = builder.title
+        iconBacking = builder.icon
         components = builder.components?.toList() ?: emptyList()
         content = builder.content ?: @Composable {
             val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current

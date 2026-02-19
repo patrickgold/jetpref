@@ -18,29 +18,26 @@ package dev.patrickgold.jetpref.datastore.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.ui.ListPreferenceEntry
 
-sealed interface PreferenceComponent {
+sealed interface PreferenceComponent : Presentable {
     val id: Int
-
-    val title: @Composable () -> String
-
-    val icon: (@Composable () -> ImageVector)?
 
     val enabledIf: PreferenceDataEvaluator
 
     val visibleIf: PreferenceDataEvaluator
+
+    val associatedGroup: GroupHeader?
 
     val level: Int
 
     @Composable
     fun Render()
 
-    interface GroupTitle : PreferenceComponent
+    interface GroupHeader : PreferenceComponent
 
     interface ComposableContent : PreferenceComponent {
         val content: @Composable () -> Unit

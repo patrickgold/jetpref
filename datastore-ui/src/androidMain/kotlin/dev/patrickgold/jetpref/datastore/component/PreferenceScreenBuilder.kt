@@ -83,6 +83,8 @@ open class PreferenceComponentListBuilder(
     val groupVisibleIf: PreferenceDataEvaluator? = null,
     val level: Int,
 ) {
+    internal var associatedGroup: PreferenceComponent.GroupHeader? = null
+
     @PublishedApi
     internal val components = mutableListOf<PreferenceComponent>()
 
@@ -119,22 +121,23 @@ open class PreferenceComponentListBuilder(
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
         val builder = PreferenceComponentListBuilder(combineEnabledIf(enabledIf), combineVisibleIf(visibleIf), level + 1)
-        builder.groupTitle(title, icon)
+        builder.groupHeader(title, icon)
         builder.block()
         components.addAll(builder.components)
     }
 
     @PublishedApi
-    internal fun groupTitle(
+    internal fun groupHeader(
         title: @Composable () -> String,
         icon: (@Composable () -> ImageVector)? = null,
     ) {
-        val component = object : PreferenceComponent.GroupTitle {
+        val component = object : PreferenceComponent.GroupHeader {
             override val id = PreferenceComponentId.next()
             override val title = title
             override val icon = icon
             override val enabledIf = this@PreferenceComponentListBuilder.groupEnabledIf ?: { true }
             override val visibleIf = this@PreferenceComponentListBuilder.groupVisibleIf ?: { true }
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -155,6 +158,7 @@ open class PreferenceComponentListBuilder(
                 }
             }
         }
+        associatedGroup = component
         components.add(component)
     }
 
@@ -170,6 +174,7 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val content = content
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -196,6 +201,7 @@ open class PreferenceComponentListBuilder(
             override val summary = summary
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -226,6 +232,7 @@ open class PreferenceComponentListBuilder(
             override val summaryOff = summaryOff
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -252,6 +259,7 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val entries = entries
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -282,6 +290,7 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val entries = entries
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -316,6 +325,7 @@ open class PreferenceComponentListBuilder(
             override val defaultColors = defaultColors
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -340,6 +350,7 @@ open class PreferenceComponentListBuilder(
             override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -380,6 +391,7 @@ open class PreferenceComponentListBuilder(
             override val validateValue = validateValue
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val level = this@PreferenceComponentListBuilder.level
 
             @Composable
@@ -417,6 +429,7 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val convertToV = convertToV
 
             @Composable
@@ -487,6 +500,7 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
             override val convertToV = convertToV
 
             @Composable

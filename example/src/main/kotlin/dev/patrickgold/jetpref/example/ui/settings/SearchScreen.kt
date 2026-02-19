@@ -19,7 +19,9 @@ data object SearchScreen : PreferenceScreen({
         var searchText by remember { mutableStateOf("") }
         PreferenceSearch(
             modifier = Modifier.fillMaxSize(),
-            searchIndex = remember { ExamplePreferenceComponentTree.buildSearchIndex() },
+            searchIndex = remember {
+                ExamplePreferenceComponentTree.buildSearchIndex()
+            },
             searchText = searchText,
             beforeResultsContent = {
                 TextField(
