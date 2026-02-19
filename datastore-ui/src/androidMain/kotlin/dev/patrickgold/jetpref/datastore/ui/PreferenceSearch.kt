@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import dev.patrickgold.jetpref.datastore.component.SearchIndex
+import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
 
 @Composable
@@ -42,8 +43,10 @@ fun PreferenceSearch(
         item { beforeResultsContent() }
         items(searchIndex.entries, key = { it.component.id }) { entry ->
             val title = entry.component.title.invoke()
-            val displayPath = entry.displayPath.map { it.icon?.invoke() to it.title.invoke() }
-            if (searchTextTrimmed.isNotBlank() && title.lowercase().contains(searchTextTrimmed)) {
+            val visible = entry.component.visibleIf(PreferenceDataEvaluatorScope) &&
+                searchTextTrimmed.isNotBlank() &&
+                title.lowercase().contains(searchTextTrimmed)
+            if (visible) {
                 JetPrefListItem(
                     modifier = Modifier
                         .clickable {
@@ -53,6 +56,7 @@ fun PreferenceSearch(
                     headlineContent = { Text(title) },
                     secondaryContent = {
                         Row {
+                            val displayPath = entry.displayPath.map { it.icon?.invoke() to it.title.invoke() }
                             displayPath.forEachIndexed { index, (icon, title) ->
                                 if (index > 0) {
                                     Text(" > ")

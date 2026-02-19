@@ -16,15 +16,30 @@
 
 package dev.patrickgold.jetpref.datastore.component
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
+import dev.patrickgold.jetpref.datastore.ui.LocalFlashModifierProvider
 import dev.patrickgold.jetpref.datastore.ui.LocalIconSpaceReserved
 import dev.patrickgold.jetpref.datastore.ui.LocalPreferenceComponentIdToHighlight
+import kotlinx.coroutines.delay
 
 abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Presentable {
     private val titleBacking: @Composable () -> String
@@ -49,6 +64,7 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
         components = builder.components?.toList() ?: emptyList()
         content = builder.content ?: @Composable {
             val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
+            val provideFlashModifier = LocalFlashModifierProvider.current
             val lazyListState = rememberLazyListState()
             LaunchedEffect(componentIdToHighlight) {
                 val index = this@PreferenceScreen.components.indexOfFirst { it.id == componentIdToHighlight }
@@ -59,7 +75,14 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
             }
             LazyColumn(state = lazyListState) {
                 items(components, key = { it.id }) { component ->
-                    component.Render()
+                    Box {
+                        component.Render()
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .then(provideFlashModifier(component))
+                        )
+                    }
                 }
             }
         }
@@ -77,4 +100,29 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
             content()
         }
     }
+}
+
+fun Modifier.flash(
+    component: PreferenceComponent,
+    initialDelay: Long = 300L,
+    visibleFor: Long = 1000L,
+    flashColor: Color = Color.Unspecified,
+) = composed {
+    val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
+    var highlightedId by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(componentIdToHighlight) {
+        delay(initialDelay)
+        highlightedId = componentIdToHighlight
+        delay(visibleFor)
+        highlightedId = null
+    }
+    val isHighlighted = component.id == highlightedId
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isHighlighted -> flashColor.takeOrElse { MaterialTheme.colorScheme.primary.copy(0.5f) }
+            else -> Color.Transparent
+        },
+        animationSpec = tween(600),
+    )
+    return@composed Modifier.background(backgroundColor)
 }

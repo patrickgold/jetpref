@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,13 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
-import dev.patrickgold.jetpref.datastore.model.PreferenceModel
-import dev.patrickgold.jetpref.datastore.runtime.DataStore
-
-@DslMarker
-@Target(AnnotationTarget.TYPE)
-annotation class PreferenceUiScopeDsl
-
-typealias PreferenceUiContent<T> = @Composable @PreferenceUiScopeDsl PreferenceUiScope<T>.() -> Unit
+import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
+import dev.patrickgold.jetpref.datastore.component.flash
 
 /**
  * Composition local for the global setting if all sub-preference composables should reserve an icon space.
@@ -54,170 +37,44 @@ val LocalIconSpaceReserved = staticCompositionLocalOf { false }
  *
  * @since 0.2.0
  */
-val LocalIsPrefEnabled = staticCompositionLocalOf { true }
+val LocalIsPrefEnabled = compositionLocalOf { true }
 
 /**
  * Composition local of the current isVisible state which applies.
  *
  * @since 0.2.0
  */
-val LocalIsPrefVisible = staticCompositionLocalOf { true }
+val LocalIsPrefVisible = compositionLocalOf { true }
 
 /**
- * Preference UI scope which allows access to the current datastore model.
+ * Composition local providing the flash modifier for component search targets.
  *
- * @property prefs The current datastore model.
- *
- * @since 0.1.0
+ * @since 0.4.0
  */
-class PreferenceUiScope<T : PreferenceModel>(
-    val prefs: T,
-    columnScope: ColumnScope,
-) : ColumnScope by columnScope
-
-/**
- * Material preference layout which allows for easy access to the preference datastore.
- * All preference composables within this layout will make use of the provided datastore
- * automatically.
- *
- * @param dataStore The cached preference datastore model of your app.
- * @param modifier Modifier to be applied to this layout.
- * @param iconSpaceReserved Global setting if all sub-preference composables should reserve
- *  an additional space if no icon is specified. Can be overridden for each individual preference
- *  composable.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference layout
- *  should be enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference layout
- *  should be visible (true) or hidden (false).
- * @param content The content of this preference layout.
- *
- * @since 0.1.0
- */
-@Composable
-fun <T : PreferenceModel> PreferenceLayout(
-    dataStore: DataStore<T>,
-    modifier: Modifier = Modifier,
-    iconSpaceReserved: Boolean = true,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-    content: PreferenceUiContent<T>,
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalIsPrefEnabled provides enabledIf(PreferenceDataEvaluatorScope),
-        LocalIsPrefVisible provides visibleIf(PreferenceDataEvaluatorScope),
-    ) {
-        Column(modifier = modifier) {
-            val prefModel by dataStore
-            val preferenceScope = PreferenceUiScope(
-                prefs = prefModel,
-                columnScope = this,
-            )
-            content(preferenceScope)
-        }
-    }
+val LocalFlashModifierProvider = staticCompositionLocalOf<((PreferenceComponent) -> Modifier)> {
+    error("No FlashModifierProvider provided")
 }
 
 /**
- * Material preference layout which allows for easy access to the preference datastore.
- * All preference composables within this layout will make use of the provided datastore
- * automatically. Additionally, this layout also provides a default scroll modifier.
+ * Root element for the JetPref hierarchy. Must be used to provide necessary composition locals.
  *
- * @param dataStore The cached preference datastore model of your app.
- * @param modifier Modifier to be applied to this layout.
- * @param iconSpaceReserved Global setting if all sub-preference composables should reserve
- *  an additional space if no icon is specified. Can be overridden for each individual preference
- *  composable.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference layout
- *  should be enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference layout
- *  should be visible (true) or hidden (false).
- * @param content The content of this preference layout.
- *
- * @since 0.1.0
- */
-@Composable
-fun <T : PreferenceModel> ScrollablePreferenceLayout(
-    dataStore: DataStore<T>,
-    modifier: Modifier = Modifier,
-    iconSpaceReserved: Boolean = true,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-    content: PreferenceUiContent<T>,
-) {
-    PreferenceLayout(
-        dataStore = dataStore,
-        modifier = modifier.verticalScroll(rememberScrollState()),
-        iconSpaceReserved = iconSpaceReserved,
-        enabledIf = enabledIf,
-        visibleIf = visibleIf,
-        content = content,
-    )
-}
-
-/**
- * Material preference group which automatically provides a title UI.
- *
- * @param modifier Modifier to be applied to this group.
- * @param icon The [ImageVector] of the group title.
+ * @param router The router that will map a screen route request to the in-app navigation controller.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
- *  space) if no `icon` is provided. Also acts as a local setting if all sub-preference composables
- *  should reserve an additional space if no icon is specified. It Can be overridden for each
- *  preference composable.
- * @param title The title of this preference group.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference layout
- *  should be enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference layout
- *  should be visible (true) or hidden (false).
- * @param content The content of this preference group.
+*   space) if no `icon` is provided for a preference.
+ * @param provideFlashModifier The modifier that will be applied after jumping to a component from search.
  *
- * @since 0.1.0
+ * @since 0.4.0
  */
-@Composable
-fun <T : PreferenceModel> PreferenceUiScope<T>.PreferenceGroup(
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-    content: PreferenceUiContent<T>,
-) {
-    if (LocalIsPrefVisible.current && visibleIf(PreferenceDataEvaluatorScope)) {
-        Column(modifier = modifier) {
-            val preferenceScope = PreferenceUiScope(
-                prefs = this@PreferenceGroup.prefs,
-                columnScope = this@Column,
-            )
-            CompositionLocalProvider(
-                LocalIconSpaceReserved provides iconSpaceReserved,
-                LocalIsPrefEnabled provides enabledIf(PreferenceDataEvaluatorScope),
-                LocalIsPrefVisible provides visibleIf(PreferenceDataEvaluatorScope),
-            ) {
-                ListItem(
-                    leadingContent = maybeJetIcon(icon),
-                    headlineContent = { Text(
-                        text = title,
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    ) },
-                )
-                content(preferenceScope)
-            }
-        }
-    }
-}
-
 @Composable
 fun JetPrefHost(
     router: PreferenceNavigationRouter,
     iconSpaceReserved: Boolean = true,
+    provideFlashModifier: ((PreferenceComponent) -> Modifier) = { Modifier.flash(it) },
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalPreferenceNavigationRouter provides router,
+        LocalFlashModifierProvider provides provideFlashModifier,
         LocalIconSpaceReserved provides iconSpaceReserved,
     ) {
         content()
