@@ -17,8 +17,10 @@ data object HomeScreen : PreferenceScreen({
 
     val prefs by ExamplePreferenceStore
     components {
+        navigationTo(SearchScreen)
         navigationTo(ColorPickerDemoScreen)
         navigationTo(AdditionalScreen)
+        navigationTo(VisualizeSearchIndexScreen)
         listPicker(
             listPref = prefs.theme,
             icon = { Icons.Default.Palette },

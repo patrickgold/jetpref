@@ -50,12 +50,18 @@ annotation class PreferenceComponentBuilderDslMarker
 class PreferenceScreenBuilder(val kClass: KClass<*>) {
     internal var title: @Composable () -> String = { kClass.simpleName ?: "<unnamed screen>" }
 
+    internal var icon: (@Composable () -> ImageVector)? = null
+
     internal var components: List<PreferenceComponent>? = null
 
     internal var content: (@Composable () -> Unit)? = null
 
     fun title(block: @Composable () -> String) {
         title = block
+    }
+
+    fun icon(block: @Composable () -> ImageVector) {
+        icon = block
     }
 
     fun components(block: PreferenceComponentListBuilder.() -> Unit) {
@@ -177,7 +183,7 @@ open class PreferenceComponentListBuilder(
     fun navigationTo(
         targetScreen: PreferenceScreen,
         title: @Composable () -> String = targetScreen.title,
-        icon: (@Composable () -> ImageVector)? = null,
+        icon: (@Composable () -> ImageVector)? = targetScreen.icon,
         summary: (@Composable () -> String)? = null,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },

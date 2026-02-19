@@ -22,11 +22,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.ui.LocalIconSpaceReserved
 import dev.patrickgold.jetpref.datastore.ui.LocalPreferenceComponentIdToHighlight
 
 abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) {
     val title: @Composable () -> String
+
+    val icon: (@Composable () -> ImageVector)?
 
     val components: List<PreferenceComponent>
 
@@ -36,6 +39,7 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) {
         val builder = PreferenceScreenBuilder(this::class)
         builder.block()
         title = builder.title
+        icon = builder.icon
         components = builder.components?.toList() ?: emptyList()
         content = builder.content ?: @Composable {
             val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
