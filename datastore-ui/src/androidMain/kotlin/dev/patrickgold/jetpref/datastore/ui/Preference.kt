@@ -84,35 +84,13 @@ fun Preference(
                 icon = maybeJetIcon(icon),
                 text = title,
                 secondaryText = summary,
-                trailing = trailing,
+                trailingContent = trailing,
                 enabled = isEnabled,
             )
         }
     }
 }
 
-@Deprecated("Use new Preference instead.")
-@Composable
-fun Preference(
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    summary: String? = null,
-    trailing: @Composable (() -> Unit)? = null,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-    onClick: (() -> Unit)? = null,
-    eventModifier: (@Composable () -> Modifier)? = null,
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-    ) {
-        Preference(
-            modifier, icon,  title, summary, trailing, enabledIf, visibleIf, onClick, eventModifier,
-       )
-    }
-}
 
 @Composable
 fun NavigationEntryPreference(

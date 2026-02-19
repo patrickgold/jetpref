@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.Dp
  * @param secondaryText The secondary text of the list item.
  * @param singleLineSecondaryText If the secondary text should be limited to a single line.
  * @param enabled If false, this list item will be grayed out.
- * @param trailing The trailing meta text, icon, switch or checkbox.
+ * @param trailingContent The trailing meta text, icon, switch or checkbox.
  * @param colors The colors to be used for the list item.
  * @param tonalElevation The elevation to be used for the tonal surface.
  * @param shadowElevation The elevation to be used for the shadow surface.
@@ -54,14 +54,14 @@ fun JetPrefListItem(
     secondaryText: String? = null,
     singleLineSecondaryText: Boolean = false,
     enabled: Boolean = true,
-    trailing: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
     colors: ListItemColors = ListItemDefaults.colors(),
     tonalElevation: Dp = ListItemDefaults.Elevation,
     shadowElevation: Dp = ListItemDefaults.Elevation,
 ) {
-    ListItem(
-        modifier = modifier.alpha(if (enabled) 1.0f else 0.38f),
-        leadingContent = icon,
+    JetPrefListItem(
+        modifier,
+        icon,
         overlineContent = whenNotNullOrBlank(overlineText) { str ->
             Text(
                 text = str,
@@ -76,14 +76,61 @@ fun JetPrefListItem(
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        supportingContent = whenNotNullOrBlank(secondaryText) { str ->
-            Text(
-                text = str,
-                maxLines = if (singleLineSecondaryText) { 1 } else { 2 },
-                overflow = TextOverflow.Ellipsis,
-            )
+        secondaryContent = {
+            whenNotNullOrBlank(secondaryText) { str ->
+                Text(
+                    text = str,
+                    maxLines = if (singleLineSecondaryText) { 1 } else { 2 },
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         },
-        trailingContent = trailing,
+        enabled,
+        trailingContent = trailingContent,
+        colors = colors,
+        tonalElevation = tonalElevation,
+        shadowElevation = shadowElevation,
+    )
+}
+
+/**
+ * Material Design list item.
+ *
+ * @param modifier Modifier to be applied to the list item.
+ * @param icon The leading supporting visual of the list item.
+ * @param overlineContent The text displayed above the primary text.
+ * @param headlineContent The primary text of the list item.
+ * @param secondaryContent The secondary composable of the list item.
+ * @param enabled If false, this list item will be grayed out.
+ * @param trailingContent The trailing meta text, icon, switch or checkbox.
+ * @param colors The colors to be used for the list item.
+ * @param tonalElevation The elevation to be used for the tonal surface.
+ * @param shadowElevation The elevation to be used for the shadow surface.
+ *
+ * @since 0.4.0
+ *
+ * @see androidx.compose.material3.ListItem
+ */
+@Composable
+fun JetPrefListItem(
+    modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
+    overlineContent: (@Composable () -> Unit)? = null,
+    headlineContent: (@Composable () -> Unit),
+    secondaryContent: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true,
+    trailingContent: (@Composable () -> Unit)? = null,
+    colors: ListItemColors = ListItemDefaults.colors(),
+    tonalElevation: Dp = ListItemDefaults.Elevation,
+    shadowElevation: Dp = ListItemDefaults.Elevation,
+) {
+    ListItem(
+        modifier = modifier.alpha(if (enabled) 1.0f else 0.38f),
+        leadingContent = icon,
+        overlineContent = overlineContent,
+        headlineContent = headlineContent,
+        supportingContent = secondaryContent,
+        trailingContent = trailingContent,
         colors = colors,
         tonalElevation = tonalElevation,
         shadowElevation = shadowElevation,
