@@ -16,15 +16,11 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
-import android.text.format.DateFormat.is24HourFormat
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,6 +31,8 @@ import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,17 +40,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
+import jetpref.datastore_ui.generated.resources.Res
+import jetpref.datastore_ui.generated.resources.ic_keyboard
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+
+@Composable
+expect fun rememberIs24HourFormat(): State<Boolean>
 
 /**
  * Material preference which provides a dialog with a time picker for choosing a time.
@@ -78,20 +80,12 @@ fun LocalTimePickerPreference(
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
-    val context = LocalContext.current
     val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
     val prefValue by pref.collectAsState()
     var isDialogOpen by remember { mutableStateOf(false) }
     var displayMode by remember { mutableStateOf(DisplayMode.Picker) }
-    var is24hour by remember {
-        mutableStateOf(is24HourFormat(context))
-    }
-
-    LifecycleResumeEffect(Unit) {
-        is24hour = is24HourFormat(context)
-        onPauseOrDispose { }
-    }
+    val is24hour by rememberIs24HourFormat()
 
     Preference(
         modifier = modifier,
@@ -112,9 +106,8 @@ fun LocalTimePickerPreference(
             is24Hour = is24hour,
         )
 
-        LifecycleResumeEffect(Unit) {
-            timePickerState.is24hour = is24HourFormat(context)
-            onPauseOrDispose { }
+        LaunchedEffect(is24hour) {
+            timePickerState.is24hour = is24hour
         }
 
         JetPrefAlertDialog(
@@ -202,7 +195,7 @@ private fun DisplayModeToggleButton(
             onClick = { onDisplayModeChange(DisplayMode.Input) },
         ) {
             Icon(
-                imageVector = Icons.Default.Keyboard,
+                painter = painterResource(Res.drawable.ic_keyboard),
                 contentDescription = "Switch time input to keyboard input",
             )
         }
@@ -212,7 +205,7 @@ private fun DisplayModeToggleButton(
             onClick = { onDisplayModeChange(DisplayMode.Picker) },
         ) {
             Icon(
-                imageVector = Icons.Default.Schedule,
+                painter = painterResource(Res.drawable.ic_keyboard),
                 contentDescription = "Switch time input to time picker",
             )
         }

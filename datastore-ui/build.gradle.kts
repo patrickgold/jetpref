@@ -18,6 +18,8 @@ kotlin {
         compileSdk = projectCompileSdk.toInt()
         minSdk = projectMinSdk.toInt()
 
+        androidResources.enable = true
+
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
             freeCompilerArgs = listOf("-XXLanguage:+ContextParameters")
@@ -32,10 +34,10 @@ kotlin {
     }
 
     sourceSets {
-        androidMain {
+        commonMain {
             dependencies {
+                implementation(libs.jetbrains.compose.components.resources)
                 implementation(libs.jetbrains.compose.material3)
-                implementation(libs.jetbrains.compose.material.icons.extended)
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.jetbrains.compose.ui)
                 implementation(libs.androidx.core.ktx)

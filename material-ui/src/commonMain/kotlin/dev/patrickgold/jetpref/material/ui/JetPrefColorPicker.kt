@@ -17,7 +17,7 @@
 package dev.patrickgold.jetpref.material.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -36,10 +36,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,16 +57,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.LinearGradientShader
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
@@ -78,6 +71,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.takeOrElse
+import jetpref.material_ui.generated.resources.Res
+import jetpref.material_ui.generated.resources.ic_check
+import jetpref.material_ui.generated.resources.ic_close
+import jetpref.material_ui.generated.resources.ic_edit
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.ceil
 
 private val PreviewSize = 64.dp
@@ -190,7 +188,7 @@ fun JetPrefColorPicker(
                 trailingIcon = {
                     if (!state.isEditorMode) {
                         IconButton(onClick = { state.isEditorMode = true }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit color")
+                            Icon(painterResource(Res.drawable.ic_edit), contentDescription = "Edit color")
                         }
                     } else {
                         Row {
@@ -206,10 +204,10 @@ fun JetPrefColorPicker(
                                 selectedRepresentation = newRepresentation
                                 state.isEditorMode = false
                             }) {
-                                Icon(Icons.Default.Done, contentDescription = "Apply changes")
+                                Icon(painterResource(Res.drawable.ic_check), contentDescription = "Apply changes")
                             }
                             IconButton(onClick = { state.isEditorMode = false }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Discard changes")
+                                Icon(painterResource(Res.drawable.ic_close), contentDescription = "Discard changes")
                             }
                         }
                     }
@@ -277,9 +275,8 @@ private fun HueBar(
             .height(SliderTrackHeight),
     ) {
         val width = this.constraints.maxWidth
-        val height = this.constraints.maxHeight
-        val hueBarShader = remember(width, height) {
-            HueBarShader(width, height)
+        val hueBarShader = remember {
+            HueBarShader()
         }
 
         val inputModifier = Modifier.pointerInput(hueBarShader, state.isEditorMode) {
@@ -303,7 +300,7 @@ private fun HueBar(
         ColorSlider(
             modifier = inputModifier.padding(),
             state = state,
-            bitmap = hueBarShader.image,
+            brush = hueBarShader.brush,
             fillColor = state.rememberHueColor(),
             strokeColor = strokeColor,
             thumbPosition = width.toDp() * (state.hue / 360f) - SliderThumbSize / 2,
@@ -324,10 +321,9 @@ fun AlphaBar(
             .height(SliderTrackHeight),
     ) {
         val width = this.constraints.maxWidth
-        val height = this.constraints.maxHeight
         val colorWithoutAlpha = state.rememberColorWithoutAlpha()
-        val alphaBarShader = remember(width, height, colorWithoutAlpha) {
-            AlphaBarShader(width, height, colorWithoutAlpha)
+        val alphaBarShader = remember(colorWithoutAlpha) {
+            AlphaBarShader(colorWithoutAlpha)
         }
 
         val inputModifier = Modifier.pointerInput(alphaBarShader, state.isEditorMode) {
@@ -351,7 +347,7 @@ fun AlphaBar(
         ColorSlider(
             modifier = inputModifier,
             state = state,
-            bitmap = alphaBarShader.image,
+            brush = alphaBarShader.brush,
             fillColor = state.rememberColor(),
             strokeColor = strokeColor,
             thumbPosition = width.toDp() * state.alpha - (SliderThumbSize / 2),
@@ -376,8 +372,8 @@ private fun SaturationValueBox(
         val width = this.constraints.maxWidth
         val height = this.constraints.maxHeight
         val hueColor = state.rememberHueColor()
-        val satValBox = remember(width, height, hueColor) {
-            SaturationValueBoxShader(width, height, hueColor)
+        val satValBox = remember(hueColor) {
+            SaturationValueBoxShader(hueColor)
         }
 
         val inputModifier = Modifier.pointerInput(satValBox, state.isEditorMode) {
@@ -402,12 +398,11 @@ private fun SaturationValueBox(
         Box(
             modifier = inputModifier.matchParentSize(),
         ) {
-            Image(
+            Box(
                 modifier = Modifier
                     .matchParentSize()
+                    .background(satValBox.brush)
                     .clip(OutlinedTextFieldDefaults.shape),
-                contentDescription = null,
-                bitmap = satValBox.image,
             )
             if (!state.isEditorMode) {
                 Thumb(
@@ -425,7 +420,7 @@ private fun SaturationValueBox(
 private fun ColorSlider(
     modifier: Modifier = Modifier,
     state: JetPrefColorPickerState,
-    bitmap: ImageBitmap,
+    brush: Brush,
     fillColor: Color,
     strokeColor: Color,
     thumbPosition: Dp = 0.dp,
@@ -435,15 +430,13 @@ private fun ColorSlider(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Image(
+        Box(
             modifier = Modifier
-                .fillMaxSize()
+                .matchParentSize()
                 .clip(CircleShape)
+                .background(brush)
                 .then(if (checkeredBackground) Modifier.checkeredBackground() else Modifier),
-            contentDescription = null,
-            bitmap = bitmap,
         )
-
         if (!state.isEditorMode) {
             Thumb(
                 fillColor = fillColor,
@@ -467,7 +460,7 @@ private fun Thumb(
         modifier = modifier
             .requiredSize(SliderThumbSize)
             .offset(x = thumbPositionX, y = thumbPositionY)
-            .pointerInteropFilter { false },
+            .pointerInput(Unit) { },
         shape = CircleShape,
         color = fillColor.compositeOver(Color.White),
         border = BorderStroke(SliderThumbBorderSize, strokeColor),
@@ -611,13 +604,11 @@ private class JetPrefColorPickerStateImpl(
 }
 
 private interface ShaderBase {
-    val image: ImageBitmap
+    val brush: Brush
 }
 
-private class HueBarShader(width: Int, height: Int) : ShaderBase {
-    private val hueGradient = LinearGradientShader(
-        from = Offset.Zero,
-        to = Offset(x = width.toFloat(), y = 0f),
+private class HueBarShader : ShaderBase {
+    override val brush = Brush.horizontalGradient(
         colors = listOf(
             Color.Red,
             Color.Yellow,
@@ -627,84 +618,32 @@ private class HueBarShader(width: Int, height: Int) : ShaderBase {
             Color.Magenta,
             Color.Red,
         ),
-        colorStops = null,
     )
-
-    override val image = ImageBitmap(width, height).also { imageBitmap ->
-        val canvas = Canvas(imageBitmap)
-        val paint = Paint().apply { shader = hueGradient }
-        canvas.drawRect(
-            left = 0f,
-            top = 0f,
-            right = width.toFloat(),
-            bottom = height.toFloat(),
-            paint = paint,
-        )
-    }
 }
 
-private class AlphaBarShader(width: Int, height: Int, colorWithoutAlpha: Color) : ShaderBase {
-    private val alphaGradient = LinearGradientShader(
-        from = Offset.Zero,
-        to = Offset(x = width.toFloat(), y = 0f),
+private class AlphaBarShader(colorWithoutAlpha: Color) : ShaderBase {
+    override val brush = Brush.horizontalGradient(
         colors = listOf(
             Color.Transparent,
             colorWithoutAlpha,
         ),
-        colorStops = null,
     )
-
-    override val image = ImageBitmap(width, height).also { imageBitmap ->
-        val canvas = Canvas(imageBitmap)
-        val paint = Paint().apply { shader = alphaGradient }
-        canvas.drawRect(
-            left = 0f,
-            top = 0f,
-            right = width.toFloat(),
-            bottom = height.toFloat(),
-            paint = paint,
-        )
-    }
 }
 
-private class SaturationValueBoxShader(width: Int, height: Int, hueColor: Color) : ShaderBase {
-    private val saturationGradient = LinearGradientShader(
-        from = Offset.Zero,
-        to = Offset(x = width.toFloat(), y = 0f),
+private class SaturationValueBoxShader(hueColor: Color) : ShaderBase {
+    private val saturationGradient = Brush.horizontalGradient(
         colors = listOf(
             Color.White,
             hueColor,
         ),
-        colorStops = null,
     )
 
-    private val valueGradient = LinearGradientShader(
-        from = Offset(x = 0f, y = height.toFloat()),
-        to = Offset.Zero,
+    private val valueGradient = Brush.verticalGradient(
         colors = listOf(
-            Color.Black,
             Color.Transparent,
+            Color.Black,
         ),
-        colorStops = null,
     )
 
-    override val image = ImageBitmap(width, height).also { imageBitmap ->
-        val canvas = Canvas(imageBitmap)
-        val saturationPaint = Paint().apply { shader = saturationGradient }
-        canvas.drawRect(
-            left = 0f,
-            top = 0f,
-            right = width.toFloat(),
-            bottom = height.toFloat(),
-            paint = saturationPaint,
-        )
-        val valuePaint = Paint().apply { shader = valueGradient }
-        canvas.drawRect(
-            left = 0f,
-            top = 0f,
-            right = width.toFloat(),
-            bottom = height.toFloat(),
-            paint = valuePaint,
-        )
-    }
+    override val brush = Brush.composite(saturationGradient, valueGradient, BlendMode.Multiply)
 }

@@ -30,7 +30,7 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
     companion object {
         const val PREFERENCE_DATA_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.model.PreferenceData"
         const val PREFERENCES_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.annotations.Preferences"
-        const val PREFERNCE_MODEL_DUPLICATE_KEY_EXCEPTION_QUALIFIED_NAME =
+        const val PREFERENCE_MODEL_DUPLICATE_KEY_EXCEPTION_QUALIFIED_NAME =
             "dev.patrickgold.jetpref.datastore.runtime.PreferenceModelDuplicateKeyException"
         const val TYPED_KEY_QUALIFIED_NAME = "dev.patrickgold.jetpref.datastore.model.PreferenceModel.TypedKey"
     }
@@ -107,7 +107,7 @@ class ModelProcessor(private val env: SymbolProcessorEnvironment) : SymbolProces
         val abstractModelName = modelClassDecl.simpleName.asString()
         val finalModelName = abstractModelName + "Impl"
         val declaredPreferenceEntriesName = "declaredPreferenceEntries"
-        val duplicateClassName = ClassName.bestGuess(PREFERNCE_MODEL_DUPLICATE_KEY_EXCEPTION_QUALIFIED_NAME)
+        val duplicateClassName = ClassName.bestGuess(PREFERENCE_MODEL_DUPLICATE_KEY_EXCEPTION_QUALIFIED_NAME)
         val typedKeyClassName = ClassName.bestGuess(TYPED_KEY_QUALIFIED_NAME)
         val preferenceDataClassName = ClassName.bestGuess(PREFERENCE_DATA_QUALIFIED_NAME)
 

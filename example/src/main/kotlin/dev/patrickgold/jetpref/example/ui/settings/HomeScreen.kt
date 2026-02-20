@@ -1,8 +1,5 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatPaint
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -23,7 +20,7 @@ data object HomeScreen : PreferenceScreen({
         navigationTo(VisualizeSearchIndexScreen)
         listPicker(
             listPref = prefs.theme,
-            icon = { Icons.Default.Palette },
+            icon = { ImageVector.vectorResource(R.drawable.ic_palette) },
             title = { "Theme" },
             entries = Theme.listEntries(),
         )
@@ -84,7 +81,7 @@ data object HomeScreen : PreferenceScreen({
                 title = { "Accent color 1" },
                 summary = { "Without advanced and alpha" },
                 defaultValueLabel = { "Default" },
-                icon = { Icons.Default.FormatPaint },
+                icon = { ImageVector.vectorResource(R.drawable.ic_format_paint) },
                 showAlphaSlider = false,
                 enableAdvancedLayout = false,
                 defaultColors = defaultColors,
@@ -94,7 +91,7 @@ data object HomeScreen : PreferenceScreen({
                 title = { "Accent color 2" },
                 summary = { "Without advanced with alpha" },
                 defaultValueLabel = { "Default" },
-                icon = { Icons.Default.FormatPaint },
+                icon = { ImageVector.vectorResource(R.drawable.ic_format_paint) },
                 showAlphaSlider = true,
                 enableAdvancedLayout = false,
                 defaultColors = defaultColors,
@@ -104,7 +101,7 @@ data object HomeScreen : PreferenceScreen({
                 title = { "Accent color 3" },
                 summary = { "With advanced without alpha" },
                 defaultValueLabel = { "Default" },
-                icon = { Icons.Default.FormatPaint },
+                icon = { ImageVector.vectorResource(R.drawable.ic_format_paint) },
                 showAlphaSlider = false,
                 enableAdvancedLayout = true,
                 defaultColors = defaultColors,
@@ -114,7 +111,7 @@ data object HomeScreen : PreferenceScreen({
                 title = { "Accent color 4" },
                 summary = { "With advanced and alpha" },
                 defaultValueLabel = { "Default" },
-                icon = { Icons.Default.FormatPaint },
+                icon = { ImageVector.vectorResource(R.drawable.ic_format_paint) },
                 showAlphaSlider = true,
                 enableAdvancedLayout = true,
                 defaultColors = defaultColors,
