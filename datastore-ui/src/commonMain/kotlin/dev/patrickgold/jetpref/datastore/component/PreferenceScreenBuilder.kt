@@ -33,7 +33,7 @@ import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
 import dev.patrickgold.jetpref.datastore.ui.ListPreferenceEntry
 import dev.patrickgold.jetpref.datastore.ui.LocalTimePickerPreference
-import dev.patrickgold.jetpref.datastore.ui.NavigationEntryPreference
+import dev.patrickgold.jetpref.datastore.ui.PreferenceNavigationEntry
 import dev.patrickgold.jetpref.datastore.ui.SwitchPreference
 import dev.patrickgold.jetpref.datastore.ui.TextFieldPreference
 import dev.patrickgold.jetpref.datastore.ui.maybeJetIcon
@@ -206,7 +206,7 @@ open class PreferenceComponentListBuilder(
 
             @Composable
             override fun Render() {
-                NavigationEntryPreference(this)
+                PreferenceNavigationEntry(this)
             }
         }
         components.add(component)

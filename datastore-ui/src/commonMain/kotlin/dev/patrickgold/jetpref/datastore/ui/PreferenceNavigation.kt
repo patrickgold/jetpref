@@ -16,8 +16,10 @@
 
 package dev.patrickgold.jetpref.datastore.ui
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.component.PreferenceScreen
 
@@ -29,4 +31,29 @@ internal val LocalPreferenceComponentIdToHighlight = compositionLocalOf { -1 }
 
 internal val LocalPreferenceNavigationRouter = staticCompositionLocalOf<PreferenceNavigationRouter> {
     error("No PreferenceNavigationRouter provided.")
+}
+
+/**
+ * Navigation entry in the style of a preference.
+ *
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
+ *
+ * @since 0.4.0
+ */
+@Composable
+fun PreferenceNavigationEntry(
+    component: PreferenceComponent.NavigationEntry,
+    modifier: Modifier = Modifier,
+) {
+    val router = LocalPreferenceNavigationRouter.current
+    Preference(
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summary = component.summary?.invoke(),
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        onClick = { router.navigateTo(component.targetScreen, null) },
+    )
 }

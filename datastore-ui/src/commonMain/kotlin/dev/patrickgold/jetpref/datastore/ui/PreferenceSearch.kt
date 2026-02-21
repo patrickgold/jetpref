@@ -18,16 +18,22 @@ package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import dev.patrickgold.jetpref.datastore.component.SearchIndex
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
 import dev.patrickgold.jetpref.material.ui.JetPrefListItem
+import jetpref.datastore_ui.generated.resources.Res
+import jetpref.datastore_ui.generated.resources.ic_chevron_right
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun PreferenceSearch(
@@ -37,7 +43,6 @@ fun PreferenceSearch(
     beforeResultsContent: @Composable () -> Unit = { },
     afterResultsContent: @Composable () -> Unit = { },
 ) {
-    val router = LocalPreferenceNavigationRouter.current
     val searchTextTrimmed = remember(searchText) { searchText.trim().lowercase() }
     LazyColumn(modifier) {
         item { beforeResultsContent() }
@@ -47,35 +52,46 @@ fun PreferenceSearch(
                 searchTextTrimmed.isNotBlank() &&
                 title.lowercase().contains(searchTextTrimmed)
             if (visible) {
-                JetPrefListItem(
-                    modifier = Modifier
-                        .clickable {
-                            router.navigateTo(entry.associatedScreen, entry.component)
-                        },
-                    icon = maybeJetIcon(entry.component.icon?.invoke()),
-                    headlineContent = { Text(title) },
-                    secondaryContent = {
-                        Row {
-                            val displayPath = entry.displayPath.map { it.icon?.invoke() to it.title.invoke() }
-                            displayPath.forEachIndexed { index, (icon, title) ->
-                                if (index > 0) {
-                                    Text(" > ")
-                                }
-                                if (icon != null) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                    )
-                                }
-                                Text(title)
-                            }
-                        }
-                    },
-                )
-            } else {
-                //
+                SearchEntryDisplay(entry, title)
             }
         }
         item { afterResultsContent() }
     }
+}
+
+@Composable
+private fun SearchEntryDisplay(
+    entry: SearchIndex.Entry,
+    title: String,
+) {
+    val router = LocalPreferenceNavigationRouter.current
+    JetPrefListItem(
+        modifier = Modifier
+            .clickable {
+                router.navigateTo(entry.associatedScreen, entry.component)
+            },
+        icon = maybeJetIcon(entry.component.icon?.invoke()),
+        headlineContent = { Text(title) },
+        secondaryContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val displayPath = entry.displayPath.map { it.icon?.invoke() to it.title.invoke() }
+                displayPath.forEachIndexed { index, (icon, title) ->
+                    if (index > 0) {
+                        Icon(
+                            modifier = Modifier.size(16.dp),
+                            painter = painterResource(Res.drawable.ic_chevron_right),
+                            contentDescription = null,
+                        )
+                    }
+                    if (icon != null) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                        )
+                    }
+                    Text(title)
+                }
+            }
+        },
+    )
 }
