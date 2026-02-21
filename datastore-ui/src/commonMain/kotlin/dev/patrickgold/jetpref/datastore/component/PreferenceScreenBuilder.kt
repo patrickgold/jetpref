@@ -40,6 +40,8 @@ import dev.patrickgold.jetpref.datastore.ui.maybeJetIcon
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import kotlin.reflect.KClass
 
 @DslMarker
@@ -550,10 +552,22 @@ open class PreferenceComponentListBuilder(
 @PublishedApi
 internal inline fun <reified V : Number> selectConverter(): (Float) -> V {
     return when (V::class) {
-        Int::class -> { v -> v.toInt() as V }
-        Long::class -> { v -> v.toLong() as V }
-        Float::class -> { v -> v as V }
-        Double::class -> { v -> v.toDouble() as V }
+        Int::class -> { value ->
+            try {
+                value.roundToInt()
+            } catch (_: IllegalArgumentException) {
+                value.toInt()
+            } as V
+        }
+        Long::class -> { value ->
+            try {
+                value.roundToLong()
+            } catch (_: IllegalArgumentException) {
+                value.toLong()
+            } as V
+        }
+        Float::class -> { value -> value as V }
+        Double::class -> { value -> value.toDouble() as V }
         else -> error("Unknown subclass of V: ${V::class}")
     }
 }

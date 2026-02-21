@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.res.stringResource
 
 data class DialogPrefStrings(
     val confirmLabel: String,
@@ -36,11 +35,16 @@ val LocalDialogPrefStrings = staticCompositionLocalOf {
     )
 }
 
-@Deprecated("Use the renamed LocalDialogPrefStrings composition local.",
-    ReplaceWith("LocalDialogPrefStrings"))
-val LocalDefaultDialogPrefStrings = LocalDialogPrefStrings
+@Composable
+internal expect fun defaultConfirmLabel(): String
 
-/**
+@Composable
+internal expect fun defaultDismissLabel(): String
+
+@Composable
+internal expect fun defaultNeutralLabel(): String
+
+    /**
  * Provides the button strings to use in preference dialogs.
  *
  * @param confirmLabel The label for the confirm button. Null means
@@ -54,9 +58,9 @@ val LocalDefaultDialogPrefStrings = LocalDialogPrefStrings
  */
 @Composable
 fun ProvideDialogPrefStrings(
-    confirmLabel: String = stringResource(android.R.string.ok),
-    dismissLabel: String = stringResource(android.R.string.cancel),
-    neutralLabel: String = "Default",
+    confirmLabel: String = defaultConfirmLabel(),
+    dismissLabel: String = defaultDismissLabel(),
+    neutralLabel: String = defaultNeutralLabel(),
     content: @Composable () -> Unit,
 ) {
     val dialogPrefStrings = remember(confirmLabel, dismissLabel, neutralLabel) {
@@ -66,26 +70,4 @@ fun ProvideDialogPrefStrings(
         LocalDialogPrefStrings provides dialogPrefStrings,
         content = content,
     )
-}
-
-/**
- * Provides the default button strings to use for all preferences
- * which show a dialog.
- *
- * @param confirmLabel The label for the confirm button. Null means
- *  no preferred default value.
- * @param dismissLabel The label for the dismiss button. Null means
- *  no preferred default value.
- * @param neutralLabel The label for the neutral button. Null means
- *  no preferred default value.
- */
-@Deprecated("Use the renamed ProvideDialogPrefStrings function.")
-@Composable
-fun ProvideDefaultDialogPrefStrings(
-    confirmLabel: String = stringResource(android.R.string.ok),
-    dismissLabel: String = stringResource(android.R.string.cancel),
-    neutralLabel: String = "Default",
-    content: @Composable () -> Unit,
-) {
-    ProvideDialogPrefStrings(confirmLabel, dismissLabel, neutralLabel, content)
 }

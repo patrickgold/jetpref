@@ -19,17 +19,13 @@ package dev.patrickgold.jetpref.datastore.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
-import dev.patrickgold.jetpref.datastore.model.PreferenceData
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefTextField
@@ -40,59 +36,31 @@ import kotlinx.coroutines.launch
 /**
  * Material text field preference which provides a dialog with a text field.
  *
- * @param pref The string preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param summaryIfBlank The summary of this preference if the state is blank.
- * @param summaryIfEmpty The summary of this preference if the state is empty.
- * @param summary The summary function of this preference, shown as the list item secondary text (max 2 lines). If
- *  this is specified it will override provided [summaryIfBlank] and [summaryIfEmpty].
- * @param transformValue The transformation function to transform the entered value before saving/validating it.
- * @param validateValue The validation function to check if the entered value is valid (after transformation). To
- *  indicate an invalid value, throw an exception.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be enabled (true) or
- *  disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be visible (true) or
- *  hidden (false).
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
  *
  * @since 0.4.0
  */
 @Composable
 fun TextFieldPreference(
-    pref: PreferenceData<String>,
+    component: PreferenceComponent.TextField,
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    summaryIfBlank: String? = null,
-    summaryIfEmpty: String? = null,
-    summary: @Composable (String) -> String? = {
-        when {
-            it.isEmpty() -> summaryIfEmpty ?: it
-            it.isBlank() -> summaryIfBlank ?: it
-            else -> it
-        }
-    },
-    transformValue: (String) -> String = { it },
-    validateValue: (String) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
-    val prefValue by pref.collectAsState()
+    val prefValue by component.pref.collectAsState()
     var localPrefValue by remember { mutableStateOf("") }
     var isDialogOpen by remember { mutableStateOf(false) }
 
     Preference(
         modifier = modifier,
-        icon = icon,
-        title = title,
-        summary = summary(prefValue),
-        enabledIf = enabledIf,
-        visibleIf = visibleIf,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summary = component.summary.invoke(prefValue),
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
         onClick = {
-            localPrefValue = pref.get()
+            localPrefValue = component.pref.get()
             isDialogOpen = true
         },
     )
@@ -100,16 +68,16 @@ fun TextFieldPreference(
     if (isDialogOpen) {
         val validationResult = remember(localPrefValue) {
             runCatching {
-                validateValue(transformValue(localPrefValue))
+                component.validateValue(component.transformValue(localPrefValue))
             }
         }
         JetPrefAlertDialog(
-            title = title,
+            title = component.title.invoke(),
             confirmLabel = dialogStrings.confirmLabel,
             confirmEnabled = validationResult.isSuccess,
             onConfirm = {
                 scope.launch {
-                    pref.set(transformValue(localPrefValue))
+                    component.pref.set(component.transformValue(localPrefValue))
                 }
                 isDialogOpen = false
             },
@@ -120,7 +88,7 @@ fun TextFieldPreference(
             neutralLabel = dialogStrings.neutralLabel,
             onNeutral = {
                 scope.launch {
-                    pref.reset()
+                    component.pref.reset()
                 }
                 isDialogOpen = false
             },
@@ -141,58 +109,4 @@ fun TextFieldPreference(
             }
         }
     }
-}
-
-@Deprecated("Use new TextFieldPreference instead.")
-@Composable
-fun TextFieldPreference(
-    pref: PreferenceData<String>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    summaryIfBlank: String? = null,
-    summaryIfEmpty: String? = null,
-    summary: @Composable (String) -> String? = {
-        when {
-            it.isEmpty() -> summaryIfEmpty ?: it
-            it.isBlank() -> summaryIfBlank ?: it
-            else -> it
-        }
-    },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    transformValue: (String) -> String = { it },
-    validateValue: (String) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        TextFieldPreference(
-            pref, modifier, icon, title, summaryIfBlank, summaryIfEmpty, summary, transformValue, validateValue,
-            enabledIf,
-        )
-    }
-}
-
-@Composable
-fun TextFieldPreference(
-    component: PreferenceComponent.TextField,
-    modifier: Modifier = Modifier,
-) {
-    TextFieldPreference(
-        pref = component.pref,
-        modifier = modifier,
-        icon = component.icon?.invoke(),
-        title = component.title.invoke(),
-        summaryIfBlank = component.summaryIfBlank?.invoke(),
-        summaryIfEmpty = component.summaryIfEmpty?.invoke(),
-        summary = component.summary,
-        transformValue = component.transformValue,
-        validateValue = component.validateValue,
-        enabledIf = component.enabledIf,
-        visibleIf = component.visibleIf,
-    )
 }

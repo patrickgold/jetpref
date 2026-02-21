@@ -30,7 +30,6 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -39,13 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.model.LocalTime
-import dev.patrickgold.jetpref.datastore.model.PreferenceData
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import jetpref.datastore_ui.generated.resources.Res
@@ -59,41 +55,31 @@ expect fun rememberIs24HourFormat(): State<Boolean>
 /**
  * Material preference which provides a dialog with a time picker for choosing a time.
  *
- * @param pref The localTime preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
  *
  * @since 0.4.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalTimePickerPreference(
-    pref: PreferenceData<LocalTime>,
+    component: PreferenceComponent.LocalTimePicker,
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
-    val prefValue by pref.collectAsState()
+    val prefValue by component.pref.collectAsState()
     var isDialogOpen by remember { mutableStateOf(false) }
     var displayMode by remember { mutableStateOf(DisplayMode.Picker) }
     val is24hour by rememberIs24HourFormat()
 
     Preference(
         modifier = modifier,
-        icon = icon,
-        title = title,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
         summary = prefValue.stringRepresentation(is24hour),
-        enabledIf = enabledIf,
-        visibleIf = visibleIf,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
         onClick = {
             isDialogOpen = true
         },
@@ -111,14 +97,14 @@ fun LocalTimePickerPreference(
         }
 
         JetPrefAlertDialog(
-            title = title,
+            title = component.title.invoke(),
             modifier = Modifier
                 .width(IntrinsicSize.Min)
                 .height(IntrinsicSize.Min),
             confirmLabel = dialogStrings.confirmLabel,
             onConfirm = {
                 scope.launch {
-                    pref.set(timePickerState.toLocalTime())
+                    component.pref.set(timePickerState.toLocalTime())
                 }
                 isDialogOpen = false
             },
@@ -129,7 +115,7 @@ fun LocalTimePickerPreference(
             neutralLabel = dialogStrings.neutralLabel,
             onNeutral = {
                 scope.launch {
-                    pref.reset()
+                    component.pref.reset()
                 }
                 isDialogOpen = false
             },
@@ -147,42 +133,6 @@ fun LocalTimePickerPreference(
     }
 }
 
-@Deprecated("Use new LocalTimePickerPreference instead.")
-@Composable
-fun LocalTimePickerPreference(
-    pref: PreferenceData<LocalTime>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        LocalTimePickerPreference(pref, modifier, icon, title, enabledIf, visibleIf)
-    }
-}
-
-@Composable
-fun LocalTimePickerPreference(
-    component: PreferenceComponent.LocalTimePicker,
-    modifier: Modifier = Modifier,
-) {
-    LocalTimePickerPreference(
-        pref = component.pref,
-        modifier = modifier,
-        icon = component.icon?.invoke(),
-        title = component.title.invoke(),
-        enabledIf = component.enabledIf,
-        visibleIf = component.visibleIf,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DisplayModeToggleButton(
     displayMode: DisplayMode,

@@ -35,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -52,8 +51,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
-import dev.patrickgold.jetpref.datastore.model.PreferenceData
-import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.AlphaBar
 import dev.patrickgold.jetpref.material.ui.ExperimentalJetPrefMaterial3Ui
@@ -66,49 +63,31 @@ import kotlinx.coroutines.launch
 /**
  * Material Color picker preference with a preset and a custom layout
  *
- * @param pref The color preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
- * @param defaultValueLabel The label for the default color box.
- * @param showAlphaSlider If the alpha slider should be shown.
- * @param enableAdvancedLayout If the advancedLayout should be shown.
- * @param defaultColors [List] of [Color] which will be shown as default colors.
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
  * @param transformValue Optional callback for overriding colors with other colors.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
  *
  * @since 0.4.0
  */
 @OptIn(ExperimentalJetPrefMaterial3Ui::class)
 @Composable
 fun ColorPickerPreference(
-    pref: PreferenceData<Color>,
+    component: PreferenceComponent.ColorPicker,
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    summary: String? = null,
-    defaultValueLabel: String? = null,
-    showAlphaSlider: Boolean = false,
-    enableAdvancedLayout: Boolean = false,
-    defaultColors: List<Color>,
     transformValue: (Color) -> Color = { it },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
 ) {
     val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
     var showPicker by remember { mutableStateOf(false) }
     var dialogValue by remember { mutableIntStateOf(0) }
-    val prefValue by pref.collectAsState()
+    val prefValue by component.pref.collectAsState()
     val safeValue = prefValue.safeValue()
 
     Preference(
         modifier = modifier,
-        icon = icon,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summary = component.summary?.invoke(),
         trailing = {
             Box(
                 modifier = Modifier
@@ -120,10 +99,8 @@ fun ColorPickerPreference(
                     .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
             )
         },
-        title = title,
-        summary = summary,
-        enabledIf = enabledIf,
-        visibleIf = visibleIf,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
         onClick = {
             dialogValue = safeValue
             showPicker = true
@@ -131,11 +108,11 @@ fun ColorPickerPreference(
     )
 
     if (showPicker) {
-        val defaultColor = Color(pref.default.safeValue())
+        val defaultColor = Color(component.pref.default.safeValue())
         val color = Color(dialogValue)
         val presetColors = remember {
-            defaultColors.apply {
-                if (defaultValueLabel == null) {
+            component.defaultColors.apply {
+                if (component.defaultValueLabel == null) {
                     plus(defaultColor)
                 }
             }
@@ -151,12 +128,12 @@ fun ColorPickerPreference(
             mutableStateOf(
                 !presetColors.contains(color.copy(alpha = 1f))
                     && color.copy(1f)
-                    != defaultColor && enableAdvancedLayout
+                    != defaultColor && component.enableAdvancedLayout
             )
         }
-        val neutralLabel by remember(advanced, enableAdvancedLayout) {
+        val neutralLabel by remember(advanced, component.enableAdvancedLayout) {
             mutableStateOf(
-                if (!enableAdvancedLayout) {
+                if (!component.enableAdvancedLayout) {
                     null
                 } else {
                     if (advanced) "Presets" else "Custom"
@@ -167,7 +144,7 @@ fun ColorPickerPreference(
 
         key(advanced) {
             JetPrefAlertDialog(
-                title = title,
+                title = component.title.invoke(),
                 scrollModifier = Modifier,
                 content = {
                     if (advanced) {
@@ -177,7 +154,7 @@ fun ColorPickerPreference(
                             onColorChange = {
                                 dialogValue = it.toArgb()
                             },
-                            withAlpha = showAlphaSlider,
+                            withAlpha = component.showAlphaSlider,
                             saturationValueAspectRatio = 1f,
                         )
                     } else {
@@ -192,7 +169,7 @@ fun ColorPickerPreference(
                                         ColorBox(
                                             color = presetColors[index].copy(alpha = color.alpha),
                                             selected = selectedPreset == index,
-                                            icon = icon,
+                                            icon = component.icon?.invoke(),
                                             onSelect = {
                                                 selectedPreset = index
                                                 dialogValue = it.toArgb()
@@ -203,7 +180,7 @@ fun ColorPickerPreference(
                                 }
                             )
 
-                            defaultValueLabel?.let {
+                            component.defaultValueLabel?.invoke()?.let { defaultValueLabel ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
@@ -218,7 +195,7 @@ fun ColorPickerPreference(
                                     ColorBox(
                                         color = defaultColor,
                                         selected = color.copy(1f) == defaultColor,
-                                        icon = icon,
+                                        icon = component.icon?.invoke(),
                                         onSelect = {
                                             selectedPreset = -1
                                             dialogValue = defaultColor.toArgb()
@@ -229,13 +206,13 @@ fun ColorPickerPreference(
                                     Text(
                                         modifier = Modifier.padding(horizontal = 4.dp),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        text = defaultValueLabel
+                                        text = defaultValueLabel,
                                     )
 
                                 }
                             }
 
-                            if (showAlphaSlider) {
+                            if (component.showAlphaSlider) {
                                 AlphaBar(
                                     onColorChange = {
                                         dialogValue = it.toArgb()
@@ -251,11 +228,11 @@ fun ColorPickerPreference(
                 onNeutral = {
                     advanced = !advanced
                 },
-                neutralEnabled = enableAdvancedLayout,
+                neutralEnabled = component.enableAdvancedLayout,
                 confirmLabel = dialogStrings.confirmLabel,
                 onConfirm = {
                     scope.launch {
-                        pref.set(transformValue(Color(dialogValue)))
+                        component.pref.set(transformValue(Color(dialogValue)))
                     }
                     showPicker = false
                 },
@@ -266,64 +243,11 @@ fun ColorPickerPreference(
     }
 }
 
-@Deprecated("Use new ColorPickerPreference instead.")
-@OptIn(ExperimentalJetPrefMaterial3Ui::class)
-@Composable
-fun ColorPickerPreference(
-    pref: PreferenceData<Color>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    summary: String? = null,
-    defaultValueLabel: String? = null,
-    showAlphaSlider: Boolean = false,
-    enableAdvancedLayout: Boolean = false,
-    defaultColors: Array<Color>,
-    colorOverride: (Color) -> Color = { it },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        ColorPickerPreference(
-            pref, modifier, icon, title, summary, defaultValueLabel, showAlphaSlider,
-            enableAdvancedLayout, defaultColors.toList(), transformValue = colorOverride,
-            enabledIf, visibleIf,
-        )
-    }
-}
-
-@Composable
-fun ColorPickerPreference(
-    component: PreferenceComponent.ColorPicker,
-    modifier: Modifier = Modifier,
-    transformValue: (Color) -> Color = { it },
-) {
-    ColorPickerPreference(
-        pref = component.pref,
-        modifier = modifier,
-        icon = component.icon?.invoke(),
-        title = component.title.invoke(),
-        summary = component.summary?.invoke(),
-        defaultValueLabel = component.defaultValueLabel?.invoke(),
-        showAlphaSlider = component.showAlphaSlider,
-        enableAdvancedLayout = component.enableAdvancedLayout,
-        defaultColors = component.defaultColors,
-        transformValue = transformValue,
-        enabledIf = component.enabledIf,
-        visibleIf = component.visibleIf,
-    )
-}
-
 /**
  * ColorBox used in the [ColorPickerPreference] for displaying the default colors.
  *
  * @param color The [Color] of the ColorBox
- * @param selected If the colorbox is currently selected.
+ * @param selected If the color box is currently selected.
  * @param icon the [ImageVector] that should be used as selected indicator.
  * @param onSelect callback for selecting the color of the color box.
  * @since 0.2.0

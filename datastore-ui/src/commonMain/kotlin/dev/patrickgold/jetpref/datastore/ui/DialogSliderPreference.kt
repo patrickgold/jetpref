@@ -27,7 +27,6 @@ import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,10 +46,70 @@ import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import kotlinx.coroutines.launch
 import kotlin.math.round
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
+
+/**
+ * Material preference which provides a dialog with a slider for choosing a value.
+ *
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
+ *
+ * @since 0.4.0
+ */
+@Composable
+fun <V> DialogSliderPreference(
+    component: PreferenceComponent.SingleSlider<V>,
+    modifier: Modifier = Modifier,
+) where V : Number, V : Comparable<V> {
+    DialogSliderPreferenceImpl(
+        pref = component.pref,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        valueLabel = component.valueLabel,
+        summary = component.summary,
+        min = component.min,
+        max = component.max,
+        stepIncrement = component.stepIncrement,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        convertToV = component.convertToV,
+    )
+}
+
+/**
+ * Material preference which provides a dialog with two sliders for choosing two values at once.
+ *
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
+ *
+ * @since 0.4.0
+ */
+@Composable
+fun <V> DialogSliderPreference(
+    component: PreferenceComponent.DualSlider<V>,
+    modifier: Modifier = Modifier,
+) where V : Number, V : Comparable<V> {
+    DialogSliderPreferenceImpl(
+        primaryPref = component.pref1,
+        secondaryPref = component.pref2,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        primaryLabel = component.pref1Label.invoke(),
+        secondaryLabel = component.pref2Label.invoke(),
+        valueLabel = component.valueLabel,
+        summary = component.summary,
+        min = component.min,
+        max = component.max,
+        stepIncrement = component.stepIncrement,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        convertToV = component.convertToV,
+    )
+}
 
 @Composable
-internal fun <V> DialogSliderPreference(
+private fun <V> DialogSliderPreferenceImpl(
     pref: PreferenceData<V>,
     modifier: Modifier,
     icon: ImageVector? = null,
@@ -60,7 +119,6 @@ internal fun <V> DialogSliderPreference(
     min: V,
     max: V,
     stepIncrement: V,
-    onPreviewSelectedValue: (V) -> Unit,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
     convertToV: (Float) -> V,
@@ -124,7 +182,6 @@ internal fun <V> DialogSliderPreference(
                     valueRange = min.toFloat()..max.toFloat(),
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).roundToInt() - 1,
                     onValueChange = { sliderValue = round(it) },
-                    onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
                     colors = customSliderDialogColors(),
                 )
             }
@@ -133,7 +190,7 @@ internal fun <V> DialogSliderPreference(
 }
 
 @Composable
-internal fun <V> DialogSliderPreference(
+private fun <V> DialogSliderPreferenceImpl(
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     modifier: Modifier,
@@ -146,8 +203,6 @@ internal fun <V> DialogSliderPreference(
     min: V,
     max: V,
     stepIncrement: V,
-    onPreviewSelectedPrimaryValue: (V) -> Unit,
-    onPreviewSelectedSecondaryValue: (V) -> Unit,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
     convertToV: (Float) -> V,
@@ -219,7 +274,6 @@ internal fun <V> DialogSliderPreference(
                     valueRange = min.toFloat()..max.toFloat(),
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
                     onValueChange = { primarySliderValue = convertToV(it) },
-                    onValueChangeFinished = { onPreviewSelectedPrimaryValue(primarySliderValue) },
                     colors = customSliderDialogColors(),
                 )
                 Row(
@@ -239,7 +293,6 @@ internal fun <V> DialogSliderPreference(
                     valueRange = min.toFloat()..max.toFloat(),
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
                     onValueChange = { secondarySliderValue = convertToV(it) },
-                    onValueChangeFinished = { onPreviewSelectedSecondaryValue(secondarySliderValue) },
                     colors = customSliderDialogColors(),
                 )
             }
@@ -255,742 +308,5 @@ private fun customSliderDialogColors(): SliderColors {
         activeTickColor = Color.Transparent,
         inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
         inactiveTickColor = Color.Transparent,
-    )
-}
-
-/**
- * Material preference which provides a dialog with a slider for choosing a value.
- *
- * @param pref The integer preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
- *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
- *  will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Int>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    valueLabel: @Composable (Int) -> String = { it.toString() },
-    summary: @Composable (Int) -> String = valueLabel,
-    min: Int,
-    max: Int,
-    stepIncrement: Int,
-    onPreviewSelectedValue: (Int) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        pref, modifier, icon, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-    ) {
-        try {
-            it.roundToInt()
-        } catch (_: IllegalArgumentException) {
-            it.toInt()
-        }
-    }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Int>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    valueLabel: @Composable (Int) -> String = { it.toString() },
-    summary: @Composable (Int) -> String = valueLabel,
-    min: Int,
-    max: Int,
-    stepIncrement: Int,
-    onPreviewSelectedValue: (Int) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        DialogSliderPreference(
-            pref, modifier, icon, title, valueLabel, summary, min, max,
-            stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-        )
-    }
-}
-
-/**
- * Material preference which provides a dialog with two sliders for choosing two values at once.
- *
- * @param primaryPref The primary integer preference data entry from the datastore.
- * @param secondaryPref The secondary integer preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param primaryLabel The label to display above the primary slider in the dialog.
- * @param secondaryLabel The label to display above the secondary slider in the dialog.
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel] / [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
- *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
- *  actual selected new primary value will be written to the preference once the user confirms it.
- * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
- *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
- *  actual selected new secondary value will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Int>,
-    secondaryPref: PreferenceData<Int>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Int) -> String = { it.toString() },
-    summary: @Composable (Int, Int) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Int,
-    max: Int,
-    stepIncrement: Int,
-    onPreviewSelectedPrimaryValue: (Int) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Int) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-    ) {
-        try {
-            it.roundToInt()
-        } catch (_: IllegalArgumentException) {
-            it.toInt()
-        }
-    }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Int>,
-    secondaryPref: PreferenceData<Int>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Int) -> String = { it.toString() },
-    summary: @Composable (Int, Int) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Int,
-    max: Int,
-    stepIncrement: Int,
-    onPreviewSelectedPrimaryValue: (Int) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Int) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        DialogSliderPreference(
-            primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-            secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-            onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-        )
-    }
-}
-
-/**
- * Material preference which provides a dialog with a slider for choosing a value.
- *
- * @param pref The long preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
- *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
- *  will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Long>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    valueLabel: @Composable (Long) -> String = { it.toString() },
-    summary: @Composable (Long) -> String = valueLabel,
-    min: Long,
-    max: Long,
-    stepIncrement: Long,
-    onPreviewSelectedValue: (Long) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        pref, modifier, icon, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-    ) {
-        try {
-            it.roundToLong()
-        } catch (_: IllegalArgumentException) {
-            it.toLong()
-        }
-    }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Long>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    valueLabel: @Composable (Long) -> String = { it.toString() },
-    summary: @Composable (Long) -> String = valueLabel,
-    min: Long,
-    max: Long,
-    stepIncrement: Long,
-    onPreviewSelectedValue: (Long) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        DialogSliderPreference(
-            pref, modifier, icon, title, valueLabel, summary, min, max,
-            stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-        )
-    }
-}
-
-/**
- * Material preference which provides a dialog with two sliders for choosing two values at once.
- *
- * @param primaryPref The primary long preference data entry from the datastore.
- * @param secondaryPref The secondary long preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param primaryLabel The label to display above the primary slider in the dialog.
- * @param secondaryLabel The label to display above the secondary slider in the dialog.
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel] / [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
- *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
- *  actual selected new primary value will be written to the preference once the user confirms it.
- * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
- *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
- *  actual selected new secondary value will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Long>,
-    secondaryPref: PreferenceData<Long>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Long) -> String = { it.toString() },
-    summary: @Composable (Long, Long) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Long,
-    max: Long,
-    stepIncrement: Long,
-    onPreviewSelectedPrimaryValue: (Long) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Long) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-    ) {
-        try {
-            it.roundToLong()
-        } catch (_: IllegalArgumentException) {
-            it.toLong()
-        }
-    }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Long>,
-    secondaryPref: PreferenceData<Long>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Long) -> String = { it.toString() },
-    summary: @Composable (Long, Long) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Long,
-    max: Long,
-    stepIncrement: Long,
-    onPreviewSelectedPrimaryValue: (Long) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Long) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        DialogSliderPreference(
-            primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-            secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-            onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-        ) {
-            try {
-                it.roundToLong()
-            } catch (_: IllegalArgumentException) {
-                it.toLong()
-            }
-        }
-    }
-}
-
-/**
- * Material preference which provides a dialog with a slider for choosing a value.
- *
- * @param pref The double preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
- *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
- *  will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Double>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    valueLabel: @Composable (Double) -> String = { it.toString() },
-    summary: @Composable (Double) -> String = valueLabel,
-    min: Double,
-    max: Double,
-    stepIncrement: Double,
-    onPreviewSelectedValue: (Double) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        pref, modifier, icon, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-    ) { it.toDouble() }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Double>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    valueLabel: @Composable (Double) -> String = { it.toString() },
-    summary: @Composable (Double) -> String = valueLabel,
-    min: Double,
-    max: Double,
-    stepIncrement: Double,
-    onPreviewSelectedValue: (Double) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings,
-    ) {
-        DialogSliderPreference(
-            pref, modifier, icon, title, valueLabel, summary, min, max,
-            stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-        ) { it.toDouble() }
-    }
-}
-
-/**
- * Material preference which provides a dialog with two sliders for choosing two values at once.
- *
- * @param primaryPref The primary double preference data entry from the datastore.
- * @param secondaryPref The secondary double preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param primaryLabel The label to display above the primary slider in the dialog.
- * @param secondaryLabel The label to display above the secondary slider in the dialog.
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel] / [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
- *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
- *  actual selected new primary value will be written to the preference once the user confirms it.
- * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
- *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
- *  actual selected new secondary value will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Double>,
-    secondaryPref: PreferenceData<Double>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Double) -> String = { it.toString() },
-    summary: @Composable (Double, Double) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Double,
-    max: Double,
-    stepIncrement: Double,
-    onPreviewSelectedPrimaryValue: (Double) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Double) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-    ) { it.toDouble() }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Double>,
-    secondaryPref: PreferenceData<Double>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Double) -> String = { it.toString() },
-    summary: @Composable (Double, Double) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Double,
-    max: Double,
-    stepIncrement: Double,
-    onPreviewSelectedPrimaryValue: (Double) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Double) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings
-    ) {
-        DialogSliderPreference(
-            primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-            secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-            onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-        ) { it.toDouble() }
-    }
-}
-
-/**
- * Material preference which provides a dialog with a slider for choosing a value.
- *
- * @param pref The float preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
- *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
- *  will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Float>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    valueLabel: @Composable (Float) -> String = { it.toString() },
-    summary: @Composable (Float) -> String = valueLabel,
-    min: Float,
-    max: Float,
-    stepIncrement: Float,
-    onPreviewSelectedValue: (Float) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        pref, modifier, icon, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-    ) { it }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    pref: PreferenceData<Float>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    valueLabel: @Composable (Float) -> String = { it.toString() },
-    summary: @Composable (Float) -> String = valueLabel,
-    min: Float,
-    max: Float,
-    stepIncrement: Float,
-    onPreviewSelectedValue: (Float) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings
-    ) {
-        DialogSliderPreference(
-            pref, modifier, icon, title, valueLabel, summary, min, max,
-            stepIncrement, onPreviewSelectedValue, enabledIf, visibleIf,
-        ) { it }
-    }
-}
-
-/**
- * Material preference which provides a dialog with two sliders for choosing two values at once.
- *
- * @param primaryPref The primary float preference data entry from the datastore.
- * @param secondaryPref The secondary float preference data entry from the datastore.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param primaryLabel The label to display above the primary slider in the dialog.
- * @param secondaryLabel The label to display above the secondary slider in the dialog.
- * @param valueLabel The label of the value, used to add a unit to a value or to display a different text for special
- *  value (e.g. -1 -> System default).
- * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines). Defaults to
- *  [valueLabel] / [valueLabel].
- * @param min The minimum value allowed on the slider. Must be smaller than [max].
- * @param max The maximum value allowed on the slider. Must be greater than [min].
- * @param stepIncrement The step increment for the slider. Must be greater than 0.
- * @param onPreviewSelectedPrimaryValue Optional callback which gets invoked when the primary slider drag movement is
- *  finished. This allows to preview the effect of the selected primary value. This value should not be stored, the
- *  actual selected new primary value will be written to the preference once the user confirms it.
- * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
- *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
- *  actual selected new secondary value will be written to the preference once the user confirms it.
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
- *  enabled (true) or disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
- *  visible (true) or hidden (false).
- *
- * @since 0.4.0
- */
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Float>,
-    secondaryPref: PreferenceData<Float>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Float) -> String = { it.toString() },
-    summary: @Composable (Float, Float) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Float,
-    max: Float,
-    stepIncrement: Float,
-    onPreviewSelectedPrimaryValue: (Float) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Float) -> Unit = { },
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-        secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-    ) { it }
-}
-
-@Deprecated("Use new DialogSliderPreference instead.")
-@Composable
-fun DialogSliderPreference(
-    primaryPref: PreferenceData<Float>,
-    secondaryPref: PreferenceData<Float>,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    primaryLabel: String,
-    secondaryLabel: String,
-    valueLabel: @Composable (Float) -> String = { it.toString() },
-    summary: @Composable (Float, Float) -> String = { p, s -> "${valueLabel(p)} / ${valueLabel(s)}" },
-    min: Float,
-    max: Float,
-    stepIncrement: Float,
-    onPreviewSelectedPrimaryValue: (Float) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (Float) -> Unit = { },
-    dialogStrings: DialogPrefStrings = LocalDialogPrefStrings.current,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-) {
-    CompositionLocalProvider(
-        LocalIconSpaceReserved provides iconSpaceReserved,
-        LocalDialogPrefStrings provides dialogStrings
-    ) {
-        DialogSliderPreference(
-            primaryPref, secondaryPref, modifier, icon, title, primaryLabel,
-            secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-            onPreviewSelectedSecondaryValue, enabledIf, visibleIf,
-        ) { it }
-    }
-}
-
-@Composable
-fun <V> DialogSliderPreference(
-    component: PreferenceComponent.SingleSlider<V>,
-    modifier: Modifier = Modifier,
-    onPreviewSelectedValue: (V) -> Unit = { },
-) where V : Number, V : Comparable<V> {
-    DialogSliderPreference(
-        pref = component.pref,
-        modifier = modifier,
-        icon = component.icon?.invoke(),
-        title = component.title.invoke(),
-        valueLabel = component.valueLabel,
-        summary = component.summary,
-        min = component.min,
-        max = component.max,
-        stepIncrement = component.stepIncrement,
-        onPreviewSelectedValue = onPreviewSelectedValue,
-        enabledIf = component.enabledIf,
-        visibleIf = component.visibleIf,
-        convertToV = component.convertToV,
-    )
-}
-
-@Composable
-fun <V> DialogSliderPreference(
-    component: PreferenceComponent.DualSlider<V>,
-    modifier: Modifier = Modifier,
-    onPreviewSelectedPrimaryValue: (V) -> Unit = { },
-    onPreviewSelectedSecondaryValue: (V) -> Unit = { },
-) where V : Number, V : Comparable<V> {
-    DialogSliderPreference(
-        primaryPref = component.pref1,
-        secondaryPref = component.pref2,
-        modifier = modifier,
-        icon = component.icon?.invoke(),
-        title = component.title.invoke(),
-        primaryLabel = component.pref1Label.invoke(),
-        secondaryLabel = component.pref2Label.invoke(),
-        valueLabel = component.valueLabel,
-        summary = component.summary,
-        min = component.min,
-        max = component.max,
-        stepIncrement = component.stepIncrement,
-        onPreviewSelectedPrimaryValue = onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue = onPreviewSelectedSecondaryValue,
-        enabledIf = component.enabledIf,
-        visibleIf = component.visibleIf,
-        convertToV = component.convertToV,
     )
 }

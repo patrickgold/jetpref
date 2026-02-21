@@ -209,18 +209,8 @@ fun <V : Any> listPrefEntries(
  * Material list preference which allows the user to select a single entry from a list of entries. Optionally, a switch
  * preference can be provided to enable or disable the list preference's entries.
  *
- * @param listPref The [PreferenceData] for the list preference.
- * @param switchPref The [PreferenceData] for the switch preference. If null, no switch will be shown.
- * @param modifier Modifier to be applied to the underlying list item.
- * @param icon The [ImageVector] of the list entry.
- * @param title The title of this preference, shown as the list item primary text (max 1 line).
- * @param summarySwitchDisabled The summary of this preference if the switch is disabled. If this is
- *  specified it will override the auto-generated summary. Shown as the list item secondary text (max 2 lines).
- * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be enabled (true) or
- *  disabled (false).
- * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be visible (true) or
- *  hidden (false).
- * @param entries The list of list preference entries.
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
  *
  * @since 0.4.0
  *
@@ -228,8 +218,55 @@ fun <V : Any> listPrefEntries(
  */
 @Composable
 fun <V : Any> ListPreference(
+    component: PreferenceComponent.ListPicker<V>,
+    modifier: Modifier = Modifier
+) {
+    ListPreferenceImpl(
+        listPref = component.listPref,
+        switchPref = null,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summarySwitchDisabled = null,
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        entries = component.entries,
+    )
+}
+
+/**
+ * Material list preference which allows the user to select a single entry from a list of entries. Optionally, a switch
+ * preference can be provided to enable or disable the list preference's entries.
+ *
+ * @param component Component describing what to display.
+ * @param modifier Modifier to be applied to the underlying preference.
+ *
+ * @since 0.4.0
+ *
+ * @see listPrefEntries
+ */
+@Composable
+fun <V : Any> ListPreference(
+    component: PreferenceComponent.ListPickerWithSwitch<V>,
+    modifier: Modifier = Modifier,
+) {
+    ListPreferenceImpl(
+        listPref = component.listPref,
+        switchPref = component.switchPref,
+        modifier = modifier,
+        icon = component.icon?.invoke(),
+        title = component.title.invoke(),
+        summarySwitchDisabled = component.summarySwitchDisabled?.invoke(),
+        enabledIf = component.enabledIf,
+        visibleIf = component.visibleIf,
+        entries = component.entries,
+    )
+}
+
+@Composable
+private fun <V : Any> ListPreferenceImpl(
     listPref: PreferenceData<V>,
-    switchPref: PreferenceData<Boolean>? = null,
+    switchPref: PreferenceData<Boolean>?,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     title: String,
@@ -393,40 +430,4 @@ fun <V : Any> ListPreference(
             }
         }
     }
-}
-
-@Composable
-fun <V : Any> ListPreference(
-    component: PreferenceComponent.ListPicker<V>,
-    modifier: Modifier = Modifier
-) {
-    ListPreference(
-        listPref = component.listPref,
-        switchPref = null,
-        modifier = modifier,
-        icon = component.icon?.invoke(),
-        title = component.title.invoke(),
-        summarySwitchDisabled = null,
-        enabledIf = component.enabledIf,
-        visibleIf = component.visibleIf,
-        entries = component.entries,
-    )
-}
-
-@Composable
-fun <V : Any> ListPreference(
-    component: PreferenceComponent.ListPickerWithSwitch<V>,
-    modifier: Modifier = Modifier,
-) {
-    ListPreference(
-        listPref = component.listPref,
-        switchPref = component.switchPref,
-        modifier = modifier,
-        icon = component.icon?.invoke(),
-        title = component.title.invoke(),
-        summarySwitchDisabled = component.summarySwitchDisabled?.invoke(),
-        enabledIf = component.enabledIf,
-        visibleIf = component.visibleIf,
-        entries = component.entries,
-    )
 }
