@@ -66,9 +66,9 @@ class PreferenceScreenBuilder(val kClass: KClass<*>) {
         icon = block
     }
 
-    fun components(block: PreferenceComponentListBuilder.() -> Unit) {
+    fun components(block: PreferenceComponentScreenBuilder.() -> Unit) {
         require(components == null && content == null)
-        val builder = PreferenceComponentListBuilder(level = 0)
+        val builder = PreferenceComponentScreenBuilder(level = 0)
         builder.block()
         components = builder.components.toList()
     }
@@ -80,7 +80,35 @@ class PreferenceScreenBuilder(val kClass: KClass<*>) {
 }
 
 @PreferenceComponentBuilderDslMarker
-open class PreferenceComponentListBuilder(
+open class PreferenceComponentScreenBuilder(
+    groupEnabledIf: PreferenceDataEvaluator? = null,
+    groupVisibleIf: PreferenceDataEvaluator? = null,
+    level: Int,
+) : PreferenceComponentGroupBuilder(
+    groupEnabledIf,
+    groupVisibleIf,
+    level,
+) {
+    @OptIn(ExperimentalContracts::class)
+    inline fun group(
+        noinline title: @Composable () -> String,
+        noinline icon: (@Composable () -> ImageVector)? = null,
+        noinline enabledIf: PreferenceDataEvaluator? = null,
+        noinline visibleIf: PreferenceDataEvaluator? = null,
+        block: PreferenceComponentGroupBuilder.() -> Unit,
+    ) {
+        contract {
+            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        }
+        val builder = PreferenceComponentGroupBuilder(combineEnabledIf(enabledIf), combineVisibleIf(visibleIf), level + 1)
+        builder.groupHeader(title, icon)
+        builder.block()
+        components.addAll(builder.components)
+    }
+}
+
+@PreferenceComponentBuilderDslMarker
+open class PreferenceComponentGroupBuilder(
     val groupEnabledIf: PreferenceDataEvaluator? = null,
     val groupVisibleIf: PreferenceDataEvaluator? = null,
     val level: Int,
@@ -111,23 +139,6 @@ open class PreferenceComponentListBuilder(
     @PublishedApi
     internal fun combineVisibleIf(visibleIf: PreferenceDataEvaluator?) = combineEvaluators(groupVisibleIf, visibleIf)
 
-    @OptIn(ExperimentalContracts::class)
-    inline fun group(
-        noinline title: @Composable () -> String,
-        noinline icon: (@Composable () -> ImageVector)? = null,
-        noinline enabledIf: PreferenceDataEvaluator? = null,
-        noinline visibleIf: PreferenceDataEvaluator? = null,
-        block: PreferenceComponentListBuilder.() -> Unit,
-    ) {
-        contract {
-            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
-        }
-        val builder = PreferenceComponentListBuilder(combineEnabledIf(enabledIf), combineVisibleIf(visibleIf), level + 1)
-        builder.groupHeader(title, icon)
-        builder.block()
-        components.addAll(builder.components)
-    }
-
     @PublishedApi
     internal fun groupHeader(
         title: @Composable () -> String,
@@ -137,10 +148,10 @@ open class PreferenceComponentListBuilder(
             override val id = PreferenceComponentId.next()
             override val title = title
             override val icon = icon
-            override val enabledIf = this@PreferenceComponentListBuilder.groupEnabledIf ?: { true }
-            override val visibleIf = this@PreferenceComponentListBuilder.groupVisibleIf ?: { true }
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val enabledIf = this@PreferenceComponentGroupBuilder.groupEnabledIf ?: { true }
+            override val visibleIf = this@PreferenceComponentGroupBuilder.groupVisibleIf ?: { true }
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -176,8 +187,8 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val content = content
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -203,8 +214,8 @@ open class PreferenceComponentListBuilder(
             override val summary = summary
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -234,8 +245,8 @@ open class PreferenceComponentListBuilder(
             override val summaryOff = summaryOff
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -261,8 +272,8 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val entries = entries
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -292,8 +303,8 @@ open class PreferenceComponentListBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val entries = entries
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -327,8 +338,8 @@ open class PreferenceComponentListBuilder(
             override val defaultColors = defaultColors
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -352,8 +363,8 @@ open class PreferenceComponentListBuilder(
             override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -393,8 +404,8 @@ open class PreferenceComponentListBuilder(
             override val validateValue = validateValue
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
-            override val level = this@PreferenceComponentListBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -430,8 +441,8 @@ open class PreferenceComponentListBuilder(
             override val stepIncrement = stepIncrement
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val level = this@PreferenceComponentListBuilder.level
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
             override val convertToV = convertToV
 
             @Composable
@@ -501,8 +512,8 @@ open class PreferenceComponentListBuilder(
             override val stepIncrement = stepIncrement
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val level = this@PreferenceComponentListBuilder.level
-            override val associatedGroup = this@PreferenceComponentListBuilder.associatedGroup
+            override val level = this@PreferenceComponentGroupBuilder.level
+            override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
             override val convertToV = convertToV
 
             @Composable

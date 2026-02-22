@@ -40,6 +40,7 @@ import dev.patrickgold.jetpref.datastore.ui.LocalFlashModifierProvider
 import dev.patrickgold.jetpref.datastore.ui.LocalIconSpaceReserved
 import dev.patrickgold.jetpref.datastore.ui.LocalPreferenceComponentIdToHighlight
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Presentable {
     private val titleBacking: @Composable () -> String
@@ -111,9 +112,9 @@ fun Modifier.flash(
     val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
     var highlightedId by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(componentIdToHighlight) {
-        delay(initialDelay)
+        delay(initialDelay.milliseconds)
         highlightedId = componentIdToHighlight
-        delay(visibleFor)
+        delay(visibleFor.milliseconds)
         highlightedId = null
     }
     val isHighlighted = component.id == highlightedId
