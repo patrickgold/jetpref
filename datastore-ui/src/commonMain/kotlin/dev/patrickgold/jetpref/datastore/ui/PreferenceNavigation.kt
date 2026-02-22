@@ -49,9 +49,9 @@ fun PreferenceNavigationEntry(
     val router = LocalPreferenceNavigationRouter.current
     Preference(
         modifier = modifier,
-        icon = component.icon?.invoke(),
+        icon = component.icon.invoke(),
         title = component.title.invoke(),
-        summary = component.summary?.invoke(),
+        summary = component.summary.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
         onClick = { router.navigateTo(component.targetScreen, null) },

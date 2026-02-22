@@ -12,8 +12,9 @@ import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 data object HomeScreen : PreferenceScreen({
     title { "Settings" }
 
-    val prefs by ExamplePreferenceStore
     components {
+        val prefs by ExamplePreferenceStore
+
         navigationTo(SearchScreen)
         navigationTo(ColorPickerDemoScreen)
         navigationTo(AdditionalScreen)
@@ -47,7 +48,7 @@ data object HomeScreen : PreferenceScreen({
             )
         }
 
-        composableContent {
+        content {
             HorizontalDivider()
         }
 
@@ -62,7 +63,7 @@ data object HomeScreen : PreferenceScreen({
             summaryIfEmpty = { "(empty)" },
         )
 
-        composableContent {
+        content {
             HorizontalDivider()
         }
 

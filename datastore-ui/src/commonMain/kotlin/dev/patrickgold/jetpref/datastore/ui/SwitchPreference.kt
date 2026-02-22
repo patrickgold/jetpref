@@ -59,14 +59,9 @@ fun SwitchPreference(
                 },
             )
         },
-        icon = component.icon?.invoke(),
+        icon = component.icon.invoke(),
         title = component.title.invoke(),
-        summary = when {
-            prefValue && component.summaryOn != null -> component.summaryOn
-            !prefValue && component.summaryOff != null -> component.summaryOff
-            component.summary != null -> component.summary
-            else -> null
-        }?.invoke(),
+        summary = component.summary.invoke(),
         trailing = {
             Switch(
                 modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize),

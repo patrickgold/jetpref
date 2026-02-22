@@ -22,5 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 interface Presentable {
     val title: @Composable () -> String
 
-    val icon: (@Composable () -> ImageVector)?
+    val summary: @Composable () -> String?
+
+    val icon: @Composable () -> ImageVector?
 }

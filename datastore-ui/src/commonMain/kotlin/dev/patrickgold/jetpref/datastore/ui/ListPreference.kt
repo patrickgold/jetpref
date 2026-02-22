@@ -225,9 +225,9 @@ fun <V : Any> ListPreference(
         listPref = component.listPref,
         switchPref = null,
         modifier = modifier,
-        icon = component.icon?.invoke(),
+        icon = component.icon.invoke(),
         title = component.title.invoke(),
-        summarySwitchDisabled = null,
+        summary = component.summary.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
         entries = component.entries,
@@ -254,9 +254,9 @@ fun <V : Any> ListPreference(
         listPref = component.listPref,
         switchPref = component.switchPref,
         modifier = modifier,
-        icon = component.icon?.invoke(),
+        icon = component.icon.invoke(),
         title = component.title.invoke(),
-        summarySwitchDisabled = component.summarySwitchDisabled?.invoke(),
+        summary = component.summary.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
         entries = component.entries,
@@ -270,7 +270,7 @@ private fun <V : Any> ListPreferenceImpl(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     title: String,
-    summarySwitchDisabled: String? = null,
+    summary: String?,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
     entries: List<ListPreferenceEntry<V>>,
@@ -287,11 +287,7 @@ private fun <V : Any> ListPreferenceImpl(
         modifier = modifier,
         icon = icon,
         title = title,
-        summary = if (switchPrefValue?.value == true || switchPrefValue == null) {
-            entries.find {
-                it.key == listPrefValue
-            }?.label?.invoke() ?: "!! invalid !!"
-        } else { summarySwitchDisabled },
+        summary = summary,
         trailing = {
             if (switchPrefValue != null) {
                 val dividerColor = MaterialTheme.colorScheme.outlineVariant

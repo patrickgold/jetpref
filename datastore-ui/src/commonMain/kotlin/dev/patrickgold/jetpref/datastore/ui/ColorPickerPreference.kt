@@ -85,9 +85,9 @@ fun ColorPickerPreference(
 
     Preference(
         modifier = modifier,
-        icon = component.icon?.invoke(),
+        icon = component.icon.invoke(),
         title = component.title.invoke(),
-        summary = component.summary?.invoke(),
+        summary = component.summary.invoke(),
         trailing = {
             Box(
                 modifier = Modifier
@@ -109,10 +109,11 @@ fun ColorPickerPreference(
 
     if (showPicker) {
         val defaultColor = Color(component.pref.default.safeValue())
+        val defaultValueLabel = component.defaultValueLabel.invoke()
         val color = Color(dialogValue)
         val presetColors = remember {
             component.defaultColors.apply {
-                if (component.defaultValueLabel == null) {
+                if (defaultValueLabel == null) {
                     plus(defaultColor)
                 }
             }
@@ -169,7 +170,7 @@ fun ColorPickerPreference(
                                         ColorBox(
                                             color = presetColors[index].copy(alpha = color.alpha),
                                             selected = selectedPreset == index,
-                                            icon = component.icon?.invoke(),
+                                            icon = component.icon.invoke(),
                                             onSelect = {
                                                 selectedPreset = index
                                                 dialogValue = it.toArgb()
@@ -180,7 +181,7 @@ fun ColorPickerPreference(
                                 }
                             )
 
-                            component.defaultValueLabel?.invoke()?.let { defaultValueLabel ->
+                            defaultValueLabel?.let { defaultValueLabel ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
@@ -195,7 +196,7 @@ fun ColorPickerPreference(
                                     ColorBox(
                                         color = defaultColor,
                                         selected = color.copy(1f) == defaultColor,
-                                        icon = component.icon?.invoke(),
+                                        icon = component.icon.invoke(),
                                         onSelect = {
                                             selectedPreset = -1
                                             dialogValue = defaultColor.toArgb()

@@ -48,9 +48,14 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
     override val title: @Composable () -> String
         get() = titleBacking
 
-    private val iconBacking: (@Composable () -> ImageVector)?
+    private val summaryBacking: @Composable () -> String?
 
-    override val icon: (@Composable () -> ImageVector)?
+    override val summary: @Composable () -> String?
+        get() = summaryBacking
+
+    private val iconBacking: @Composable () -> ImageVector?
+
+    override val icon: @Composable () -> ImageVector?
         get() = iconBacking
 
     val components: List<PreferenceComponent>
@@ -61,6 +66,7 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
         val builder = PreferenceScreenBuilder(this::class)
         builder.block()
         titleBacking = builder.title
+        summaryBacking = builder.summary
         iconBacking = builder.icon
         components = builder.components?.toList() ?: emptyList()
         content = builder.content ?: @Composable {

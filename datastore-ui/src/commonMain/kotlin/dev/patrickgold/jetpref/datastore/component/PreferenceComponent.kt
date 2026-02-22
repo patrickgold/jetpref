@@ -45,14 +45,10 @@ sealed interface PreferenceComponent : Presentable {
 
     interface NavigationEntry : PreferenceComponent {
         val targetScreen: PreferenceScreen
-        val summary: (@Composable () -> String)?
     }
 
     interface Switch : PreferenceComponent {
         val pref: PreferenceData<Boolean>
-        val summary: (@Composable () -> String)?
-        val summaryOn: (@Composable () -> String)?
-        val summaryOff: (@Composable () -> String)?
     }
 
     interface ListPicker<V : Any> : PreferenceComponent {
@@ -62,13 +58,11 @@ sealed interface PreferenceComponent : Presentable {
 
     interface ListPickerWithSwitch<V : Any> : ListPicker<V> {
         val switchPref: PreferenceData<Boolean>
-        val summarySwitchDisabled: (@Composable () -> String)?
     }
 
     interface ColorPicker : PreferenceComponent {
         val pref: PreferenceData<Color>
-        val summary: (@Composable () -> String)?
-        val defaultValueLabel: (@Composable () -> String)?
+        val defaultValueLabel: @Composable () -> String?
         val showAlphaSlider: Boolean
         val enableAdvancedLayout: Boolean
         val defaultColors: List<Color>
@@ -80,9 +74,6 @@ sealed interface PreferenceComponent : Presentable {
 
     interface TextField : PreferenceComponent {
         val pref: PreferenceData<String>
-        val summaryIfBlank: (@Composable () -> String)?
-        val summaryIfEmpty: (@Composable () -> String)?
-        val summary: @Composable (String) -> String?
         val transformValue: (String) -> String
         val validateValue: (String) -> Unit
     }
@@ -90,7 +81,6 @@ sealed interface PreferenceComponent : Presentable {
     interface SingleSlider<V> : PreferenceComponent where V : Number, V : Comparable<V> {
         val pref: PreferenceData<V>
         val valueLabel: @Composable (V) -> String
-        val summary: @Composable (V) -> String
         val min: V
         val max: V
         val stepIncrement: V
@@ -103,7 +93,6 @@ sealed interface PreferenceComponent : Presentable {
         val pref1Label: @Composable () -> String
         val pref2Label: @Composable () -> String
         val valueLabel: @Composable (V) -> String
-        val summary: @Composable (V, V) -> String
         val min: V
         val max: V
         val stepIncrement: V

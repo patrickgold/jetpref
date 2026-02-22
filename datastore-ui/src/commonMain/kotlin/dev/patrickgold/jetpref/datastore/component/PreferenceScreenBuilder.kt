@@ -20,6 +20,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +30,7 @@ import dev.patrickgold.jetpref.datastore.model.LocalTime
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluatorScope
+import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.DialogSliderPreference
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
@@ -49,10 +52,12 @@ import kotlin.reflect.KClass
 annotation class PreferenceComponentBuilderDslMarker
 
 @PreferenceComponentBuilderDslMarker
-class PreferenceScreenBuilder(val kClass: KClass<*>) {
+open class PreferenceScreenBuilder(val kClass: KClass<*>) {
     internal var title: @Composable () -> String = { kClass.simpleName ?: "<unnamed screen>" }
 
-    internal var icon: (@Composable () -> ImageVector)? = null
+    internal var summary: @Composable () -> String? = { null }
+
+    internal var icon: @Composable () -> ImageVector? = { null }
 
     internal var components: List<PreferenceComponent>? = null
 
@@ -62,7 +67,11 @@ class PreferenceScreenBuilder(val kClass: KClass<*>) {
         title = block
     }
 
-    fun icon(block: @Composable () -> ImageVector) {
+    fun summary(block: @Composable () -> String?) {
+        summary = block
+    }
+
+    fun icon(block: @Composable () -> ImageVector?) {
         icon = block
     }
 
@@ -92,7 +101,8 @@ open class PreferenceComponentScreenBuilder(
     @OptIn(ExperimentalContracts::class)
     inline fun group(
         noinline title: @Composable () -> String,
-        noinline icon: (@Composable () -> ImageVector)? = null,
+        noinline summary: @Composable () -> String? = { null },
+        noinline icon: @Composable () -> ImageVector? = { null },
         noinline enabledIf: PreferenceDataEvaluator? = null,
         noinline visibleIf: PreferenceDataEvaluator? = null,
         block: PreferenceComponentGroupBuilder.() -> Unit,
@@ -101,7 +111,7 @@ open class PreferenceComponentScreenBuilder(
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
         val builder = PreferenceComponentGroupBuilder(combineEnabledIf(enabledIf), combineVisibleIf(visibleIf), level + 1)
-        builder.groupHeader(title, icon)
+        builder.groupHeader(title, summary, icon)
         builder.block()
         components.addAll(builder.components)
     }
@@ -142,11 +152,13 @@ open class PreferenceComponentGroupBuilder(
     @PublishedApi
     internal fun groupHeader(
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
+        summary: @Composable () -> String? = { null },
+        icon: @Composable () -> ImageVector? = { null },
     ) {
         val component = object : PreferenceComponent.GroupHeader {
             override val id = PreferenceComponentId.next()
             override val title = title
+            override val summary = summary
             override val icon = icon
             override val enabledIf = this@PreferenceComponentGroupBuilder.groupEnabledIf ?: { true }
             override val visibleIf = this@PreferenceComponentGroupBuilder.groupVisibleIf ?: { true }
@@ -157,7 +169,7 @@ open class PreferenceComponentGroupBuilder(
             override fun Render() {
                 if (visibleIf(PreferenceDataEvaluatorScope)) {
                     ListItem(
-                        leadingContent = maybeJetIcon(icon?.invoke()),
+                        leadingContent = maybeJetIcon(icon.invoke()),
                         headlineContent = {
                             Text(
                                 text = title.invoke(),
@@ -175,15 +187,19 @@ open class PreferenceComponentGroupBuilder(
         components.add(component)
     }
 
-    fun composableContent(
+    fun content(
+        title: @Composable () -> String,
+        summary: @Composable () -> String? = { null },
+        icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
         content: @Composable () -> Unit,
     ) {
         val component = object : PreferenceComponent.ComposableContent {
             override val id = PreferenceComponentId.next()
-            override val title = @Composable { "<generic component impl>" }
-            override val icon = null
+            override val title = title
+            override val summary = summary
+            override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val content = content
@@ -198,11 +214,20 @@ open class PreferenceComponentGroupBuilder(
         components.add(component)
     }
 
+    fun content(
+        content: @Composable () -> Unit,
+    ) {
+        content(
+            title = @Composable { "<anonymous content impl>" },
+            content = content,
+        )
+    }
+
     fun navigationTo(
         targetScreen: PreferenceScreen,
         title: @Composable () -> String = targetScreen.title,
-        icon: (@Composable () -> ImageVector)? = targetScreen.icon,
-        summary: (@Composable () -> String)? = null,
+        summary: @Composable () -> String? = targetScreen.summary,
+        icon: @Composable () -> ImageVector? = targetScreen.icon,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
@@ -210,8 +235,8 @@ open class PreferenceComponentGroupBuilder(
             override val id = PreferenceComponentId.next()
             override val targetScreen = targetScreen
             override val title = title
-            override val icon = icon
             override val summary = summary
+            override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
@@ -228,10 +253,8 @@ open class PreferenceComponentGroupBuilder(
     fun switch(
         pref: PreferenceData<Boolean>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
-        summary: (@Composable () -> String)? = null,
-        summaryOn: (@Composable () -> String)? = null,
-        summaryOff: (@Composable () -> String)? = null,
+        summary: @Composable () -> String? = { null },
+        icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
@@ -239,10 +262,8 @@ open class PreferenceComponentGroupBuilder(
             override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
-            override val icon = icon
             override val summary = summary
-            override val summaryOn = summaryOn
-            override val summaryOff = summaryOff
+            override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
@@ -256,10 +277,35 @@ open class PreferenceComponentGroupBuilder(
         components.add(component)
     }
 
+    fun switch(
+        pref: PreferenceData<Boolean>,
+        title: @Composable () -> String,
+        summaryOn: @Composable () -> String? = { null },
+        summaryOff: @Composable () -> String? = { null },
+        icon: @Composable () -> ImageVector? = { null },
+        enabledIf: PreferenceDataEvaluator = { true },
+        visibleIf: PreferenceDataEvaluator = { true },
+    ) {
+        switch(
+            pref = pref,
+            title = title,
+            summary = {
+                val prefValue by pref.collectAsState()
+                when (prefValue) {
+                    true -> summaryOn
+                    false -> summaryOff
+                }.invoke()
+            },
+            icon = icon,
+            enabledIf = enabledIf,
+            visibleIf = visibleIf,
+        )
+    }
+
     fun <V : Any> listPicker(
         listPref: PreferenceData<V>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
+        icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
         entries: List<ListPreferenceEntry<V>>,
@@ -268,6 +314,15 @@ open class PreferenceComponentGroupBuilder(
             override val id = PreferenceComponentId.next()
             override val listPref = listPref
             override val title = title
+            override val summary = @Composable {
+                val listPrefValue by listPref.collectAsState()
+                val entry = remember(listPrefValue) {
+                    entries.find {
+                        it.key == listPrefValue
+                    }
+                }
+                entry?.label?.invoke() ?: "!! invalid !!"
+            }
             override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
@@ -287,8 +342,8 @@ open class PreferenceComponentGroupBuilder(
         listPref: PreferenceData<V>,
         switchPref: PreferenceData<Boolean>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
-        summarySwitchDisabled: (@Composable () -> String)? = null,
+        summarySwitchDisabled: @Composable () -> String? = { null },
+        icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
         entries: List<ListPreferenceEntry<V>>,
@@ -298,8 +353,20 @@ open class PreferenceComponentGroupBuilder(
             override val listPref = listPref
             override val switchPref = switchPref
             override val title = title
+            override val summary = @Composable {
+                val listPrefValue by listPref.collectAsState()
+                val switchPrefValue by switchPref.collectAsState()
+                val entry = remember(listPrefValue) {
+                    entries.find {
+                        it.key == listPrefValue
+                    }
+                }
+                when (switchPrefValue) {
+                    false -> summarySwitchDisabled.invoke()
+                    else -> entry?.label?.invoke() ?: "!! invalid !!"
+                }
+            }
             override val icon = icon
-            override val summarySwitchDisabled = summarySwitchDisabled
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val entries = entries
@@ -317,9 +384,9 @@ open class PreferenceComponentGroupBuilder(
     fun colorPicker(
         pref: PreferenceData<Color>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
-        summary: (@Composable () -> String)? = null,
-        defaultValueLabel: (@Composable () -> String)? = null,
+        summary: @Composable () -> String? = { null },
+        defaultValueLabel: @Composable () -> String? = { null },
+        icon: @Composable () -> ImageVector? = { null },
         showAlphaSlider: Boolean = false,
         enableAdvancedLayout: Boolean = false,
         defaultColors: List<Color>,
@@ -330,8 +397,8 @@ open class PreferenceComponentGroupBuilder(
             override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
-            override val icon = icon
             override val summary = summary
+            override val icon = icon
             override val defaultValueLabel = defaultValueLabel
             override val showAlphaSlider = showAlphaSlider
             override val enableAdvancedLayout = enableAdvancedLayout
@@ -352,7 +419,7 @@ open class PreferenceComponentGroupBuilder(
     fun localTimePicker(
         pref: PreferenceData<LocalTime>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
+        icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
     ) {
@@ -360,6 +427,7 @@ open class PreferenceComponentGroupBuilder(
             override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
+            override val summary = @Composable { null }
             override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
@@ -377,16 +445,16 @@ open class PreferenceComponentGroupBuilder(
     fun textField(
         pref: PreferenceData<String>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)? = null,
-        summaryIfBlank: (@Composable () -> String)? = null,
-        summaryIfEmpty: (@Composable () -> String)? = null,
-        summary: @Composable (String) -> String? = { v ->
+        summaryIfBlank: @Composable () -> String? = { null },
+        summaryIfEmpty: @Composable () -> String? = { null },
+        summary: @Composable (String) -> String? = { value ->
             when {
-                v.isEmpty() -> summaryIfEmpty?.invoke() ?: v
-                v.isBlank() -> summaryIfBlank?.invoke() ?: v
-                else -> v
+                value.isEmpty() -> summaryIfEmpty.invoke() ?: value
+                value.isBlank() -> summaryIfBlank.invoke() ?: value
+                else -> value
             }
         },
+        icon: @Composable () -> ImageVector? = { null },
         transformValue: (String) -> String = { it },
         validateValue: (String) -> Unit = { },
         enabledIf: PreferenceDataEvaluator = { true },
@@ -396,10 +464,11 @@ open class PreferenceComponentGroupBuilder(
             override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
+            override val summary = @Composable {
+                val prefValue by pref.collectAsState()
+                summary(prefValue)
+            }
             override val icon = icon
-            override val summaryIfBlank = summaryIfBlank
-            override val summaryIfEmpty = summaryIfEmpty
-            override val summary = summary
             override val transformValue = transformValue
             override val validateValue = validateValue
             override val enabledIf = combineEnabledIf(enabledIf)
@@ -419,9 +488,9 @@ open class PreferenceComponentGroupBuilder(
     internal fun <V> slider(
         pref: PreferenceData<V>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)?,
         valueLabel: @Composable (V) -> String,
         summary: @Composable (V) -> String,
+        icon: @Composable () -> ImageVector?,
         min: V,
         max: V,
         stepIncrement: V,
@@ -433,9 +502,12 @@ open class PreferenceComponentGroupBuilder(
             override val id = PreferenceComponentId.next()
             override val pref = pref
             override val title = title
-            override val icon = icon
             override val valueLabel = valueLabel
-            override val summary = summary
+            override val summary = @Composable {
+                val prefValue by pref.collectAsState()
+                summary(prefValue)
+            }
+            override val icon = icon
             override val min = min
             override val max = max
             override val stepIncrement = stepIncrement
@@ -456,9 +528,9 @@ open class PreferenceComponentGroupBuilder(
     inline fun <reified V> slider(
         pref: PreferenceData<V>,
         noinline title: @Composable () -> String,
-        noinline icon: (@Composable () -> ImageVector)? = null,
         noinline valueLabel: @Composable (V) -> String = { v -> v.toString() },
         noinline summary: @Composable (V) -> String = valueLabel,
+        noinline icon: @Composable () -> ImageVector? = { null },
         min: V,
         max: V,
         stepIncrement: V,
@@ -468,9 +540,9 @@ open class PreferenceComponentGroupBuilder(
         slider(
             pref = pref,
             title = title,
-            icon = icon,
             valueLabel = valueLabel,
             summary = summary,
+            icon = icon,
             min = min,
             max = max,
             stepIncrement = stepIncrement,
@@ -485,11 +557,11 @@ open class PreferenceComponentGroupBuilder(
         pref1: PreferenceData<V>,
         pref2: PreferenceData<V>,
         title: @Composable () -> String,
-        icon: (@Composable () -> ImageVector)?,
         pref1Label: @Composable () -> String,
         pref2Label: @Composable () -> String,
         valueLabel: @Composable (V) -> String,
         summary: @Composable (V, V) -> String,
+        icon: @Composable () -> ImageVector?,
         min: V,
         max: V,
         stepIncrement: V,
@@ -502,11 +574,15 @@ open class PreferenceComponentGroupBuilder(
             override val pref1 = pref1
             override val pref2 = pref2
             override val title = title
-            override val icon = icon
             override val pref1Label = pref1Label
             override val pref2Label = pref2Label
             override val valueLabel = valueLabel
-            override val summary = summary
+            override val summary = @Composable {
+                val pref1Value by pref1.collectAsState()
+                val pref2Value by pref2.collectAsState()
+                summary(pref1Value, pref2Value)
+            }
+            override val icon = icon
             override val min = min
             override val max = max
             override val stepIncrement = stepIncrement
@@ -528,13 +604,13 @@ open class PreferenceComponentGroupBuilder(
         pref1: PreferenceData<V>,
         pref2: PreferenceData<V>,
         noinline title: @Composable () -> String,
-        noinline icon: (@Composable () -> ImageVector)? = null,
         noinline pref1Label: @Composable () -> String,
         noinline pref2Label: @Composable () -> String,
         noinline valueLabel: @Composable (V) -> String = { v -> v.toString() },
         noinline summary: @Composable (V, V) -> String = { v1, v2 ->
             "${valueLabel.invoke(v1)} / ${valueLabel.invoke(v2)}"
         },
+        noinline icon: @Composable () -> ImageVector? = { null },
         min: V,
         max: V,
         stepIncrement: V,
@@ -545,11 +621,11 @@ open class PreferenceComponentGroupBuilder(
             pref1 = pref1,
             pref2 = pref2,
             title = title,
-            icon = icon,
             pref1Label = pref1Label,
             pref2Label = pref2Label,
             valueLabel = valueLabel,
             summary = summary,
+            icon = icon,
             min = min,
             max = max,
             stepIncrement = stepIncrement,

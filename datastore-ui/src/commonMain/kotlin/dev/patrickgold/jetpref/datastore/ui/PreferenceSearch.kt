@@ -70,11 +70,11 @@ private fun SearchEntryDisplay(
             .clickable {
                 router.navigateTo(entry.associatedScreen, entry.component)
             },
-        icon = maybeJetIcon(entry.component.icon?.invoke()),
+        icon = maybeJetIcon(entry.component.icon.invoke()),
         headlineContent = { Text(title) },
         secondaryContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val displayPath = entry.displayPath.map { it.icon?.invoke() to it.title.invoke() }
+                val displayPath = entry.displayPath.map { it.icon.invoke() to it.title.invoke() }
                 displayPath.forEachIndexed { index, (icon, title) ->
                     if (index > 0) {
                         Icon(

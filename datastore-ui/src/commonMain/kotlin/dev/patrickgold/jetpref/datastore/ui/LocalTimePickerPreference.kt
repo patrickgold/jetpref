@@ -75,7 +75,7 @@ fun LocalTimePickerPreference(
 
     Preference(
         modifier = modifier,
-        icon = component.icon?.invoke(),
+        icon = component.icon.invoke(),
         title = component.title.invoke(),
         summary = prefValue.stringRepresentation(is24hour),
         enabledIf = component.enabledIf,

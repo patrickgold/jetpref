@@ -26,7 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
-import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.material.ui.JetPrefAlertDialog
 import dev.patrickgold.jetpref.material.ui.JetPrefTextField
 import dev.patrickgold.jetpref.material.ui.JetPrefTextFieldDefaults
@@ -48,15 +47,14 @@ fun TextFieldPreference(
 ) {
     val dialogStrings = LocalDialogPrefStrings.current
     val scope = rememberCoroutineScope()
-    val prefValue by component.pref.collectAsState()
     var localPrefValue by remember { mutableStateOf("") }
     var isDialogOpen by remember { mutableStateOf(false) }
 
     Preference(
         modifier = modifier,
-        icon = component.icon?.invoke(),
+        icon = component.icon.invoke(),
         title = component.title.invoke(),
-        summary = component.summary.invoke(prefValue),
+        summary = component.summary.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
         onClick = {

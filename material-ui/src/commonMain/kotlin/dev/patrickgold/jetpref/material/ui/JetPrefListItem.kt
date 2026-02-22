@@ -76,14 +76,12 @@ fun JetPrefListItem(
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        secondaryContent = {
-            whenNotNullOrBlank(secondaryText) { str ->
-                Text(
-                    text = str,
-                    maxLines = if (singleLineSecondaryText) { 1 } else { 2 },
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+        secondaryContent = whenNotNullOrBlank(secondaryText) { str ->
+            Text(
+                text = str,
+                maxLines = if (singleLineSecondaryText) { 1 } else { 2 },
+                overflow = TextOverflow.Ellipsis,
+            )
         },
         enabled,
         trailingContent = trailingContent,
