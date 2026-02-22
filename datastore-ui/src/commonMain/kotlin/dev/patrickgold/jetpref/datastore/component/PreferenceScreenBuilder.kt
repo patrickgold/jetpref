@@ -77,7 +77,7 @@ open class PreferenceScreenBuilder(val kClass: KClass<*>) {
 
     fun components(block: PreferenceComponentScreenBuilder.() -> Unit) {
         require(components == null && content == null)
-        val builder = PreferenceComponentScreenBuilder(level = 0)
+        val builder = PreferenceComponentScreenBuilder()
         builder.block()
         components = builder.components.toList()
     }
@@ -92,11 +92,9 @@ open class PreferenceScreenBuilder(val kClass: KClass<*>) {
 open class PreferenceComponentScreenBuilder(
     groupEnabledIf: PreferenceDataEvaluator? = null,
     groupVisibleIf: PreferenceDataEvaluator? = null,
-    level: Int,
 ) : PreferenceComponentGroupBuilder(
     groupEnabledIf,
     groupVisibleIf,
-    level,
 ) {
     @OptIn(ExperimentalContracts::class)
     inline fun group(
@@ -110,7 +108,7 @@ open class PreferenceComponentScreenBuilder(
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
-        val builder = PreferenceComponentGroupBuilder(combineEnabledIf(enabledIf), combineVisibleIf(visibleIf), level + 1)
+        val builder = PreferenceComponentGroupBuilder(combineEnabledIf(enabledIf), combineVisibleIf(visibleIf))
         builder.groupHeader(title, summary, icon)
         builder.block()
         components.addAll(builder.components)
@@ -121,7 +119,6 @@ open class PreferenceComponentScreenBuilder(
 open class PreferenceComponentGroupBuilder(
     val groupEnabledIf: PreferenceDataEvaluator? = null,
     val groupVisibleIf: PreferenceDataEvaluator? = null,
-    val level: Int,
 ) {
     internal var associatedGroup: PreferenceComponent.GroupHeader? = null
 
@@ -154,6 +151,7 @@ open class PreferenceComponentGroupBuilder(
         title: @Composable () -> String,
         summary: @Composable () -> String? = { null },
         icon: @Composable () -> ImageVector? = { null },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
         val component = object : PreferenceComponent.GroupHeader {
             override val id = PreferenceComponentId.next()
@@ -162,8 +160,8 @@ open class PreferenceComponentGroupBuilder(
             override val icon = icon
             override val enabledIf = this@PreferenceComponentGroupBuilder.groupEnabledIf ?: { true }
             override val visibleIf = this@PreferenceComponentGroupBuilder.groupVisibleIf ?: { true }
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -193,6 +191,7 @@ open class PreferenceComponentGroupBuilder(
         icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
         content: @Composable () -> Unit,
     ) {
         val component = object : PreferenceComponent.ComposableContent {
@@ -203,8 +202,8 @@ open class PreferenceComponentGroupBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val content = content
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -220,6 +219,7 @@ open class PreferenceComponentGroupBuilder(
         content(
             title = @Composable { "<anonymous content impl>" },
             content = content,
+            searchPolicy = SearchPolicy.AlwaysExclude,
         )
     }
 
@@ -230,6 +230,7 @@ open class PreferenceComponentGroupBuilder(
         icon: @Composable () -> ImageVector? = targetScreen.icon,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
         val component = object : PreferenceComponent.NavigationEntry {
             override val id = PreferenceComponentId.next()
@@ -239,8 +240,8 @@ open class PreferenceComponentGroupBuilder(
             override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -257,6 +258,7 @@ open class PreferenceComponentGroupBuilder(
         icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
         val component = object : PreferenceComponent.Switch {
             override val id = PreferenceComponentId.next()
@@ -266,8 +268,8 @@ open class PreferenceComponentGroupBuilder(
             override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -285,6 +287,7 @@ open class PreferenceComponentGroupBuilder(
         icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
         switch(
             pref = pref,
@@ -299,6 +302,7 @@ open class PreferenceComponentGroupBuilder(
             icon = icon,
             enabledIf = enabledIf,
             visibleIf = visibleIf,
+            searchPolicy = searchPolicy,
         )
     }
 
@@ -308,6 +312,7 @@ open class PreferenceComponentGroupBuilder(
         icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
         entries: List<ListPreferenceEntry<V>>,
     ) {
         val component = object : PreferenceComponent.ListPicker<V> {
@@ -327,8 +332,8 @@ open class PreferenceComponentGroupBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val entries = entries
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -346,6 +351,7 @@ open class PreferenceComponentGroupBuilder(
         icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
         entries: List<ListPreferenceEntry<V>>,
     ) {
         val component = object : PreferenceComponent.ListPickerWithSwitch<V> {
@@ -370,8 +376,8 @@ open class PreferenceComponentGroupBuilder(
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
             override val entries = entries
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -392,6 +398,7 @@ open class PreferenceComponentGroupBuilder(
         defaultColors: List<Color>,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
         val component = object : PreferenceComponent.ColorPicker {
             override val id = PreferenceComponentId.next()
@@ -405,8 +412,8 @@ open class PreferenceComponentGroupBuilder(
             override val defaultColors = defaultColors
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -422,6 +429,7 @@ open class PreferenceComponentGroupBuilder(
         icon: @Composable () -> ImageVector? = { null },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
         val component = object : PreferenceComponent.LocalTimePicker {
             override val id = PreferenceComponentId.next()
@@ -431,8 +439,8 @@ open class PreferenceComponentGroupBuilder(
             override val icon = icon
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -459,6 +467,7 @@ open class PreferenceComponentGroupBuilder(
         validateValue: (String) -> Unit = { },
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
         val component = object : PreferenceComponent.TextField {
             override val id = PreferenceComponentId.next()
@@ -473,8 +482,8 @@ open class PreferenceComponentGroupBuilder(
             override val validateValue = validateValue
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
-            override val level = this@PreferenceComponentGroupBuilder.level
 
             @Composable
             override fun Render() {
@@ -496,6 +505,7 @@ open class PreferenceComponentGroupBuilder(
         stepIncrement: V,
         enabledIf: PreferenceDataEvaluator,
         visibleIf: PreferenceDataEvaluator,
+        searchPolicy: SearchPolicy,
         convertToV: (Float) -> V,
     ) where V : Number, V : Comparable<V> {
         val component = object : PreferenceComponent.SingleSlider<V> {
@@ -513,7 +523,7 @@ open class PreferenceComponentGroupBuilder(
             override val stepIncrement = stepIncrement
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val level = this@PreferenceComponentGroupBuilder.level
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
             override val convertToV = convertToV
 
@@ -536,6 +546,7 @@ open class PreferenceComponentGroupBuilder(
         stepIncrement: V,
         noinline enabledIf: PreferenceDataEvaluator = { true },
         noinline visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) where V : Number, V : Comparable<V> {
         slider(
             pref = pref,
@@ -548,6 +559,7 @@ open class PreferenceComponentGroupBuilder(
             stepIncrement = stepIncrement,
             enabledIf = enabledIf,
             visibleIf = visibleIf,
+            searchPolicy = searchPolicy,
             convertToV = selectConverter()
         )
     }
@@ -567,6 +579,7 @@ open class PreferenceComponentGroupBuilder(
         stepIncrement: V,
         enabledIf: PreferenceDataEvaluator,
         visibleIf: PreferenceDataEvaluator,
+        searchPolicy: SearchPolicy,
         convertToV: (Float) -> V,
     ) where V : Number, V : Comparable<V> {
         val component = object : PreferenceComponent.DualSlider<V> {
@@ -588,7 +601,7 @@ open class PreferenceComponentGroupBuilder(
             override val stepIncrement = stepIncrement
             override val enabledIf = combineEnabledIf(enabledIf)
             override val visibleIf = combineVisibleIf(visibleIf)
-            override val level = this@PreferenceComponentGroupBuilder.level
+            override val searchPolicy = searchPolicy
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
             override val convertToV = convertToV
 
@@ -616,6 +629,7 @@ open class PreferenceComponentGroupBuilder(
         stepIncrement: V,
         noinline enabledIf: PreferenceDataEvaluator = { true },
         noinline visibleIf: PreferenceDataEvaluator = { true },
+        searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) where V : Number, V : Comparable<V> {
         dualSlider(
             pref1 = pref1,
@@ -631,6 +645,7 @@ open class PreferenceComponentGroupBuilder(
             stepIncrement = stepIncrement,
             enabledIf = enabledIf,
             visibleIf = visibleIf,
+            searchPolicy = searchPolicy,
             convertToV = selectConverter()
         )
     }

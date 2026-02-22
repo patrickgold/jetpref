@@ -44,12 +44,12 @@ abstract class PreferenceComponentTree {
                     displayPath
                 }
             }
-            when (component) {
-                is PreferenceComponent.NavigationEntry -> {
+            when {
+                component is PreferenceComponent.NavigationEntry -> {
                     entries.add(SearchIndex.Entry(component, screen, displayPath))
                     buildSearchIndexRecursive(options, entries, displayPath.plus(component.targetScreen), component.targetScreen)
                 }
-                is PreferenceComponent.ComposableContent -> {
+                component.searchPolicy is SearchPolicy.AlwaysExclude -> {
                     // exclude from indexing
                 }
                 else -> {

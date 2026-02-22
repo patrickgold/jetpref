@@ -30,9 +30,9 @@ sealed interface PreferenceComponent : Presentable {
 
     val visibleIf: PreferenceDataEvaluator
 
-    val associatedGroup: GroupHeader?
+    val searchPolicy: SearchPolicy
 
-    val level: Int
+    val associatedGroup: GroupHeader?
 
     @Composable
     fun Render()
