@@ -35,41 +35,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
-import androidx.compose.ui.graphics.vector.ImageVector
 import dev.patrickgold.jetpref.datastore.ui.LocalFlashModifierProvider
 import dev.patrickgold.jetpref.datastore.ui.LocalIconSpaceReserved
 import dev.patrickgold.jetpref.datastore.ui.LocalPreferenceComponentIdToHighlight
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
-abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Presentable {
-    private val titleBacking: @Composable () -> String
+abstract class PreferenceScreen(builder: PreferenceScreenBuilder) : Presentable {
+    override val title = builder.title
+    override val summary = builder.summary
+    override val icon = builder.icon
 
-    override val title: @Composable () -> String
-        get() = titleBacking
+    val components: List<PreferenceComponent> = builder.components?.toList() ?: emptyList()
 
-    private val summaryBacking: @Composable () -> String?
-
-    override val summary: @Composable () -> String?
-        get() = summaryBacking
-
-    private val iconBacking: @Composable () -> ImageVector?
-
-    override val icon: @Composable () -> ImageVector?
-        get() = iconBacking
-
-    val components: List<PreferenceComponent>
-
-    val content: @Composable () -> Unit
+    val content: @Composable (Modifier) -> Unit
 
     init {
-        val builder = PreferenceScreenBuilder(this::class)
-        builder.block()
-        titleBacking = builder.title
-        summaryBacking = builder.summary
-        iconBacking = builder.icon
-        components = builder.components?.toList() ?: emptyList()
-        content = builder.content ?: @Composable {
+        components
+        content = builder.content ?: @Composable { modifier ->
             val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
             val provideFlashModifier = LocalFlashModifierProvider.current
             val lazyListState = rememberLazyListState()
@@ -80,7 +63,7 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
                 }
                 lazyListState.animateScrollToItem(index)
             }
-            LazyColumn(state = lazyListState) {
+            LazyColumn(modifier, state = lazyListState) {
                 items(components, key = { it.id }) { component ->
                     Box {
                         component.Render()
@@ -95,6 +78,15 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
         }
     }
 
+    constructor(
+        block: PreferenceScreenBuilder.() -> Unit,
+    ) : this(PreferenceScreenBuilder().also { it.block() })
+
+    @Composable
+    open fun Render() {
+        content(Modifier)
+    }
+
     @Composable
     operator fun invoke(
         componentIdToHighlight: Int = -1,
@@ -104,7 +96,7 @@ abstract class PreferenceScreen(block: PreferenceScreenBuilder.() -> Unit) : Pre
             LocalPreferenceComponentIdToHighlight provides componentIdToHighlight,
             LocalIconSpaceReserved provides iconSpaceReserved,
         ) {
-            content()
+            Render()
         }
     }
 }

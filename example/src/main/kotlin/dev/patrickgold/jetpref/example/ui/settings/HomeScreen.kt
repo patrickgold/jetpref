@@ -12,12 +12,12 @@ import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 data object HomeScreen : PreferenceScreen({
     title { "Settings" }
 
+    val prefs by ExamplePreferenceStore
     components {
-        val prefs by ExamplePreferenceStore
-
         navigationTo(SearchScreen)
         navigationTo(ColorPickerDemoScreen)
         navigationTo(AdditionalScreen)
+        navigationTo(CustomScreen)
         navigationTo(VisualizeSearchIndexScreen)
         listPicker(
             listPref = prefs.theme,

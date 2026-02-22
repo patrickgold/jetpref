@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -45,15 +46,14 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
-import kotlin.reflect.KClass
 
 @DslMarker
 @Target(AnnotationTarget.CLASS)
 annotation class PreferenceComponentBuilderDslMarker
 
 @PreferenceComponentBuilderDslMarker
-open class PreferenceScreenBuilder(val kClass: KClass<*>) {
-    internal var title: @Composable () -> String = { kClass.simpleName ?: "<unnamed screen>" }
+open class PreferenceScreenBuilder {
+    internal var title: @Composable () -> String = { "<unnamed screen>" }
 
     internal var summary: @Composable () -> String? = { null }
 
@@ -61,7 +61,7 @@ open class PreferenceScreenBuilder(val kClass: KClass<*>) {
 
     internal var components: List<PreferenceComponent>? = null
 
-    internal var content: (@Composable () -> Unit)? = null
+    internal var content: (@Composable (Modifier) -> Unit)? = null
 
     fun title(block: @Composable () -> String) {
         title = block
@@ -82,7 +82,7 @@ open class PreferenceScreenBuilder(val kClass: KClass<*>) {
         components = builder.components.toList()
     }
 
-    fun content(block: @Composable () -> Unit) {
+    fun content(block: @Composable (modifier: Modifier) -> Unit) {
         require(components == null && content == null)
         content = block
     }
