@@ -1,11 +1,11 @@
 package dev.patrickgold.jetpref.example.ui.settings
 
-import dev.patrickgold.jetpref.datastore.component.PreferenceScreen
+import dev.patrickgold.jetpref.datastore.component.PreferencePage
 import dev.patrickgold.jetpref.datastore.ui.listPrefEntries
 import dev.patrickgold.jetpref.example.ExamplePreferenceStore
 
-data object AdditionalScreen : PreferenceScreen({
-    title { "Additional Screen" }
+data object SubPage : PreferencePage({
+    title { "Sub Page" }
 
     val prefs by ExamplePreferenceStore
     components {

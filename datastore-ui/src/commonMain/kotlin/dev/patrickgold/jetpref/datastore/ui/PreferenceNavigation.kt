@@ -17,17 +17,14 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
-import dev.patrickgold.jetpref.datastore.component.PreferenceScreen
+import dev.patrickgold.jetpref.datastore.component.PreferencePage
 
 fun interface PreferenceNavigationRouter {
-    fun navigateTo(screen: PreferenceScreen, item: PreferenceComponent?)
+    fun navigateTo(page: PreferencePage, anchor: PreferenceComponent?)
 }
-
-internal val LocalPreferenceComponentIdToHighlight = compositionLocalOf { -1 }
 
 internal val LocalPreferenceNavigationRouter = staticCompositionLocalOf<PreferenceNavigationRouter> {
     error("No PreferenceNavigationRouter provided.")
@@ -43,7 +40,7 @@ internal val LocalPreferenceNavigationRouter = staticCompositionLocalOf<Preferen
  */
 @Composable
 fun PreferenceNavigationEntry(
-    component: PreferenceComponent.NavigationEntry,
+    component: PreferenceComponent.LinkedPage,
     modifier: Modifier = Modifier,
 ) {
     val router = LocalPreferenceNavigationRouter.current
@@ -54,6 +51,6 @@ fun PreferenceNavigationEntry(
         summary = component.summary.invoke(),
         enabledIf = component.enabledIf,
         visibleIf = component.visibleIf,
-        onClick = { router.navigateTo(component.targetScreen, null) },
+        onClick = { router.navigateTo(component.targetPage, null) },
     )
 }

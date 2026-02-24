@@ -68,7 +68,7 @@ private fun SearchEntryDisplay(
     JetPrefListItem(
         modifier = Modifier
             .clickable {
-                router.navigateTo(entry.associatedScreen, entry.component)
+                router.navigateTo(entry.associatedPage, entry.component)
             },
         icon = maybeJetIcon(entry.component.icon.invoke()),
         headlineContent = { Text(title) },

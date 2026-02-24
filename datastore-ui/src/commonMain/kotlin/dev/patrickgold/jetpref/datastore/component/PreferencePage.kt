@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,86 +35,63 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import dev.patrickgold.jetpref.datastore.ui.LocalFlashModifierProvider
-import dev.patrickgold.jetpref.datastore.ui.LocalIconSpaceReserved
-import dev.patrickgold.jetpref.datastore.ui.LocalPreferenceComponentIdToHighlight
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
-abstract class PreferenceScreen(builder: PreferenceScreenBuilder) : Presentable {
+abstract class PreferencePage(builder: PreferencePageBuilder) : Presentable {
     override val title = builder.title
     override val summary = builder.summary
     override val icon = builder.icon
 
     val components: List<PreferenceComponent> = builder.components?.toList() ?: emptyList()
 
-    val content: @Composable (Modifier) -> Unit
-
-    init {
-        components
-        content = builder.content ?: @Composable { modifier ->
-            val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
-            val provideFlashModifier = LocalFlashModifierProvider.current
-            val lazyListState = rememberLazyListState()
-            LaunchedEffect(componentIdToHighlight) {
-                val index = this@PreferenceScreen.components.indexOfFirst { it.id == componentIdToHighlight }
-                if (index == -1) {
-                    return@LaunchedEffect
-                }
-                lazyListState.animateScrollToItem(index)
-            }
-            LazyColumn(modifier, state = lazyListState) {
-                items(components, key = { it.id }) { component ->
-                    Box {
-                        component.Render()
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .then(provideFlashModifier(component))
-                        )
-                    }
-                }
-            }
-        }
-    }
-
     constructor(
-        block: PreferenceScreenBuilder.() -> Unit,
-    ) : this(PreferenceScreenBuilder().also { it.block() })
-
-    @Composable
-    open fun Render() {
-        content(Modifier)
-    }
+        block: PreferencePageBuilder.() -> Unit,
+    ) : this(PreferencePageBuilder().also { it.block() })
 
     @Composable
     operator fun invoke(
-        componentIdToHighlight: Int = -1,
-        iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+        modifier: Modifier = Modifier,
+        anchorId: Int = -1,
     ) {
-        CompositionLocalProvider(
-            LocalPreferenceComponentIdToHighlight provides componentIdToHighlight,
-            LocalIconSpaceReserved provides iconSpaceReserved,
-        ) {
-            Render()
+        val provideFlashModifier = LocalFlashModifierProvider.current
+        val lazyListState = rememberLazyListState()
+        LaunchedEffect(anchorId) {
+            val index = this@PreferencePage.components.indexOfFirst { it.id == anchorId }
+            if (index == -1) {
+                return@LaunchedEffect
+            }
+            lazyListState.animateScrollToItem(index)
+        }
+        LazyColumn(modifier, state = lazyListState) {
+            items(components, key = { it.id }) { component ->
+                Box {
+                    component.Content()
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .then(if (component.id == anchorId) {
+                                provideFlashModifier()
+                            } else Modifier)
+                    )
+                }
+            }
         }
     }
 }
 
 fun Modifier.flash(
-    component: PreferenceComponent,
     initialDelay: Long = 300L,
     visibleFor: Long = 1000L,
     flashColor: Color = Color.Unspecified,
 ) = composed {
-    val componentIdToHighlight = LocalPreferenceComponentIdToHighlight.current
-    var highlightedId by remember { mutableStateOf<Int?>(null) }
-    LaunchedEffect(componentIdToHighlight) {
+    var isHighlighted by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
         delay(initialDelay.milliseconds)
-        highlightedId = componentIdToHighlight
+        isHighlighted = true
         delay(visibleFor.milliseconds)
-        highlightedId = null
+        isHighlighted = false
     }
-    val isHighlighted = component.id == highlightedId
     val backgroundColor by animateColorAsState(
         targetValue = when {
             isHighlighted -> flashColor.takeOrElse { MaterialTheme.colorScheme.primary.copy(0.5f) }

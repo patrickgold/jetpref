@@ -21,7 +21,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import dev.patrickgold.jetpref.datastore.component.PreferenceComponent
 import dev.patrickgold.jetpref.datastore.component.flash
 
 /**
@@ -51,7 +50,7 @@ val LocalIsPrefVisible = compositionLocalOf { true }
  *
  * @since 0.4.0
  */
-val LocalFlashModifierProvider = staticCompositionLocalOf<((PreferenceComponent) -> Modifier)> {
+val LocalFlashModifierProvider = staticCompositionLocalOf<(() -> Modifier)> {
     error("No FlashModifierProvider provided")
 }
 
@@ -69,7 +68,7 @@ val LocalFlashModifierProvider = staticCompositionLocalOf<((PreferenceComponent)
 fun JetPrefHost(
     router: PreferenceNavigationRouter,
     iconSpaceReserved: Boolean = true,
-    provideFlashModifier: ((PreferenceComponent) -> Modifier) = { Modifier.flash(it) },
+    provideFlashModifier: (() -> Modifier) = { Modifier.flash() },
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(

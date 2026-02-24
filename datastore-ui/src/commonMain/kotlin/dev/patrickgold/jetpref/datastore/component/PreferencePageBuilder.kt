@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +51,7 @@ import kotlin.math.roundToLong
 annotation class PreferenceComponentBuilderDslMarker
 
 @PreferenceComponentBuilderDslMarker
-open class PreferenceScreenBuilder {
+open class PreferencePageBuilder {
     internal var title: @Composable () -> String = { "<unnamed screen>" }
 
     internal var summary: @Composable () -> String? = { null }
@@ -60,8 +59,6 @@ open class PreferenceScreenBuilder {
     internal var icon: @Composable () -> ImageVector? = { null }
 
     internal var components: List<PreferenceComponent>? = null
-
-    internal var content: (@Composable (Modifier) -> Unit)? = null
 
     fun title(block: @Composable () -> String) {
         title = block
@@ -76,15 +73,10 @@ open class PreferenceScreenBuilder {
     }
 
     fun components(block: PreferenceComponentScreenBuilder.() -> Unit) {
-        require(components == null && content == null)
+        require(components == null)
         val builder = PreferenceComponentScreenBuilder()
         builder.block()
         components = builder.components.toList()
-    }
-
-    fun content(block: @Composable (modifier: Modifier) -> Unit) {
-        require(components == null && content == null)
-        content = block
     }
 }
 
@@ -164,7 +156,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 if (visibleIf(PreferenceDataEvaluatorScope)) {
                     ListItem(
                         leadingContent = maybeJetIcon(icon.invoke()),
@@ -206,7 +198,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 content()
             }
         }
@@ -223,18 +215,18 @@ open class PreferenceComponentGroupBuilder(
         )
     }
 
-    fun navigationTo(
-        targetScreen: PreferenceScreen,
-        title: @Composable () -> String = targetScreen.title,
-        summary: @Composable () -> String? = targetScreen.summary,
-        icon: @Composable () -> ImageVector? = targetScreen.icon,
+    fun linkedPage(
+        targetPage: PreferencePage,
+        title: @Composable () -> String = targetPage.title,
+        summary: @Composable () -> String? = targetPage.summary,
+        icon: @Composable () -> ImageVector? = targetPage.icon,
         enabledIf: PreferenceDataEvaluator = { true },
         visibleIf: PreferenceDataEvaluator = { true },
         searchPolicy: SearchPolicy = SearchPolicy.AlwaysInclude,
     ) {
-        val component = object : PreferenceComponent.NavigationEntry {
+        val component = object : PreferenceComponent.LinkedPage {
             override val id = PreferenceComponentId.next()
-            override val targetScreen = targetScreen
+            override val targetPage = targetPage
             override val title = title
             override val summary = summary
             override val icon = icon
@@ -244,7 +236,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 PreferenceNavigationEntry(this)
             }
         }
@@ -272,7 +264,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 SwitchPreference(this)
             }
         }
@@ -336,7 +328,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 ListPreference(this)
             }
         }
@@ -380,7 +372,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 ListPreference(this)
             }
         }
@@ -416,7 +408,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 ColorPickerPreference(this)
             }
         }
@@ -443,7 +435,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 LocalTimePickerPreference(this)
             }
         }
@@ -486,7 +478,7 @@ open class PreferenceComponentGroupBuilder(
             override val associatedGroup = this@PreferenceComponentGroupBuilder.associatedGroup
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 TextFieldPreference(this)
             }
         }
@@ -528,7 +520,7 @@ open class PreferenceComponentGroupBuilder(
             override val convertToV = convertToV
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 DialogSliderPreference(this)
             }
         }
@@ -606,7 +598,7 @@ open class PreferenceComponentGroupBuilder(
             override val convertToV = convertToV
 
             @Composable
-            override fun Render() {
+            override fun Content() {
                 DialogSliderPreference(this)
             }
         }

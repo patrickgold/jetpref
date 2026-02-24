@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.plugin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val projectCompileSdk: String by project
@@ -72,6 +73,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+    implementation(libs.kotlinx.serialization.json)
     implementation(projects.datastoreModel)
     ksp(projects.datastoreModelProcessor)
     implementation(projects.datastoreUi)

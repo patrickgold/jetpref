@@ -12,19 +12,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.navigation3.runtime.NavEntry
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import dev.patrickgold.jetpref.datastore.component.PreferenceScreen
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.datastore.ui.JetPrefHost
 import dev.patrickgold.jetpref.datastore.ui.PreferenceNavigationRouter
 import dev.patrickgold.jetpref.datastore.ui.ProvideDialogPrefStrings
-import dev.patrickgold.jetpref.example.ui.settings.HomeScreen
+import dev.patrickgold.jetpref.example.ui.settings.ColorPickerDemoScreen
+import dev.patrickgold.jetpref.example.ui.settings.HomePage
+import dev.patrickgold.jetpref.example.ui.settings.ParameterizedScreen
+import dev.patrickgold.jetpref.example.ui.settings.SearchScreen
+import dev.patrickgold.jetpref.example.ui.settings.SubPage
+import dev.patrickgold.jetpref.example.ui.settings.VisualizeSearchIndexScreen
 import dev.patrickgold.jetpref.example.ui.theme.JetPrefTheme
 import dev.patrickgold.jetpref.example.ui.theme.Theme
+import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
     private val prefs by ExamplePreferenceStore
@@ -48,10 +57,39 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class ExampleRoute(
-    val screen: PreferenceScreen,
-    val componentId: Int = -1,
-)
+sealed interface Route : NavKey {
+    @Serializable
+    data object ColorPickerDemo : Route
+
+    @Serializable
+    data class Home(
+        val anchorId: Int = -1,
+    ) : Route
+
+    @Serializable
+    data class Parameterized(
+        val name: String,
+    ) : Route
+
+    @Serializable
+    data object Search : Route
+
+    @Serializable
+    data class Sub(
+        val anchorId: Int = -1,
+    ) : Route
+
+    @Serializable
+    data object VisualizeSearchIndex : Route
+}
+
+class Navigator(val state: NavBackStack<NavKey>) {
+    fun navigateTo(navKey: NavKey) {
+        state.add(navKey)
+    }
+}
+
+val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No Navigator provided.") }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,23 +104,44 @@ fun AppContent() {
                 title = { Text(text = "Example JetPref App") },
                 colors = TopAppBarDefaults.topAppBarColors()
             )
-            val backStack = remember { mutableStateListOf(ExampleRoute(HomeScreen)) }
+            val backStack = rememberNavBackStack(Route.Home())
+            val navigator = remember { Navigator(backStack) }
             val router = remember {
-                PreferenceNavigationRouter { screen, item ->
-                    val route = ExampleRoute(screen, componentId = item?.id ?: -1)
-                    backStack.add(route)
+                PreferenceNavigationRouter { page, anchor ->
+                    val anchorId = anchor?.id ?: -1
+                    when (page) {
+                        is HomePage -> navigator.navigateTo(Route.Home(anchorId))
+                        is SubPage -> navigator.navigateTo(Route.Sub(anchorId))
+                    }
                 }
             }
-            JetPrefHost(router) {
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
-                    entryProvider = { route ->
-                        NavEntry(route) {
-                            route.screen(route.componentId)
-                        }
-                    },
-                )
+            CompositionLocalProvider(LocalNavigator provides navigator) {
+                JetPrefHost(router) {
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = { backStack.removeLastOrNull() },
+                        entryProvider = entryProvider {
+                            entry<Route.Home> { route ->
+                                HomePage(anchorId = route.anchorId)
+                            }
+                            entry<Route.Sub> { route ->
+                                SubPage(anchorId = route.anchorId)
+                            }
+                            entry<Route.ColorPickerDemo> {
+                                ColorPickerDemoScreen()
+                            }
+                            entry<Route.Parameterized> { route ->
+                                ParameterizedScreen(route.name)
+                            }
+                            entry<Route.Search> {
+                                SearchScreen()
+                            }
+                            entry<Route.VisualizeSearchIndex> {
+                                VisualizeSearchIndexScreen()
+                            }
+                        },
+                    )
+                }
             }
         }
     }

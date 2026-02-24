@@ -35,7 +35,7 @@ sealed interface PreferenceComponent : Presentable {
     val associatedGroup: GroupHeader?
 
     @Composable
-    fun Render()
+    fun Content()
 
     interface GroupHeader : PreferenceComponent
 
@@ -43,8 +43,8 @@ sealed interface PreferenceComponent : Presentable {
         val content: @Composable () -> Unit
     }
 
-    interface NavigationEntry : PreferenceComponent {
-        val targetScreen: PreferenceScreen
+    interface LinkedPage : PreferenceComponent {
+        val targetPage: PreferencePage
     }
 
     interface Switch : PreferenceComponent {

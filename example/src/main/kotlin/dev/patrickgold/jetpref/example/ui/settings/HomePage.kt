@@ -3,22 +3,22 @@ package dev.patrickgold.jetpref.example.ui.settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import dev.patrickgold.jetpref.datastore.component.PreferenceScreen
+import dev.patrickgold.jetpref.datastore.component.PreferencePage
 import dev.patrickgold.jetpref.example.ExamplePreferenceStore
 import dev.patrickgold.jetpref.example.R
+import dev.patrickgold.jetpref.example.Route
 import dev.patrickgold.jetpref.example.ui.theme.Theme
 import dev.patrickgold.jetpref.example.ui.theme.defaultColors
 
-data object HomeScreen : PreferenceScreen({
+data object HomePage : PreferencePage({
     title { "Settings" }
 
     val prefs by ExamplePreferenceStore
     components {
-        navigationTo(SearchScreen)
-        navigationTo(ColorPickerDemoScreen)
-        navigationTo(AdditionalScreen)
-        navigationTo(CustomScreen)
-        navigationTo(VisualizeSearchIndexScreen)
+        linkedExampleScreen(Route.Search, title = { "Search" })
+        linkedPage(SubPage)
+        linkedExampleScreen(Route.VisualizeSearchIndex, title = { "Visualize search index" })
+        linkedExampleScreen(Route.ColorPickerDemo, title = { "Color picker demo" })
         listPicker(
             listPref = prefs.theme,
             icon = { ImageVector.vectorResource(R.drawable.ic_palette) },

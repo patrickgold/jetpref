@@ -17,7 +17,7 @@
 package dev.patrickgold.jetpref.datastore.component
 
 abstract class PreferenceComponentTree {
-    abstract val mainEntryPoint: PreferenceScreen
+    abstract val mainEntryPoint: PreferencePage
 
     fun buildSearchIndex(
         options: SearchIndex.Options = SearchIndex.Options.Default,
@@ -33,9 +33,9 @@ abstract class PreferenceComponentTree {
         options: SearchIndex.Options,
         entries: MutableList<SearchIndex.Entry>,
         displayPath: List<Presentable>,
-        screen: PreferenceScreen,
+        page: PreferencePage,
     ) {
-        for (component in screen.components) {
+        for (component in page.components) {
             val displayPath = when {
                 component.associatedGroup != null && options.includeGroupsInDisplayPath -> {
                     displayPath.plus(component.associatedGroup!!)
@@ -45,15 +45,15 @@ abstract class PreferenceComponentTree {
                 }
             }
             when {
-                component is PreferenceComponent.NavigationEntry -> {
-                    entries.add(SearchIndex.Entry(component, screen, displayPath))
-                    buildSearchIndexRecursive(options, entries, displayPath.plus(component.targetScreen), component.targetScreen)
+                component is PreferenceComponent.LinkedPage -> {
+                    entries.add(SearchIndex.Entry(component, page, displayPath))
+                    buildSearchIndexRecursive(options, entries, displayPath.plus(component.targetPage), component.targetPage)
                 }
                 component.searchPolicy is SearchPolicy.AlwaysExclude -> {
                     // exclude from indexing
                 }
                 else -> {
-                    entries.add(SearchIndex.Entry(component, screen, displayPath))
+                    entries.add(SearchIndex.Entry(component, page, displayPath))
                 }
             }
         }

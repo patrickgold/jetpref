@@ -30,7 +30,7 @@ data class SearchIndex(
 
     data class Entry(
         val component: PreferenceComponent,
-        val associatedScreen: PreferenceScreen,
+        val associatedPage: PreferencePage,
         val displayPath: List<Presentable>,
     )
 }
