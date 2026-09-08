@@ -24,8 +24,9 @@ kotlin {
 }
 
 mavenPublishing {
-    val projectGroupId: String by project
-    val artifactId = "jetpref-datastore-model-processor"
-    val projectVersion: String by project
-    coordinates(projectGroupId, artifactId, projectVersion)
+    coordinates(
+        groupId = providers.gradleProperty("projectGroupId").get(),
+        artifactId = "jetpref-datastore-model-processor",
+        version = providers.gradleProperty("projectVersion").get(),
+    )
 }

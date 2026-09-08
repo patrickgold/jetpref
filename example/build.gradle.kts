@@ -3,14 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.agp.application)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.plugin.compose)
 }
-
-val projectCompileSdk: String by project
-val projectMinSdk: String by project
-val projectTargetSdk: String by project
-val projectVersion: String by project
 
 kotlin {
     compilerOptions {
@@ -20,14 +14,14 @@ kotlin {
 
 android {
     namespace = "dev.patrickgold.jetpref.example"
-    compileSdk = projectCompileSdk.toInt()
+    compileSdk = providers.gradleProperty("projectCompileSdk").map { it.toInt() }.get()
 
     defaultConfig {
         applicationId = "dev.patrickgold.jetpref.example"
-        minSdk = projectMinSdk.toInt()
-        targetSdk = projectTargetSdk.toInt()
+        minSdk = providers.gradleProperty("projectMinSdk").map { it.toInt() }.get()
+        targetSdk = providers.gradleProperty("projectTargetSdk").map { it.toInt() }.get()
         versionCode = 1
-        versionName = projectVersion
+        versionName = providers.gradleProperty("projectVersion").get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
