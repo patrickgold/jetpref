@@ -16,12 +16,9 @@ kotlin {
     }
 
     android {
-        val projectCompileSdk: String by project
-        val projectMinSdk: String by project
-
         namespace = "dev.patrickgold.jetpref.datastore"
-        compileSdk = projectCompileSdk.toInt()
-        minSdk = projectMinSdk.toInt()
+        compileSdk = providers.gradleProperty("projectCompileSdk").map { it.toInt() }.get()
+        minSdk = providers.gradleProperty("projectMinSdk").map { it.toInt() }.get()
 
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
@@ -48,10 +45,10 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
-        val jvmCommonMain by creating {
+        val jvmCommonMain = create("jvmCommonMain") {
             dependsOn(commonMain.get())
         }
-        val jvmCommonTest by creating {
+        val jvmCommonTest = create("jvmCommonTest") {
             dependsOn(commonTest.get())
             dependencies {
                 implementation(libs.junit.jupiter.api)
@@ -87,8 +84,9 @@ tasks.withType<Test> {
 }
 
 mavenPublishing {
-    val projectGroupId: String by project
-    val artifactId = "jetpref-datastore-model"
-    val projectVersion: String by project
-    coordinates(projectGroupId, artifactId, projectVersion)
+    coordinates(
+        groupId = providers.gradleProperty("projectGroupId").get(),
+        artifactId = "jetpref-datastore-model",
+        version = providers.gradleProperty("projectVersion").get(),
+    )
 }

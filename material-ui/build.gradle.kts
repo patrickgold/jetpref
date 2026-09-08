@@ -10,12 +10,9 @@ plugins {
 
 kotlin {
     android {
-        val projectCompileSdk: String by project
-        val projectMinSdk: String by project
-
         namespace = "dev.patrickgold.jetpref.material.ui"
-        compileSdk = projectCompileSdk.toInt()
-        minSdk = projectMinSdk.toInt()
+        compileSdk = providers.gradleProperty("projectCompileSdk").map { it.toInt() }.get()
+        minSdk = providers.gradleProperty("projectMinSdk").map { it.toInt() }.get()
 
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
@@ -51,8 +48,9 @@ tasks.withType<Test> {
 }
 
 mavenPublishing {
-    val projectGroupId: String by project
-    val artifactId = "jetpref-material-ui"
-    val projectVersion: String by project
-    coordinates(projectGroupId, artifactId, projectVersion)
+    coordinates(
+        groupId = providers.gradleProperty("projectGroupId").get(),
+        artifactId = "jetpref-material-ui",
+        version = providers.gradleProperty("projectVersion").get(),
+    )
 }

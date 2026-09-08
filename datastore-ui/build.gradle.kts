@@ -10,12 +10,9 @@ plugins {
 
 kotlin {
     android {
-        val projectCompileSdk: String by project
-        val projectMinSdk: String by project
-
         namespace = "dev.patrickgold.jetpref.datastore.ui"
-        compileSdk = projectCompileSdk.toInt()
-        minSdk = projectMinSdk.toInt()
+        compileSdk = providers.gradleProperty("projectCompileSdk").map { it.toInt() }.get()
+        minSdk = providers.gradleProperty("projectMinSdk").map { it.toInt() }.get()
 
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
@@ -45,8 +42,9 @@ kotlin {
 }
 
 mavenPublishing {
-    val projectGroupId: String by project
-    val artifactId = "jetpref-datastore-ui"
-    val projectVersion: String by project
-    coordinates(projectGroupId, artifactId, projectVersion)
+    coordinates(
+        groupId = providers.gradleProperty("projectGroupId").get(),
+        artifactId = "jetpref-datastore-ui",
+        version = providers.gradleProperty("projectVersion").get(),
+    )
 }
