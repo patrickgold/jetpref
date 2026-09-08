@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -10,7 +9,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         val projectCompileSdk: String by project
         val projectMinSdk: String by project
 
