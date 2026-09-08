@@ -30,7 +30,8 @@ private class PreferenceDataImpl<V : Any>(
 ) : PreferenceData<V> {
     override val typedKey = PreferenceModel.TypedKey(type, key)
     private val cachedValue = AtomicReference<V?>(null)
-    private var cachedValueFlow = MutableStateFlow(default)
+    private val cachedValueFlow = MutableStateFlow(default)
+    private val cachedReadOnlyValueFlow = cachedValueFlow.asStateFlow()
     private val cachedValueWriteGuard = Mutex()
     private var valuePersistHandler: PreferenceData.ValuePersistHandler<V>? = null
 
@@ -42,7 +43,7 @@ private class PreferenceDataImpl<V : Any>(
 
     override fun getOrNull(): V? = cachedValue.get()
 
-    override fun asFlow() = cachedValueFlow.asStateFlow()
+    override fun asFlow() = cachedReadOnlyValueFlow
 
     override suspend fun set(value: V) = cachedValueWriteGuard.withLock {
         cachedValue.set(value)
