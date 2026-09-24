@@ -50,7 +50,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param eventModifier An optional modifier to apply to the preference item. This can be used to set up toggles or
  *  other interactions. Mutually exclusive with [onClick].
  *
- * @since 0.3.2
+ * @since 0.1.0
  */
 @Composable
 fun Preference(
@@ -95,27 +95,4 @@ fun Preference(
             )
         }
     }
-}
-
-/**
- * @since 0.1.0
- */
-@Deprecated(
-    message = "Use new Preference() function with the optional overlineText parameter. This function signature will be marked as an ERROR in 0.4.0 and removed in 0.5.0.",
-    replaceWith = ReplaceWith("Preference( modifier, icon, iconSpaceReserved, null, title, summary, trailing, enabledIf, visibleIf, onClick, eventModifier )"),
-)
-@Composable
-fun Preference(
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
-    title: String,
-    summary: String? = null,
-    trailing: @Composable (() -> Unit)? = null,
-    enabledIf: PreferenceDataEvaluator = { true },
-    visibleIf: PreferenceDataEvaluator = { true },
-    onClick: (() -> Unit)? = null,
-    eventModifier: (@Composable () -> Modifier)? = null,
-) {
-    Preference(modifier, icon, iconSpaceReserved, null, title, summary, trailing, enabledIf, visibleIf, onClick, eventModifier)
 }
