@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param icon The [ImageVector] of the list entry icon.
  * @param iconSpaceReserved If the space at the start of the list item should be reserved (blank
  *  space) if no icon ID is provided.
+ * @param overlineText The overline text of this preference, shown above the list item's primary text.
  * @param title The title of this preference, shown as the list item primary text (max 1 line).
  * @param summary The summary of this preference, shown as the list item secondary text (max 2 lines).
  * @param trailing Optional trailing composable, will be placed at the end of the list item.
@@ -49,13 +50,14 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param eventModifier An optional modifier to apply to the preference item. This can be used to set up toggles or
  *  other interactions. Mutually exclusive with [onClick].
  *
- * @since 0.1.0
+ * @since 0.3.2
  */
 @Composable
 fun Preference(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    overlineText: String? = null,
     title: String,
     summary: String? = null,
     trailing: @Composable (() -> Unit)? = null,
@@ -85,6 +87,7 @@ fun Preference(
                     modifier.then(eventModifier?.invoke() ?: Modifier)
                 },
                 icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                overlineText = overlineText,
                 text = title,
                 secondaryText = summary,
                 trailing = trailing,
@@ -92,4 +95,27 @@ fun Preference(
             )
         }
     }
+}
+
+/**
+ * @since 0.1.0
+ */
+@Deprecated(
+    message = "Use new Preference() function with the optional overlineText parameter. This function signature will be marked as an ERROR in 0.4.0 and removed in 0.5.0.",
+    replaceWith = ReplaceWith("Preference( modifier, icon, iconSpaceReserved, null, title, summary, trailing, enabledIf, visibleIf, onClick, eventModifier )"),
+)
+@Composable
+fun Preference(
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    title: String,
+    summary: String? = null,
+    trailing: @Composable (() -> Unit)? = null,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+    onClick: (() -> Unit)? = null,
+    eventModifier: (@Composable () -> Modifier)? = null,
+) {
+    Preference(modifier, icon, iconSpaceReserved, null, title, summary, trailing, enabledIf, visibleIf, onClick, eventModifier)
 }
