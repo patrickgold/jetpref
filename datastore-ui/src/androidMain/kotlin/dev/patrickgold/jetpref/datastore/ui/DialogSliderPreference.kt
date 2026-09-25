@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Patrick Goldinger
+ * Copyright 2021-2026 Patrick Goldinger
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,37 @@ import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
+/**
+ * Object to hold defaults used by [DialogSliderPreference].
+ *
+ * @since 0.3.2
+ */
+object DialogSliderPreferenceDefaults {
+    /**
+     * Creates slider colors used by [DialogSliderPreference].
+     *
+     * @since 0.3.2
+     */
+    @Composable
+    fun sliderColors(
+        thumbColor: Color = MaterialTheme.colorScheme.primary,
+        activeTrackColor: Color = MaterialTheme.colorScheme.primary,
+        activeTickColor: Color = Color.Transparent,
+        inactiveTrackColor: Color = MaterialTheme.colorScheme.primaryContainer,
+        inactiveTickColor: Color = Color.Transparent,
+        disabledThumbColor: Color = Color.Unspecified,
+        disabledActiveTrackColor: Color = Color.Unspecified,
+        disabledActiveTickColor: Color = Color.Transparent,
+        disabledInactiveTrackColor: Color = Color.Unspecified,
+        disabledInactiveTickColor: Color = Color.Transparent,
+    ): SliderColors {
+        return SliderDefaults.colors(
+            thumbColor, activeTrackColor, activeTickColor, inactiveTrackColor, inactiveTickColor, disabledThumbColor,
+            disabledActiveTrackColor, disabledActiveTickColor, disabledInactiveTrackColor, disabledInactiveTickColor,
+        )
+    }
+}
+
 @ExperimentalJetPrefDatastoreUi
 @Composable
 internal fun <V> DialogSliderPreference(
@@ -61,6 +92,7 @@ internal fun <V> DialogSliderPreference(
     max: V,
     stepIncrement: V,
     onPreviewSelectedValue: (V) -> Unit,
+    sliderColors: SliderColors,
     dialogStrings: DialogPrefStrings,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
@@ -126,7 +158,7 @@ internal fun <V> DialogSliderPreference(
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).roundToInt() - 1,
                     onValueChange = { sliderValue = round(it) },
                     onValueChangeFinished = { onPreviewSelectedValue(convertToV(sliderValue)) },
-                    colors = customSliderDialogColors(),
+                    colors = sliderColors,
                 )
             }
         }
@@ -151,6 +183,7 @@ internal fun <V> DialogSliderPreference(
     stepIncrement: V,
     onPreviewSelectedPrimaryValue: (V) -> Unit,
     onPreviewSelectedSecondaryValue: (V) -> Unit,
+    sliderColors: SliderColors,
     dialogStrings: DialogPrefStrings,
     enabledIf: PreferenceDataEvaluator,
     visibleIf: PreferenceDataEvaluator,
@@ -224,7 +257,7 @@ internal fun <V> DialogSliderPreference(
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
                     onValueChange = { primarySliderValue = convertToV(it) },
                     onValueChangeFinished = { onPreviewSelectedPrimaryValue(primarySliderValue) },
-                    colors = customSliderDialogColors(),
+                    colors = sliderColors,
                 )
                 Row(
                     modifier = Modifier
@@ -244,22 +277,11 @@ internal fun <V> DialogSliderPreference(
                     steps = ((max.toFloat() - min.toFloat()) / stepIncrement.toFloat()).toInt() - 1,
                     onValueChange = { secondarySliderValue = convertToV(it) },
                     onValueChangeFinished = { onPreviewSelectedSecondaryValue(secondarySliderValue) },
-                    colors = customSliderDialogColors(),
+                    colors = sliderColors,
                 )
             }
         }
     }
-}
-
-@Composable
-private fun customSliderDialogColors(): SliderColors {
-    return SliderDefaults.colors(
-        thumbColor = MaterialTheme.colorScheme.primary,
-        activeTrackColor = MaterialTheme.colorScheme.primary,
-        activeTickColor = Color.Transparent,
-        inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
-        inactiveTickColor = Color.Transparent,
-    )
 }
 
 /**
@@ -281,6 +303,7 @@ private fun customSliderDialogColors(): SliderColors {
  * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
  *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
  *  will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the slider.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -303,13 +326,14 @@ fun DialogSliderPreference(
     max: Int,
     stepIncrement: Int,
     onPreviewSelectedValue: (Int) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToInt()
@@ -344,6 +368,7 @@ fun DialogSliderPreference(
  * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
  *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
  *  actual selected new secondary value will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the sliders.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -370,6 +395,7 @@ fun DialogSliderPreference(
     stepIncrement: Int,
     onPreviewSelectedPrimaryValue: (Int) -> Unit = { },
     onPreviewSelectedSecondaryValue: (Int) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
@@ -377,7 +403,7 @@ fun DialogSliderPreference(
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToInt()
@@ -406,6 +432,7 @@ fun DialogSliderPreference(
  * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
  *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
  *  will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the slider.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -428,13 +455,14 @@ fun DialogSliderPreference(
     max: Long,
     stepIncrement: Long,
     onPreviewSelectedValue: (Long) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToLong()
@@ -469,6 +497,7 @@ fun DialogSliderPreference(
  * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
  *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
  *  actual selected new secondary value will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the sliders.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -495,6 +524,7 @@ fun DialogSliderPreference(
     stepIncrement: Long,
     onPreviewSelectedPrimaryValue: (Long) -> Unit = { },
     onPreviewSelectedSecondaryValue: (Long) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
@@ -502,7 +532,7 @@ fun DialogSliderPreference(
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
             it.roundToLong()
@@ -531,6 +561,7 @@ fun DialogSliderPreference(
  * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
  *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
  *  will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the slider.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -553,13 +584,14 @@ fun DialogSliderPreference(
     max: Double,
     stepIncrement: Double,
     onPreviewSelectedValue: (Double) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
 
@@ -588,6 +620,7 @@ fun DialogSliderPreference(
  * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
  *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
  *  actual selected new secondary value will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the sliders.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -614,6 +647,7 @@ fun DialogSliderPreference(
     stepIncrement: Double,
     onPreviewSelectedPrimaryValue: (Double) -> Unit = { },
     onPreviewSelectedSecondaryValue: (Double) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
@@ -621,7 +655,7 @@ fun DialogSliderPreference(
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
 
@@ -644,6 +678,7 @@ fun DialogSliderPreference(
  * @param onPreviewSelectedValue Optional callback which gets invoked when the slider drag movement is finished. This
  *  allows to preview the effect of the selected value. This value should not be stored, the actual selected new value
  *  will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the slider.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -666,13 +701,14 @@ fun DialogSliderPreference(
     max: Float,
     stepIncrement: Float,
     onPreviewSelectedValue: (Float) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
         pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
-        stepIncrement, onPreviewSelectedValue, dialogStrings, enabledIf, visibleIf,
+        stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
 
@@ -701,6 +737,7 @@ fun DialogSliderPreference(
  * @param onPreviewSelectedSecondaryValue Optional callback which gets invoked when the secondary slider drag movement
  *  is finished. This allows to preview the effect of the selected secondary value. This value should not be stored, the
  *  actual selected new secondary value will be written to the preference once the user confirms it.
+ * @param sliderColors The colors to use for the sliders.
  * @param dialogStrings The dialog strings to use for this dialog. Defaults to the current dialog prefs set.
  * @param enabledIf Evaluator scope which allows to dynamically decide if this preference should be
  *  enabled (true) or disabled (false).
@@ -727,6 +764,7 @@ fun DialogSliderPreference(
     stepIncrement: Float,
     onPreviewSelectedPrimaryValue: (Float) -> Unit = { },
     onPreviewSelectedSecondaryValue: (Float) -> Unit = { },
+    sliderColors: SliderColors = DialogSliderPreferenceDefaults.sliderColors(),
     dialogStrings: DialogPrefStrings = LocalDefaultDialogPrefStrings.current,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
@@ -734,6 +772,6 @@ fun DialogSliderPreference(
     DialogSliderPreference(
         primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
-        onPreviewSelectedSecondaryValue, dialogStrings, enabledIf, visibleIf,
+        onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
