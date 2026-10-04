@@ -68,10 +68,9 @@ fun SwitchPreference(
     val prefValue by pref.collectAsState()
 
     Preference(
-        checked = prefValue,
-        onCheckedChange = {
+        onClick = {
             scope.launch {
-                pref.set(it)
+                pref.set(!prefValue)
             }
         },
         modifier = modifier,
