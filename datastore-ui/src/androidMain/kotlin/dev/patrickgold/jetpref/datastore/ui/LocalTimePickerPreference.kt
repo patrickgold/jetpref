@@ -29,6 +29,7 @@ import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
@@ -70,11 +71,11 @@ import kotlinx.coroutines.launch
  *
  * @since 0.2.0-rc04
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalTimePickerPreference(
     pref: PreferenceData<LocalTime>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -98,6 +99,7 @@ fun LocalTimePickerPreference(
 
     Preference(
         modifier = modifier,
+        shapes = shapes,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         title = title,

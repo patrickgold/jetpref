@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -235,6 +236,7 @@ fun <V : Any> ListPreference(
     listPref: PreferenceData<V>,
     switchPref: PreferenceData<Boolean>? = null,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -253,6 +255,7 @@ fun <V : Any> ListPreference(
 
     Preference(
         modifier = modifier,
+        shapes = shapes,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         title = title,

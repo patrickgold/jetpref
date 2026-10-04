@@ -17,6 +17,10 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.ListItemShapes
+import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -46,15 +50,15 @@ import dev.patrickgold.jetpref.material.ui.JetPrefListItem
  * @param visibleIf Evaluator scope which allows to dynamically decide if this preference should be
  *  visible (true) or hidden (false).
  * @param onClick The action to perform if this preference is enabled and the user clicks on this
- *  preference item. Mutually exclusive with [eventModifier].
- * @param eventModifier An optional modifier to apply to the preference item. This can be used to set up toggles or
- *  other interactions. Mutually exclusive with [onClick].
+ *  preference item.
  *
  * @since 0.1.0
  */
 @Composable
 fun Preference(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     overlineText: String? = null,
@@ -63,12 +67,7 @@ fun Preference(
     trailing: @Composable (() -> Unit)? = null,
     enabledIf: PreferenceDataEvaluator = { true },
     visibleIf: PreferenceDataEvaluator = { true },
-    onClick: (() -> Unit)? = null,
-    eventModifier: (@Composable () -> Modifier)? = null,
 ) {
-    require(!(onClick != null && eventModifier != null)) {
-        "You cannot provide both an onClick lambda and an eventModifier."
-    }
     if (LocalIsPrefVisible.current && visibleIf(PreferenceDataEvaluatorScope)) {
         val isEnabled = LocalIsPrefEnabled.current && enabledIf(PreferenceDataEvaluatorScope)
         CompositionLocalProvider(
@@ -76,23 +75,91 @@ fun Preference(
             LocalIsPrefEnabled provides isEnabled,
             LocalIsPrefVisible provides true,
         ) {
-            JetPrefListItem(
-                modifier = if (onClick != null) {
-                    modifier.clickable(
+            if (shapes != null) {
+                SegmentedListItem(
+                    onClick = onClick,
+                    shapes = shapes,
+                    modifier = modifier,
+                    leadingContent = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                    overlineContent = overlineText?.let { { Text(overlineText) } },
+                    content = { Text(title) },
+                    supportingContent = summary?.let { { Text(summary) } },
+                    trailingContent = trailing,
+                    enabled = isEnabled,
+                )
+            } else {
+                JetPrefListItem(
+                    modifier = modifier.clickable(
                         enabled = isEnabled,
                         role = Role.Button,
                         onClick = onClick,
-                    )
-                } else {
-                    modifier.then(eventModifier?.invoke() ?: Modifier)
-                },
-                icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
-                overlineText = overlineText,
-                text = title,
-                secondaryText = summary,
-                trailing = trailing,
-                enabled = isEnabled,
-            )
+                    ),
+                    icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                    overlineText = overlineText,
+                    text = title,
+                    secondaryText = summary,
+                    trailing = trailing,
+                    enabled = isEnabled,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * @since 0.5.0
+ */
+@Composable
+fun Preference(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
+    icon: ImageVector? = null,
+    iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
+    overlineText: String? = null,
+    title: String,
+    summary: String? = null,
+    trailing: @Composable (() -> Unit)? = null,
+    enabledIf: PreferenceDataEvaluator = { true },
+    visibleIf: PreferenceDataEvaluator = { true },
+) {
+    if (LocalIsPrefVisible.current && visibleIf(PreferenceDataEvaluatorScope)) {
+        val isEnabled = LocalIsPrefEnabled.current && enabledIf(PreferenceDataEvaluatorScope)
+        CompositionLocalProvider(
+            LocalIconSpaceReserved provides iconSpaceReserved,
+            LocalIsPrefEnabled provides isEnabled,
+            LocalIsPrefVisible provides true,
+        ) {
+            if (shapes != null) {
+                SegmentedListItem(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange,
+                    shapes = shapes,
+                    modifier = modifier,
+                    leadingContent = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                    overlineContent = overlineText?.let { { Text(overlineText) } },
+                    content = { Text(title) },
+                    supportingContent = summary?.let { { Text(summary) } },
+                    trailingContent = trailing,
+                    enabled = isEnabled,
+                )
+            } else {
+                JetPrefListItem(
+                    modifier = modifier.toggleable(
+                        value = checked,
+                        enabled = isEnabled,
+                        role = Role.Switch,
+                        onValueChange = onCheckedChange,
+                    ),
+                    icon = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
+                    overlineText = overlineText,
+                    text = title,
+                    secondaryText = summary,
+                    trailing = trailing,
+                    enabled = isEnabled,
+                )
+            }
         }
     }
 }

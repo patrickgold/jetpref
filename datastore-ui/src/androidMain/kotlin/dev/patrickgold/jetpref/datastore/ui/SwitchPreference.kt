@@ -17,7 +17,7 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,7 +25,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalViewConfiguration
-import androidx.compose.ui.semantics.Role
 import dev.patrickgold.jetpref.datastore.model.PreferenceData
 import dev.patrickgold.jetpref.datastore.model.PreferenceDataEvaluator
 import dev.patrickgold.jetpref.datastore.model.collectAsState
@@ -55,6 +54,7 @@ import kotlinx.coroutines.launch
 fun SwitchPreference(
     pref: PreferenceData<Boolean>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -68,19 +68,14 @@ fun SwitchPreference(
     val prefValue by pref.collectAsState()
 
     Preference(
-        modifier = modifier,
-        eventModifier = {
-            Modifier.toggleable(
-                value = prefValue,
-                enabled = LocalIsPrefEnabled.current,
-                role = Role.Switch,
-                onValueChange = {
-                    scope.launch {
-                        pref.set(it)
-                    }
-                },
-            )
+        checked = prefValue,
+        onCheckedChange = {
+            scope.launch {
+                pref.set(it)
+            }
         },
+        modifier = modifier,
+        shapes = shapes,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         title = title,
