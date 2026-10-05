@@ -23,6 +23,7 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -80,6 +81,7 @@ fun Preference(
                     onClick = onClick,
                     shapes = shapes,
                     modifier = modifier,
+                    verticalAlignment = Alignment.CenterVertically,
                     leadingContent = maybeJetIcon(imageVector = icon, iconSpaceReserved = iconSpaceReserved),
                     overlineContent = overlineText?.let { { Text(overlineText) } },
                     content = { Text(title) },
