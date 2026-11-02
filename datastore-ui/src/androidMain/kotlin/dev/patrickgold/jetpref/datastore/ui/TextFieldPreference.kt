@@ -17,6 +17,7 @@
 package dev.patrickgold.jetpref.datastore.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,6 +63,7 @@ import kotlinx.coroutines.launch
 fun TextFieldPreference(
     pref: PreferenceData<String>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -87,6 +89,7 @@ fun TextFieldPreference(
 
     Preference(
         modifier = modifier,
+        shapes = shapes,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         title = title,

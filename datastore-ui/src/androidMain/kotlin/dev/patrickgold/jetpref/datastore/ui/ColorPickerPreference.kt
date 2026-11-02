@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,6 +78,7 @@ import kotlinx.coroutines.launch
 fun ColorPickerPreference(
     pref: PreferenceData<Color>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -98,6 +100,7 @@ fun ColorPickerPreference(
 
     Preference(
         modifier = modifier,
+        shapes = shapes,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         trailing = {

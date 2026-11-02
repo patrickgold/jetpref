@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
@@ -83,6 +84,7 @@ object DialogSliderPreferenceDefaults {
 internal fun <V> DialogSliderPreference(
     pref: PreferenceData<V>,
     modifier: Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean,
     title: String,
@@ -108,6 +110,7 @@ internal fun <V> DialogSliderPreference(
 
     Preference(
         modifier = modifier,
+        shapes = shapes,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         title = title,
@@ -171,6 +174,7 @@ internal fun <V> DialogSliderPreference(
     primaryPref: PreferenceData<V>,
     secondaryPref: PreferenceData<V>,
     modifier: Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean,
     title: String,
@@ -201,6 +205,7 @@ internal fun <V> DialogSliderPreference(
 
     Preference(
         modifier = modifier,
+        shapes = shapes,
         icon = icon,
         iconSpaceReserved = iconSpaceReserved,
         title = title,
@@ -317,6 +322,7 @@ internal fun <V> DialogSliderPreference(
 fun DialogSliderPreference(
     pref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -332,7 +338,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, shapes, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
@@ -383,6 +389,7 @@ fun DialogSliderPreference(
     primaryPref: PreferenceData<Int>,
     secondaryPref: PreferenceData<Int>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -401,7 +408,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        primaryPref, secondaryPref, modifier, shapes, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
         onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
@@ -446,6 +453,7 @@ fun DialogSliderPreference(
 fun DialogSliderPreference(
     pref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -461,7 +469,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, shapes, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
         try {
@@ -512,6 +520,7 @@ fun DialogSliderPreference(
     primaryPref: PreferenceData<Long>,
     secondaryPref: PreferenceData<Long>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -530,7 +539,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        primaryPref, secondaryPref, modifier, shapes, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
         onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) {
@@ -575,6 +584,7 @@ fun DialogSliderPreference(
 fun DialogSliderPreference(
     pref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -590,7 +600,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, shapes, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
 }
@@ -635,6 +645,7 @@ fun DialogSliderPreference(
     primaryPref: PreferenceData<Double>,
     secondaryPref: PreferenceData<Double>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -653,7 +664,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        primaryPref, secondaryPref, modifier, shapes, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
         onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it.toDouble() }
@@ -692,6 +703,7 @@ fun DialogSliderPreference(
 fun DialogSliderPreference(
     pref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -707,7 +719,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        pref, modifier, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
+        pref, modifier, shapes, icon, iconSpaceReserved, title, valueLabel, summary, min, max,
         stepIncrement, onPreviewSelectedValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it }
 }
@@ -752,6 +764,7 @@ fun DialogSliderPreference(
     primaryPref: PreferenceData<Float>,
     secondaryPref: PreferenceData<Float>,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes? = null,
     icon: ImageVector? = null,
     iconSpaceReserved: Boolean = LocalIconSpaceReserved.current,
     title: String,
@@ -770,7 +783,7 @@ fun DialogSliderPreference(
     visibleIf: PreferenceDataEvaluator = { true },
 ) {
     DialogSliderPreference(
-        primaryPref, secondaryPref, modifier, icon, iconSpaceReserved, title, primaryLabel,
+        primaryPref, secondaryPref, modifier, shapes, icon, iconSpaceReserved, title, primaryLabel,
         secondaryLabel, valueLabel, summary, min, max, stepIncrement, onPreviewSelectedPrimaryValue,
         onPreviewSelectedSecondaryValue, sliderColors, dialogStrings, enabledIf, visibleIf,
     ) { it }
